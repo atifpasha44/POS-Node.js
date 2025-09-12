@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .dashboard-container { display: flex; height: 100vh; }
+    .sidebar { background: #444; color: #fff; width: 260px; padding: 30px 0; }
+    .sidebar h3 { text-align: center; margin-bottom: 30px; }
+    .sidebar ul { list-style: none; padding: 0; }
+    .sidebar ul li { padding: 15px 30px; cursor: pointer; border-bottom: 1px solid #555; }
+    .sidebar ul li:hover { background: #333; }
+    .main-content { flex: 1; background: #f7f7f7; padding: 40px; }
+    .profile { position: absolute; top: 30px; right: 40px; display: flex; align-items: center; }
+    .profile-img { width: 60px; height: 60px; border-radius: 50%; margin-right: 15px; }
+    .profile-name { font-weight: bold; font-size: 1.2em; }
+    .logo-small { width: 120px; margin-bottom: 30px; display: block; margin-left: auto; margin-right: auto; }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="sidebar">
+      <img src="logo.png" alt="Logo" class="logo-small">
+      <h3>Modules</h3>
+      <ul>
+        <li>Property Management</li>
+        <li>Outlet Management</li>
+        <li>Menu Management</li>
+        <li>POS System Management</li>
+        <li>Printing Management</li>
+        <li>Report Management</li>
+        <li>End of Day</li>
+        <li>User Management</li>
+      </ul>
+    </div>
+    <div class="main-content">
+      <div class="profile" id="profile">
+        <img src="profile.png" alt="Profile" class="profile-img">
+        <span class="profile-name">User</span>
+      </div>
+      <h1>Welcome to ithots POS</h1>
+      <p>This is your dashboard. Select a module from the left to get started.</p>
+    </div>
+  </div>
+  <script src="dashboard.js"></script>
+</body>
+</html>
