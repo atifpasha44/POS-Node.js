@@ -1,0 +1,23 @@
+CREATE TABLE [dbo].[IT_CONF_TAXCODE](
+	
+
+[APPDAT] [decimal](8, 0) NOT NULL,
+	
+[TaxCode] [nvarchar](3) NULL,
+        
+[TaxName] [nvarchar](25) NOT NULL,
+	
+[TaxNameAlternate] [nvarchar](25) NULL,
+	
+[TaxGRPNAM] [nvarchar](25) NULL,
+
+
+ 
+PRIMARY KEY CLUSTERED 
+(
+	[APPDAT] ASC,
+	[TaxCode] ASC
+	)
+
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]

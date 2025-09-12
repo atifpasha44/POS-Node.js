@@ -1,0 +1,31 @@
+Tax Structures
+
+CREATE TABLE [PMS].[ IT_CONF_TAXSTRUCTURE](
+	[APPDAT] [decimal](8, 0) NOT NULL,
+	[TAXSTRCODE] [decimal](4, 0) NOT NULL,
+	[DESCRP] [varchar](30) NULL DEFAULT (' '),
+       [OUTCODE] [varchar](15) NOT NULL,
+       [MENUTYPE] [varchar](15) NOT NULL,
+
+	[SRLNUB] [decimal](6, 0) NOT NULL,
+       [SCRTAX] [varchar](3) NULL DEFAULT (' '),
+       [TAXCODE] [nvarchar](3) NULL,
+	[CALTYP] [decimal](1, 0) NULL DEFAULT ((0)),
+	[AMOUNT] [decimal](15, 3) NULL DEFAULT ((0)),
+	[TRGTAX] [decimal](3, 0) NULL DEFAULT ((0)),
+	[USERID] [varchar](10) NULL DEFAULT (' '),
+	[LSTDAT] [decimal](8, 0) NULL DEFAULT ((0)),
+	[LSTTIM] [decimal](4, 2) NULL DEFAULT ((0)),
+	[ActiveStatus] [bit] NOT NULL CONSTRAINT [DF_IT_CONF_UOM_IsActive]  DEFAULT ((1)),PRIMARY KEY CLUSTERED 
+(
+	[APPDAT] ASC,
+	[OUTCODE] ASC,
+	[TAXSTRCODE] ASC,
+	[SRLNUB] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO

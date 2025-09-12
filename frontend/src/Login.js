@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './Login.css';
+import logo from './logo.png';
 
 function Login({ setUser }) {
   const [email, setEmail] = useState('');
@@ -31,11 +32,11 @@ function Login({ setUser }) {
   };
 
   return (
-    <div className="container">
+    <div className="container login-bg-gradient">
       <div className="welcome-section">
+        <img src={logo} alt="POS Logo" className="login-logo-img" />
         <h1>Welcome to Ithots</h1>
         <p>Ithots provides you a Hospitality software. We are introducing ithots generation 5th fine dining restaurant software.</p>
-        <div className="logo" />
       </div>
       <div className="login-section">
         <h2>Login To Your Account</h2>
@@ -61,3 +62,5 @@ function Login({ setUser }) {
 }
 
 export default Login;
+
+

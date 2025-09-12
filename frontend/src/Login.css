@@ -1,41 +1,56 @@
+/* Gradient background for login */
+.login-bg-gradient {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #6dd5ed 0%, #2193b0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
 }
+
 .welcome-section {
   background: #fff;
   padding: 40px;
-  border-radius: 10px 0 0 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 20px 0 0 20px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
   width: 400px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.login-logo-img {
+  width: 120px;
+  height: auto;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(33,147,176,0.15);
 }
 .welcome-section h1 {
   font-size: 2.2em;
   margin-bottom: 10px;
+  color: #2193b0;
 }
 .welcome-section p {
   color: #666;
   margin-bottom: 30px;
 }
-.logo {
-  width: 220px;
-  height: 120px;
-  background: #1976d2;
-  margin: 20px auto 0 auto;
-  border-radius: 10px;
-}
 .login-section {
   background: #f3f3f3;
   padding: 40px;
-  border-radius: 0 10px 10px 0;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 0 20px 20px 0;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
   width: 350px;
 }
 .login-section h2 {
   margin-bottom: 20px;
+  color: #1976d2;
 }
 label {
   display: block;
@@ -47,8 +62,9 @@ input[type="email"], input[type="password"], input[type="text"] {
   padding: 10px;
   margin-top: 5px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 8px;
   box-sizing: border-box;
+  font-size: 1em;
 }
 .remember-me {
   margin: 15px 0;
@@ -58,17 +74,19 @@ input[type="email"], input[type="password"], input[type="text"] {
 .login-btn {
   width: 100%;
   padding: 12px;
-  background: #e53935;
+  background: linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%);
   color: #fff;
   border: none;
-  border-radius: 5px;
-  font-size: 1em;
+  border-radius: 8px;
+  font-size: 18px;
   font-weight: bold;
+  margin-top: 15px;
   cursor: pointer;
-  margin-top: 10px;
+  transition: background 0.3s;
+  box-shadow: 0 2px 8px rgba(33,147,176,0.10);
 }
 .login-btn:hover {
-  background: #b71c1c;
+  background: linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%);
 }
 .terms {
   font-size: 0.9em;
@@ -82,3 +100,106 @@ input[type="email"], input[type="password"], input[type="text"] {
   color: #e53935;
   margin-top: 10px;
 }
+/* Gradient background for login */
+.login-bg-gradient {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #6dd5ed 0%, #2193b0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.welcome-section {
+  background: #fff;
+  padding: 40px;
+  border-radius: 20px 0 0 20px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  width: 400px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.login-logo-img {
+  width: 120px;
+  height: auto;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(33,147,176,0.15);
+}
+.welcome-section h1 {
+  font-size: 2.2em;
+  margin-bottom: 10px;
+  color: #2193b0;
+}
+.welcome-section p {
+  color: #666;
+  margin-bottom: 30px;
+}
+.login-section {
+  background: #f3f3f3;
+  padding: 40px;
+  border-radius: 0 20px 20px 0;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+  width: 350px;
+}
+.login-section h2 {
+  margin-bottom: 20px;
+  color: #1976d2;
+}
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 600;
+}
+input[type="email"], input[type="password"], input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1em;
+}
+.remember-me {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+}
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: background 0.3s;
+  box-shadow: 0 2px 8px rgba(33,147,176,0.10);
+}
+.login-btn:hover {
+  background: linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%);
+}
+.terms {
+  font-size: 0.9em;
+  margin-top: 15px;
+}
+.terms a {
+  color: #e53935;
+  text-decoration: none;
+}
+.error {
+  color: #e53935;
+  margin-top: 10px;
+}
+/* Removed duplicate and broken trailing CSS */

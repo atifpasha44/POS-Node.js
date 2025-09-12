@@ -1,0 +1,32 @@
+CREATE TABLE [PMS].[IT_CONF_PROPERTY](
+	[APPDAT] [decimal](8, 0) NOT NULL,
+	[PRPCOD] [varchar](3) NOT NULL,
+	[LNGNAM] [varchar](100) NULL DEFAULT (' '),
+	[NCKNAM] [varchar](25) NULL DEFAULT (' '),
+	[OWNNAM] [varchar](25) NULL DEFAULT (' '),
+	[PRPADD] [varchar](150) NULL DEFAULT (' '),
+	[PRPGST] [decimal](16, 0) NULL DEFAULT ((0)),
+	[PRPPAN] [decimal](16, 0) NULL DEFAULT ((0)),
+	[GRPNAM] [varchar](25) NULL DEFAULT (' '),
+        [CURNAM] [varchar](15) NOT NULL,
+        [CURFMT] [varchar](3) NOT NULL,
+        [CURSYM] [varchar](1) NOT NULL,
+        [CURDEC] [varchar](3) NOT NULL,
+	[RNDOFF] [decimal](1, 0) NULL DEFAULT ((0)),
+        [PRPPHT] [image] NULL,
+	[USERID] [varchar](10) NULL DEFAULT (' '),
+	[LSTDAT] [decimal](8, 0) NULL DEFAULT ((0)),
+	[LSTTIM] [decimal](4, 2) NULL DEFAULT ((0)),
+	[SHTNAM] [varchar](10) NULL DEFAULT (' '),
+
+PRIMARY KEY CLUSTERED 
+(
+	[APPDAT] ASC,
+	[PRPCOD] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO

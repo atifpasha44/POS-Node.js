@@ -1,0 +1,32 @@
+Kitchens
+CREATE TABLE [PMS].[ IT_CONF_KITCHENS](
+	[APPDAT] [decimal](8, 0) NOT NULL,
+	[KITCODE] [varchar](3) NOT NULL,
+       [LNGNAM] [varchar](30) NULL DEFAULT (' '),
+	[SHTNAM] [varchar](10) NULL DEFAULT (' '),
+
+	[USERID] [varchar](10) NULL DEFAULT (' '),
+	[LSTDAT] [decimal](8, 0) NULL DEFAULT ((0)),
+	[LSTTIM] [decimal](4, 2) NULL DEFAULT ((0)),
+	[ActiveStatus] [bit] NOT NULL CONSTRAINT [DF_IT_CONF_UOM_IsActive]  DEFAULT ((1)),
+	
+PRIMARY KEY CLUSTERED 
+(
+	[APPDAT] ASC,
+	[KITCODE] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+
+
+
+
+
+
+
+

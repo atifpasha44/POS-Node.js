@@ -1,0 +1,24 @@
+Currencies
+
+
+CREATE TABLE [PMS].[ IT_CONF_Currencies](
+	[APPDAT] [decimal](8, 0) NOT NULL,
+       [CurrencyCode] [nvarchar](3) NOT NULL,
+       [CurrencyName] [varchar](30) NULL DEFAULT (' '),
+	[SHTNAM] [varchar](10) NULL DEFAULT (' '),
+       [CurrencyType] [varchar](8) NULL DEFAULT (' '),
+       [STDRAT] [decimal](15, 6) NULL DEFAULT ((0)),
+	[CurrencyDecimals] [int] NOT NULL,
+	[CurrencySymbol] [nvarchar](1) NOT NULL,
+
+ PRIMARY KEY CLUSTERED 
+(
+	[APPDAT] ASC,
+	[CURCOD] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO

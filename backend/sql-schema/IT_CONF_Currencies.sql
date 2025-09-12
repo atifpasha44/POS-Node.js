@@ -1,0 +1,12 @@
+-- MySQL version of IT_CONF_Currencies
+CREATE TABLE IF NOT EXISTS IT_CONF_Currencies (
+  APPDAT DECIMAL(8,0) NOT NULL,
+  CurrencyCode VARCHAR(3) NOT NULL,
+  CurrencyName VARCHAR(30) DEFAULT ' ',
+  SHTNAM VARCHAR(10) DEFAULT ' ',
+  CurrencyType VARCHAR(8) DEFAULT ' ',
+  STDRAT DECIMAL(15,6) DEFAULT 0,
+  CurrencyDecimals INT NOT NULL,
+  CurrencySymbol VARCHAR(4) NOT NULL,
+  PRIMARY KEY (APPDAT, CurrencyCode)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

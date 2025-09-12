@@ -1,0 +1,33 @@
+
+CREATE TABLE [PMS].[IT_GEN_Users](
+	[UserName] [nvarchar](50) NOT NULL,
+       [JobTitle] [nvarchar](50) NOT NULL,
+       [DepartmentID] [nvarchar](15) NOT NULL,
+       [PropertyName] [nvarchar](50) NOT NULL,
+	[LoginName] [nvarchar](15) NOT NULL,
+       [PWD_DATA] [dbo].[VAR_BIN_2048] NULL,
+       [Conf_PWD_DATA] [dbo].[VAR_BIN_2048] NULL,
+       [TouchID] [nvarchar](5) NULL,
+       [TouchPWD] [nvarchar](5) NULL,
+ 	[LastLoginDate] [datetime] NULL,
+	[LastFailedLogin] [datetime] NULL,
+	[EmailID] [nvarchar](50) NULL,
+       [Mobile] [nvarchar](9) NULL,
+	[ProfilePhoto] [image] NULL,
+	
+	[AppAccessControl] [nvarchar](7) NULL,
+	
+ PRIMARY KEY CLUSTERED 
+(
+	[LoginName] ASC,
+	[PropertyName] ASC,
+	[TouchID] ASC
+
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
