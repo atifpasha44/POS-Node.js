@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import infoLogo from './info-logo.svg';
-import logo from './logo.png';
+import infoLogo from './info-logo-new.png';
+import propertyLogo from './hotel-abc-logo.png';
 import SidebarMenu from './SidebarMenu';
 const menuItems = [
   {
@@ -88,12 +88,32 @@ const menuItems = [
 ];
 function Dashboard({ user, setUser }) {
   const hotelName = 'ABC Hotel';
-  const [showCompanyInfo, setShowCompanyInfo] = useState(false);
+  const [showCompanyInfo, setShowCompanyInfo] = useState(true); // Show Comp Info by default
   const [companyInfo, setCompanyInfo] = useState(null);
   const [activeTab, setActiveTab] = useState('compinfo');
   const [loadingCompany, setLoadingCompany] = useState(false);
   const [companyError, setCompanyError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Load company info immediately on mount
+    const fetchCompanyInfo = async () => {
+      setLoadingCompany(true);
+      setCompanyError('');
+      try {
+        const res = await axios.get('/api/company-info');
+        if (res.data.success) {
+          setCompanyInfo(res.data);
+        } else {
+          setCompanyError(res.data.message || 'No company info found');
+        }
+      } catch (err) {
+        setCompanyError('Failed to load company info');
+      }
+      setLoadingCompany(false);
+    };
+    fetchCompanyInfo();
+  }, []);
 
   const handleLogout = async () => {
     await fetch('/api/logout', { method: 'POST', credentials: 'include' });
@@ -142,54 +162,86 @@ function Dashboard({ user, setUser }) {
           <button onClick={handleLogout} className="dashboard-logout-btn">Logout</button>
         </div>
       </div>
-      <div className="dashboard-main">
-        <aside className="dashboard-sidebar">
-          <div className="sidebar-welcome">Welcome to Ithots POS</div>
+      {/* Sub Menu Bar - styled to match screenshot */}
+      <div className="dashboard-submenu-bar" style={{background:'#fff',borderBottom:'2px solid #ffa726',padding:'0 0 0 0',display:'flex',alignItems:'center',height:'56px'}}>
+        <span style={{color:'#1a2dc5',fontWeight:'bold',fontSize:'1.15rem',marginLeft:'32px',letterSpacing:'0.5px',whiteSpace:'nowrap'}}>Welcome to Ithots POS</span>
+        <div style={{display:'flex',gap:'8px',marginLeft:'auto',marginRight:'calc(50vw - 320px)',background:'#fff8e1',padding:'4px 0'}}>
+          <button className={`dashboard-tab${activeTab==='compinfo' ? ' active' : ''}`} onClick={handleCompInfoClick} style={{background:'#ffb300',color:'#fff',fontWeight:'500',border:'none',borderRadius:'5px',padding:'5px 14px',fontSize:'0.98rem',boxShadow:'0 1px 4px rgba(0,0,0,0.03)',cursor:'pointer',transition:'all 0.2s'}}>
+            Comp Info
+          </button>
+          <button className={`dashboard-tab${activeTab==='dashboard' ? ' active' : ''}`} onClick={()=>setActiveTab('dashboard')} style={{background:'#ffb300',color:'#fff',fontWeight:'500',border:'none',borderRadius:'5px',padding:'5px 14px',fontSize:'0.98rem',boxShadow:'0 1px 4px rgba(0,0,0,0.03)',cursor:'pointer',transition:'all 0.2s'}}>
+            Dashboard
+          </button>
+          <button className={`dashboard-tab${activeTab==='pending' ? ' active' : ''}`} onClick={()=>setActiveTab('pending')} style={{background:'#ffb300',color:'#fff',fontWeight:'500',border:'none',borderRadius:'5px',padding:'5px 14px',fontSize:'0.98rem',boxShadow:'0 1px 4px rgba(0,0,0,0.03)',cursor:'pointer',transition:'all 0.2s'}}>
+            Pending Status
+          </button>
+          <button className={`dashboard-tab${activeTab==='table' ? ' active' : ''}`} onClick={()=>setActiveTab('table')} style={{background:'#ffb300',color:'#fff',fontWeight:'500',border:'none',borderRadius:'5px',padding:'5px 14px',fontSize:'0.98rem',boxShadow:'0 1px 4px rgba(0,0,0,0.03)',cursor:'pointer',transition:'all 0.2s'}}>
+            Table Info
+          </button>
+          <button className={`dashboard-tab${activeTab==='account' ? ' active' : ''}`} onClick={()=>setActiveTab('account')} style={{background:'#ffb300',color:'#fff',fontWeight:'500',border:'none',borderRadius:'5px',padding:'5px 14px',fontSize:'0.98rem',boxShadow:'0 1px 4px rgba(0,0,0,0.03)',cursor:'pointer',transition:'all 0.2s'}}>
+            Account Setting
+          </button>
+        </div>
+      </div>
+      <div style={{display:'flex',height:'calc(100vh - 120px)'}}>
+        {/* Sidebar vertical panel always visible */}
+        <div style={{width:'300px',background:'#fff',borderRight:'2px solid #ffa726',padding:'8px 0',overflowY:'auto'}}>
           <SidebarMenu menuItems={menuItems} />
-          <div className="sidebar-footer">Copyright 2019, all rights reserved @ ithots.co.in</div>
-        </aside>
-        <main className="dashboard-content">
-          <div className="dashboard-tabs">
-            <button className={`dashboard-tab${activeTab==='compinfo' ? ' active' : ''}`} onClick={handleCompInfoClick}>Comp Info</button>
-            <button className={`dashboard-tab${activeTab==='dashboard' ? ' active' : ''}`} onClick={()=>setActiveTab('dashboard')}>Dashboard</button>
-            <button className={`dashboard-tab${activeTab==='pending' ? ' active' : ''}`} onClick={()=>setActiveTab('pending')}>Pending Status</button>
-            <button className={`dashboard-tab${activeTab==='table' ? ' active' : ''}`} onClick={()=>setActiveTab('table')}>Table Info</button>
-            <button className={`dashboard-tab${activeTab==='account' ? ' active' : ''}`} onClick={()=>setActiveTab('account')}>Account Setting</button>
-          </div>
-          <div className="dashboard-welcome-card">
-            <img src={logo} alt="Hotel Logo" className="dashboard-hotel-logo" />
-            <div className="dashboard-welcome-info">
-              <h2>{user?.name || 'HOTEL ABC'}</h2>
-              <p>Version Number : 1.2.39.0</p>
-              <p>Your annual software subscription will expire on 2021-03-31</p>
+        </div>
+        {/* Main content area */}
+        <main className="dashboard-content" style={{flex:1}}>
+          {/* Tabs are now in the sub menu bar above */}
+          {activeTab === 'account' ? (
+            <div className="compinfo-center-panel">
+              <div className="compinfo-card" style={{maxWidth:'420px',margin:'0 auto',border:'3px solid #ff9800',padding:'0'}}>
+                <div style={{background:'#ff9800',color:'#fff',fontWeight:'bold',fontSize:'1.25rem',padding:'10px 18px',borderTopLeftRadius:'28px',borderTopRightRadius:'28px'}}>Account Setting</div>
+                <div style={{padding:'18px 18px 10px 18px'}}>
+                  <div style={{fontWeight:'500',color:'#888',fontSize:'1.05rem',marginBottom:'8px'}}>CHANGE PASSWORD</div>
+                  <hr style={{margin:'0 0 18px 0',border:'none',borderTop:'1.5px solid #eee'}} />
+                  <form className="account-setting-form" style={{display:'grid',gridTemplateColumns:'1fr 1.2fr',gap:'12px 18px',alignItems:'center'}}>
+                    <label style={{fontWeight:'bold',color:'#444',fontSize:'1.08rem',textAlign:'right'}}>Current password</label>
+                    <input type="password" className="account-setting-input" style={{height:'36px',borderRadius:'5px',border:'1.5px solid #ddd',padding:'0 10px',fontSize:'1.05rem'}} />
+                    <label style={{fontWeight:'bold',color:'#444',fontSize:'1.08rem',textAlign:'right'}}>New password</label>
+                    <input type="password" className="account-setting-input" style={{height:'36px',borderRadius:'5px',border:'1.5px solid #ddd',padding:'0 10px',fontSize:'1.05rem'}} />
+                    <label style={{fontWeight:'bold',color:'#444',fontSize:'1.08rem',textAlign:'right'}}>Verify password</label>
+                    <input type="password" className="account-setting-input" style={{height:'36px',borderRadius:'5px',border:'1.5px solid #ddd',padding:'0 10px',fontSize:'1.05rem'}} />
+                    <div></div>
+                    <button type="submit" className="account-setting-btn" style={{background:'#81d4fa',color:'#fff',fontWeight:'bold',fontSize:'1.15rem',border:'none',borderRadius:'5px',height:'38px',marginTop:'8px'}}>Conform</button>
+                  </form>
+                </div>
+              </div>
             </div>
-          </div>
-          {showCompanyInfo && (
-            <div style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(0,0,0,0.3)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}}>
-              <div style={{background:'#fff',padding:32,borderRadius:12,minWidth:350,boxShadow:'0 0 20px rgba(0,0,0,0.2)',maxWidth:500}}>
-                <h2>Company Info</h2>
-                {loadingCompany && <div>Loading...</div>}
-                {companyError && <div style={{color:'red'}}>{companyError}</div>}
-                {companyInfo && (
-                  <div style={{marginTop:12}}>
-                    <div><b>Licensed Name:</b> {companyInfo.licensed_name}</div>
-                    <div><b>Legal Owner:</b> {companyInfo.legal_owner}</div>
-                    <div><b>Address:</b> {companyInfo.address}</div>
-                    <div><b>City:</b> {companyInfo.city}</div>
-                    <div><b>Subscription Start:</b> {companyInfo.subscription_start}</div>
-                    <div><b>Subscription End:</b> {companyInfo.subscription_end}</div>
-                    <div><b>Property Code:</b> {companyInfo.property_code}</div>
-                    <div><b>DB Name:</b> {companyInfo.db_name}</div>
-                    <div><b>No. of Outlets:</b> {companyInfo.no_of_outlets}</div>
-                    <div><b>TIN:</b> {companyInfo.tin}</div>
-                    <div><b>GSTIN:</b> {companyInfo.gstin}</div>
-                    <div><b>Phone:</b> {companyInfo.phone}</div>
-                    <div><b>Email:</b> {companyInfo.email}</div>
-                    <div><b>POS Version:</b> {companyInfo.pos_version}</div>
-                    <div><b>Subscription Expiry:</b> {companyInfo.subscription_expiry}</div>
+          ) : showCompanyInfo && (
+            <div className="compinfo-center-panel">
+              <div className="compinfo-card">
+                <div className="compinfo-logo-row">
+                  <img src={propertyLogo} alt="Property Logo" className="compinfo-logo" />
+                </div>
+                <div className="compinfo-title">ithots POS Version : {companyInfo?.pos_version || '1.1.0'}</div>
+                <div className="compinfo-expiry">Annual Software Subscription will Expire on {companyInfo?.subscription_expiry || companyInfo?.subscription_end || '2026-03-31'}</div>
+                <div className="compinfo-info-row">
+                  <div className="compinfo-table">
+                    <div className="compinfo-table-header">Legal Info <span className="compinfo-eye">&#128065;</span></div>
+                    <table>
+                      <tbody>
+                        <tr><td>Licensed Name</td><td>{companyInfo?.licensed_name || ''}</td></tr>
+                        <tr><td>Legal Owner</td><td>{companyInfo?.legal_owner || ''}</td></tr>
+                        <tr><td>Address</td><td>{companyInfo?.address || ''}</td></tr>
+                        <tr><td>City</td><td>{companyInfo?.city || ''}</td></tr>
+                        <tr><td>Subscription Start Date</td><td>{companyInfo?.subscription_start || ''}</td></tr>
+                      </tbody>
+                    </table>
                   </div>
-                )}
-                <button onClick={closeCompanyInfo} style={{marginTop:18,padding:'8px 18px',border:'none',borderRadius:5,background:'#1976d2',color:'#fff',fontWeight:'bold',cursor:'pointer'}}>Close</button>
+                  <div className="compinfo-table">
+                    <div className="compinfo-table-header">System Info <span className="compinfo-eye">&#128065;</span></div>
+                    <table>
+                      <tbody>
+                        <tr><td>Property Code</td><td>{companyInfo?.property_code || ''}</td></tr>
+                        <tr><td>No Outlets</td><td>{companyInfo?.no_of_outlets || ''}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           )}

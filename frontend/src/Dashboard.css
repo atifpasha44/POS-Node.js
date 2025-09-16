@@ -1,3 +1,88 @@
+/* Comp Info Center Panel Styles */
+.compinfo-center-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 120px);
+}
+.compinfo-card {
+  background: #fff;
+  border-radius: 32px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  padding: 48px 32px 32px 32px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  border: 1.5px solid #bbb;
+}
+.compinfo-logo-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.compinfo-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 2px solid #eee;
+  background: #fff;
+}
+.compinfo-title {
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 8px;
+}
+.compinfo-expiry {
+  text-align: center;
+  font-size: 1.08rem;
+  color: #888;
+  margin-bottom: 32px;
+}
+.compinfo-info-row {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 18px;
+}
+.compinfo-table {
+  background: #f7f7f7;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  padding: 0;
+  min-width: 260px;
+  flex: 1;
+}
+.compinfo-table-header {
+  background: #ededed;
+  font-size: 1.08rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.compinfo-eye {
+  font-size: 1.15em;
+  color: #888;
+}
+.compinfo-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.compinfo-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 1rem;
+  color: #444;
+}
+.compinfo-table tr:last-child td {
+  border-bottom: none;
+}
 /* Sidebar main module styles */
 .sidebar-menu-main {
   display: flex;
@@ -104,13 +189,14 @@
 .sidebar-menu-main {
   display: flex;
   align-items: center;
-  font-weight: bold;
+  font-family: 'Segoe UI', 'Roboto', 'Montserrat', 'Arial', sans-serif;
+  font-weight: 600;
   background: #f5f5f5;
   border-bottom: 1px solid #d0d0d0;
-  padding: 14px 16px 14px 22px;
+  padding: 13px 16px 13px 22px;
   color: #222;
-  font-size: 1.18rem;
-  letter-spacing: 0.5px;
+  font-size: 0.95rem;
+  letter-spacing: 0.2px;
   border-radius: 8px 8px 0 0;
 }
 .sidebar-menu-icon {
@@ -132,10 +218,11 @@
   padding-right: 8px;
 }
 .sidebar-submenu-item {
-  padding: 12px 18px 12px 32px;
+  padding: 10px 18px 10px 32px;
   border-bottom: 1px solid #e0e0e0;
   color: #222;
-  font-size: 1.08rem;
+  font-family: 'Segoe UI', 'Roboto', 'Montserrat', 'Arial', sans-serif;
+  font-size: 0.88rem;
   background: #fff;
   font-weight: 500;
   border-radius: 6px;
