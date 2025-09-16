@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
 import Dashboard from './Dashboard';
 
@@ -8,10 +9,14 @@ function App() {
     return stored ? JSON.parse(stored) : null;
   });
 
-  return user ? (
-    <Dashboard user={user} setUser={setUser} />
-  ) : (
-    <Login setUser={setUser} />
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login setUser={setUser} />} />
+        <Route path="/dashboard" element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Router>
   );
 }
 

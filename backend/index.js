@@ -37,6 +37,13 @@ app.use(session({
   cookie: { secure: false }
 }));
 
+// Logout endpoint to destroy session
+app.post('/api/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.json({ success: true });
+  });
+});
+
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',

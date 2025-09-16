@@ -1,205 +1,260 @@
-/* Gradient background for login */
-.login-bg-gradient {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #6dd5ed 0%, #2193b0 100%);
+/* Main container split */
+.login-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 60vh;
+  background: #fafafa;
+  border-radius: 32px;
+  margin: 60px auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 1.5px 8px rgba(0,0,0,0.08);
+  max-width: 900px;
 }
 
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.welcome-section {
+.login-left, .login-right {
   background: #fff;
-  padding: 40px;
-  border-radius: 20px 0 0 20px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-  width: 400px;
-  text-align: center;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  margin: 0;
+}
+
+.login-left {
+  flex: 1;
+  background: #fafafa;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-.login-logo-img {
-  width: 120px;
-  height: auto;
-  margin-bottom: 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(33,147,176,0.15);
-}
-.welcome-section h1 {
-  font-size: 2.2em;
-  margin-bottom: 10px;
-  color: #2193b0;
-}
-.welcome-section p {
-  color: #666;
-  margin-bottom: 30px;
-}
-.login-section {
-  background: #f3f3f3;
-  padding: 40px;
-  border-radius: 0 20px 20px 0;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
-  width: 350px;
-}
-.login-section h2 {
-  margin-bottom: 20px;
-  color: #1976d2;
-}
-label {
-  display: block;
-  margin-top: 15px;
-  font-weight: 600;
-}
-input[type="email"], input[type="password"], input[type="text"] {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-sizing: border-box;
-  font-size: 1em;
-}
-.remember-me {
-  margin: 15px 0;
-  display: flex;
-  align-items: center;
-}
-.login-btn {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 15px;
-  cursor: pointer;
-  transition: background 0.3s;
-  box-shadow: 0 2px 8px rgba(33,147,176,0.10);
-}
-.login-btn:hover {
-  background: linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%);
-}
-.terms {
-  font-size: 0.9em;
-  margin-top: 15px;
-}
-.terms a {
-  color: #e53935;
-  text-decoration: none;
-}
-.error {
-  color: #e53935;
-  margin-top: 10px;
-}
-/* Gradient background for login */
-.login-bg-gradient {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #6dd5ed 0%, #2193b0 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 18px 10px 18px 10px;
+  border-top-left-radius: 32px;
+  border-bottom-left-radius: 32px;
 }
 
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.welcome-section {
-  background: #fff;
-  padding: 40px;
-  border-radius: 20px 0 0 20px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-  width: 400px;
-  text-align: center;
+.ithots-main-logo {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 18px;
 }
-.login-logo-img {
-  width: 120px;
-  height: auto;
-  margin-bottom: 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(33,147,176,0.15);
+.ithots-main {
+  font-size: 3.2rem;
+  font-weight: 900;
+  color: #1a237e;
+  letter-spacing: 2px;
+  line-height: 1.1;
 }
-.welcome-section h1 {
-  font-size: 2.2em;
-  margin-bottom: 10px;
-  color: #2193b0;
+.ithots-hospitality {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3f51b5;
+  letter-spacing: 8px;
+  margin-top: 2px;
+  line-height: 1.1;
 }
-.welcome-section p {
-  color: #666;
-  margin-bottom: 30px;
-}
-.login-section {
-  background: #f3f3f3;
-  padding: 40px;
-  border-radius: 0 20px 20px 0;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
-  width: 350px;
-}
-.login-section h2 {
-  margin-bottom: 20px;
-  color: #1976d2;
-}
-label {
-  display: block;
-  margin-top: 15px;
+
+.login-left h1 {
+  font-size: 2rem;
   font-weight: 600;
+  margin-bottom: 10px;
+  color: #666;
+  text-align: center;
 }
-input[type="email"], input[type="password"], input[type="text"] {
+
+.login-desc {
+  font-size: 1.1rem;
+  color: #888;
+  margin-bottom: 28px;
+  text-align: center;
+  max-width: 400px;
+}
+
+.g5-logo-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  padding: 18px 18px 10px 18px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.g5-logo {
+  width: 210px;
+  height: auto;
+  border-radius: 18px;
+}
+
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: #fff;
+  border-top-right-radius: 32px;
+  border-bottom-right-radius: 32px;
+  box-shadow: none;
+  margin: 0;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+.login-card {
+  background: #fff;
+  padding: 24px 18px 12px 18px;
+  border-radius: 0;
+  box-shadow: none;
+  min-width: 260px;
+  max-width: 300px;
   width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-sizing: border-box;
-  font-size: 1em;
+  margin: 0;
+  text-align: left;
 }
+
+.login-card h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  text-align: left;
+}
+
+.login-subtext {
+  color: #888;
+  font-size: 1rem;
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+label {
+  font-size: 0.95rem;
+  color: #444;
+  font-weight: 500;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  background: #f3f3f3;
+  border-radius: 5px;
+  margin-bottom: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.input-icon {
+  padding: 0 12px;
+  color: #888;
+  font-size: 1.1rem;
+}
+
+.input-group input {
+  border: none;
+  background: transparent;
+  padding: 12px 10px;
+  font-size: 1rem;
+  flex: 1;
+  outline: none;
+}
+
+.tin-label {
+  font-size: 0.95rem;
+  color: #888;
+  margin-bottom: 4px;
+  margin-top: 8px;
+}
+
+.login-options {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+
 .remember-me {
-  margin: 15px 0;
+  font-size: 0.95rem;
+  color: #444;
   display: flex;
   align-items: center;
 }
+
 .login-btn {
   width: 100%;
-  padding: 12px;
-  background: linear-gradient(90deg, #2193b0 0%, #6dd5ed 100%);
+  background: #e53935;
   color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
   border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 15px;
+  border-radius: 5px;
+  padding: 12px 0;
+  margin-top: 8px;
+  margin-bottom: 10px;
   cursor: pointer;
-  transition: background 0.3s;
-  box-shadow: 0 2px 8px rgba(33,147,176,0.10);
+  transition: background 0.2s;
 }
+
 .login-btn:hover {
-  background: linear-gradient(90deg, #6dd5ed 0%, #2193b0 100%);
+  background: #b71c1c;
 }
-.terms {
-  font-size: 0.9em;
-  margin-top: 15px;
+
+.login-links {
+  font-size: 0.92rem;
+  color: #888;
+  margin-bottom: 10px;
+  text-align: left;
 }
-.terms a {
+
+.terms-link {
   color: #e53935;
-  text-decoration: none;
+  text-decoration: underline;
 }
-.error {
-  color: #e53935;
-  margin-top: 10px;
+
+.contact-admin {
+  color: #888;
+  font-size: 0.92rem;
 }
-/* Removed duplicate and broken trailing CSS */
+
+.login-footer {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin-top: 18px;
+  text-align: left;
+}
+
+@media (max-width: 1100px) {
+  .login-container {
+    border-radius: 0;
+    margin: 0;
+  }
+  .login-left, .login-right {
+    border-radius: 0;
+  }
+  .g5-logo {
+    width: 140px;
+  }
+}
+
+@media (max-width: 900px) {
+  .login-container {
+    flex-direction: column;
+    border-radius: 0;
+    margin: 0;
+  }
+  .login-left, .login-right {
+    min-height: 0;
+    height: auto;
+    width: 100%;
+    border-radius: 0;
+  }
+  .login-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+}

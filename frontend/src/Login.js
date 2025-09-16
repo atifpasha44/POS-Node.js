@@ -1,61 +1,91 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import logo from './logo.png';
 
-function Login({ setUser }) {
+function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [tin, setTin] = useState('');
   const [remember, setRemember] = useState(false);
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
+  const [error, setError] = useState('');
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/login', {
-        email,
-        password,
-        tin,
-        remember,
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, tin, remember })
       });
-      if (res.data.success) {
-        setUser(res.data.user);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate('/dashboard');
       } else {
-        setError(res.data.message || 'Login failed');
+        setError(data.message || 'Login failed');
       }
     } catch (err) {
-      setError('Login failed');
+      setError('Network error');
     }
   };
 
   return (
-    <div className="container login-bg-gradient">
-      <div className="welcome-section">
-        <img src={logo} alt="POS Logo" className="login-logo-img" />
+    <div className="login-container">
+      <div className="login-left">
+        <div className="ithots-main-logo">
+          <span className="ithots-main">ithots</span>
+          <span className="ithots-hospitality">HOSPITALITY</span>
+        </div>
         <h1>Welcome to Ithots</h1>
-        <p>Ithots provides you a Hospitality software. We are introducing ithots generation 5th fine dining restaurant software.</p>
+        <p className="login-desc">
+          Ithots Provides you a Hospitality Software.<br />
+          We are Introducing Ithots Generation 5<sup>th</sup><br />
+          Fine Dining Restaurant Software.
+        </p>
+        <div className="g5-logo-card">
+          <img src={logo} alt="ithots G5 Hospitality" className="g5-logo" />
+        </div>
       </div>
-      <div className="login-section">
-        <h2>Login To Your Account</h2>
-        <form onSubmit={handleSubmit}>
-          <label>EMAIL ADDRESS</label>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Enter Your Email" />
-          <label>PASSWORD</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter Password" />
-          <label>(or) TIN Number</label>
-          <input type="text" value={tin} onChange={e => setTin(e.target.value)} placeholder="Swipe the Card" />
-          <div className="remember-me">
-            <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
-            <label>Remember Me</label>
+      <div className="login-right">
+        <div className="login-card">
+          <h2>Login To Your Account</h2>
+          <p className="login-subtext">Enter your details to login.</p>
+          <form onSubmit={handleSubmit}>
+            <label htmlFor="email">EMAIL ADDRESS</label>
+            <div className="input-group">
+              <span className="input-icon"><i className="fa fa-envelope"></i></span>
+              <input type="email" id="email" placeholder="Enter Your Email" value={email} onChange={e => setEmail(e.target.value)} required />
+            </div>
+            <label htmlFor="password">PASSWORD</label>
+            <div className="input-group">
+              <span className="input-icon"><i className="fa fa-lock"></i></span>
+              <input type="password" id="password" placeholder="Enter Password" value={password} onChange={e => setPassword(e.target.value)} required />
+            </div>
+            <div className="tin-label">(or) TIN Number</div>
+            <div className="input-group">
+              <span className="input-icon"><i className="fa fa-id-card"></i></span>
+              <input type="text" id="tin" placeholder="Swipe the Card" value={tin} onChange={e => setTin(e.target.value)} />
+            </div>
+            <div className="login-options">
+              <label className="remember-me">
+                <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} /> Remember Me
+              </label>
+            </div>
+            <button type="submit" className="login-btn">LOGIN</button>
+            {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
+          </form>
+          <div className="login-links">
+            <span>By clicking login, you agree to our <a href="#" className="terms-link">Terms & Conditions!</a></span>
+            <br />
+            <span className="contact-admin">If you don't have account please contact to admin</span>
           </div>
-          <button type="submit" className="login-btn">LOGIN</button>
-        </form>
-        {error && <div className="error">{error}</div>}
-        <p className="terms">By clicking login, you agree to our <a href="#">Terms & Conditions!</a></p>
-        <p>If you don't have account please contact to admin</p>
+          <div className="login-footer">
+            <span>9 2019 www.ithots.co.in. All Rights Reserved | Design by <b>Syed'Atif</b></span>
+          </div>
+        </div>
       </div>
     </div>
   );
