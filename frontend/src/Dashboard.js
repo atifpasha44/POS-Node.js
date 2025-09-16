@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import './Dashboard.css';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import infoLogo from './info-logo.svg';
@@ -75,6 +76,14 @@ const menuItems = [
       'User Setup',
       'User Groups'
     ]
+  },
+  {
+    icon: '📅',
+    label: 'End Of Day'
+  },
+  {
+    icon: '🖥️',
+    label: 'POS System'
   }
 ];
 function Dashboard({ user, setUser }) {
