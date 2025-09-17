@@ -1,11 +1,15 @@
 
 import React, { useState } from 'react';
 
-function SidebarMenu({ menuItems }) {
+function SidebarMenu({ menuItems, onSubmenuClick }) {
   const [openIndex, setOpenIndex] = useState(null);
 
   const handleToggle = (idx) => {
     setOpenIndex(openIndex === idx ? null : idx);
+  };
+
+  const handleSubmenuClick = (sub) => {
+    if (onSubmenuClick) onSubmenuClick(sub);
   };
 
   return (
@@ -22,7 +26,7 @@ function SidebarMenu({ menuItems }) {
           {item.submenu && openIndex === idx && (
             <div className="sidebar-submenu">
               {item.submenu.map((sub) => (
-                <div key={sub} className="sidebar-submenu-item">{sub}</div>
+                <div key={sub} className="sidebar-submenu-item" onClick={() => handleSubmenuClick(sub)} style={{cursor:'pointer'}}>{sub}</div>
               ))}
             </div>
           )}
