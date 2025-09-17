@@ -9,7 +9,7 @@ const exportIcons = [
 
 export default function PropertyCode() {
   return (
-    <div className="propertycode-panel" style={{background:'#fff',border:'2.5px solid #bdbdbd',borderRadius:'12px',boxShadow:'0 2px 12px rgba(0,0,0,0.10)',maxWidth:'980px',margin:'32px auto',padding:'0 0 18px 0'}}>
+  <div className="propertycode-panel" style={{background:'#fff',border:'2.5px solid #bdbdbd',borderRadius:'12px',boxShadow:'0 2px 12px rgba(0,0,0,0.10)',width:'100%',maxWidth:'1200px',margin:'32px auto',padding:'0 0 18px 0',minHeight:'calc(100vh - 140px)'}}>
       {/* Top Section */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:'2px solid #e0e0e0',padding:'12px 18px 8px 18px'}}>
         <div style={{display:'flex',alignItems:'center'}}>
@@ -26,30 +26,39 @@ export default function PropertyCode() {
           ))}
         </div>
       </div>
-      {/* Form Section */}
-      <form className="propertycode-form" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'18px 32px',padding:'24px 32px 0 32px'}}>
-        {/* Left Side Fields */}
-        <div style={{display:'flex',flexDirection:'column',gap:'14px'}}>
-          <label>Applicable From<input type="date" /></label>
-          <label>Property Code<input type="text" /></label>
-          <label>Property Name<input type="text" /></label>
-          <label>Nick Name<input type="text" /></label>
-          <label>Owner Name<input type="text" /></label>
-          <label>Address Name<input type="text" /></label>
-          <label>GST Number<input type="text" /></label>
-          <label>PAN Number<input type="text" /></label>
-        </div>
-        {/* Right Side Fields */}
-        <div style={{display:'flex',flexDirection:'column',gap:'14px'}}>
-          <label>Group Name<input type="text" /></label>
-          <label>Local Currency<input type="text" /></label>
-          <label>Currency Format<input type="text" /></label>
-          <label>Symbol<input type="text" /></label>
-          <label>Decimal<input type="number" min="0" max="4" /></label>
-          <label>Date Format<input type="text" /></label>
-          <label>Round Off<input type="text" /></label>
-          <label>Property Logo<input type="file" style={{marginRight:'8px'}} /><button type="button" style={{background:'#90caf9',color:'#fff',border:'none',borderRadius:'4px',padding:'4px 12px',marginLeft:'8px'}}>Upload</button></label>
-        </div>
+      {/* Form Section - perfectly aligned grid */}
+      <form className="propertycode-form" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 32px',padding:'24px 32px 0 32px'}}>
+        {/* Left and Right Fields in grid rows */}
+        {[
+          ['Applicable From', <input type="date" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Property Code', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Property Name', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Nick Name', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Owner Name', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Address Name', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['GST Number', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['PAN Number', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />]
+        ].map(([label, input], i) => (
+          <div key={label} style={{display:'flex',alignItems:'center',marginBottom:'18px'}}>
+            <label style={{width:'160px',fontWeight:'500',color:'#222',fontSize:'1.08rem',marginRight:'12px'}}>{label}</label>
+            {input}
+          </div>
+        ))}
+        {[
+          ['Group Name', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Local Currency', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Currency Format', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Symbol', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Decimal', <input type="number" min="0" max="4" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Date Format', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Round Off', <input type="text" style={{width:'100%',height:'32px',fontSize:'1.08rem',border:'1.5px solid #bbb',borderRadius:'4px',padding:'0 8px'}} />],
+          ['Property Logo', <span><input type="file" style={{marginRight:'8px'}} /><button type="button" style={{background:'#90caf9',color:'#fff',border:'none',borderRadius:'4px',padding:'4px 12px',marginLeft:'8px'}}>Upload</button></span>]
+        ].map(([label, input], i) => (
+          <div key={label} style={{display:'flex',alignItems:'center',marginBottom:'18px'}}>
+            <label style={{width:'160px',fontWeight:'500',color:'#222',fontSize:'1.08rem',marginRight:'12px'}}>{label}</label>
+            {input}
+          </div>
+        ))}
       </form>
       {/* Bottom Section (Action Icons) */}
       <div style={{display:'flex',justifyContent:'center',gap:'48px',marginTop:'32px'}}>
