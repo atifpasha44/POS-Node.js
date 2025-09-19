@@ -87,6 +87,8 @@ const menuItems = [
   }
 ];
 function Dashboard({ user, setUser }) {
+  // Track dirty state from child modules
+  const [childDirty, setChildDirty] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const hotelName = 'ABC Hotel';
   const [showCompanyInfo, setShowCompanyInfo] = useState(true); // Show Comp Info by default
@@ -187,13 +189,23 @@ function Dashboard({ user, setUser }) {
       <div style={{display:'flex',height:'calc(100vh - 120px)'}}>
         {/* Sidebar vertical panel always visible */}
         <div style={{width:'300px',background:'#fff',borderRight:'2px solid #ffa726',padding:'8px 0',overflowY:'auto'}}>
-    <SidebarMenu menuItems={menuItems} onSubmenuClick={setActiveSubmenu} />
+    <SidebarMenu menuItems={menuItems} onSubmenuClick={sub => {
+      if (childDirty) {
+        if (!window.confirm('You have unsaved changes. If you proceed, your data will not be saved. Continue?')) return;
+      }
+      setActiveSubmenu(sub);
+      setChildDirty(false);
+    }} />
         </div>
         {/* Main content area */}
         <main className="dashboard-content" style={{flex:1}}>
           {activeSubmenu === 'Property Setup' ? (
             <React.Suspense fallback={<div>Loading...</div>}>
-              {React.createElement(require('./PropertyCode').default)}
+              {React.createElement(require('./PropertyCode').default, { setParentDirty: setChildDirty })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Outlet Setup' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./OutletSetup').default, { setParentDirty: setChildDirty })}
             </React.Suspense>
           ) : activeTab === 'dashboard' ? (
     <div className="dashboard-summary-panel" style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:'32px',marginTop:'16px'}}>
