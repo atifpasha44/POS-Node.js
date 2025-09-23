@@ -166,25 +166,31 @@ function Dashboard({ user, setUser }) {
         </div>
       </div>
       {/* Sub Menu Bar - styled to match screenshot */}
-      <div className="dashboard-submenu-bar" style={{background:'#fff',borderBottom:'2px solid #ffa726',padding:'0 0 0 0',display:'flex',alignItems:'center',height:'56px'}}>
-  <span style={{color:'#1a2dc5',fontWeight:'bold',fontSize:'1.15rem',marginLeft:'32px',letterSpacing:'0.5px',whiteSpace:'nowrap'}}>Welcome to Ithots POS</span>
-  <div style={{display:'flex',justifyContent:'center',gap:'18px',margin:'12px 0 12px 0',background:'transparent',marginLeft:'220px'}}>
-          <button className={`dashboard-tab${activeTab==='compinfo' ? ' active' : ''}`} onClick={handleCompInfoClick} style={{background:'#ffb300',color:'#fff',fontWeight:'bold',border:'none',borderRadius:'10px',padding:'8px 18px',fontSize:'1rem',boxShadow:'0 2px 8px rgba(0,0,0,0.10)',cursor:'pointer',transition:'all 0.2s',minWidth:'110px',letterSpacing:'0.5px'}}>
-            Comp Info
-          </button>
-          <button className={`dashboard-tab${activeTab==='dashboard' ? ' active' : ''}`} onClick={()=>setActiveTab('dashboard')} style={{background:'#ffb300',color:'#fff',fontWeight:'bold',border:'none',borderRadius:'10px',padding:'8px 18px',fontSize:'1rem',boxShadow:'0 2px 8px rgba(0,0,0,0.10)',cursor:'pointer',transition:'all 0.2s',minWidth:'110px',letterSpacing:'0.5px'}}>
-            Dashboard
-          </button>
-               <button className={`dashboard-tab${activeTab==='pending' ? ' active' : ''}`} onClick={()=>{ setActiveTab('pending'); setShowCompanyInfo(false); }} style={{background:'#ffb300',color:'#fff',fontWeight:'bold',border:'none',borderRadius:'10px',padding:'8px 18px',fontSize:'1rem',boxShadow:'0 2px 8px rgba(0,0,0,0.10)',cursor:'pointer',transition:'all 0.2s',minWidth:'110px',letterSpacing:'0.5px'}}>
-            Pending Status
-          </button>
-          <button className={`dashboard-tab${activeTab==='table' ? ' active' : ''}`} onClick={()=>setActiveTab('table')} style={{background:'#ffb300',color:'#fff',fontWeight:'bold',border:'none',borderRadius:'10px',padding:'8px 18px',fontSize:'1rem',boxShadow:'0 2px 8px rgba(0,0,0,0.10)',cursor:'pointer',transition:'all 0.2s',minWidth:'110px',letterSpacing:'0.5px'}}>
-            Sale Info
-          </button>
-          <button className={`dashboard-tab${activeTab==='account' ? ' active' : ''}`} onClick={()=>setActiveTab('account')} style={{background:'#ffb300',color:'#fff',fontWeight:'bold',border:'none',borderRadius:'10px',padding:'8px 18px',fontSize:'1rem',boxShadow:'0 2px 8px rgba(0,0,0,0.10)',cursor:'pointer',transition:'all 0.2s',minWidth:'110px',letterSpacing:'0.5px'}}>
-            Account Setting
-          </button>
+      <div className="dashboard-submenu-bar" style={{background:'#fff',borderBottom:'2px solid #ffa726',padding:'0 0 0 0',display:'flex',alignItems:'center',height:'56px',position:'relative'}}>
+        <span style={{color:'#1a2dc5',fontWeight:'bold',fontSize:'1.15rem',marginLeft:'32px',letterSpacing:'0.5px',whiteSpace:'nowrap'}}>Welcome to Ithots POS</span>
+        <div style={{display:'flex',justifyContent:'center',gap:'18px',margin:'12px 0 12px 0',background:'transparent',marginLeft:'220px',position:'relative'}}>
+          {[
+            { key: 'compinfo', label: 'Comp Info', onClick: handleCompInfoClick, icon: <span role="img" aria-label="info" style={{fontSize:'1.5rem',marginRight:'8px'}}>ℹ️</span>, desc: 'Company Information' },
+            { key: 'dashboard', label: 'Dashboard', onClick: ()=>setActiveTab('dashboard'), icon: <span role="img" aria-label="dashboard" style={{fontSize:'1.5rem',marginRight:'8px'}}>📊</span>, desc: 'Summary, Charts, Reports' },
+            { key: 'pending', label: 'Pending Status', onClick: ()=>{ setActiveTab('pending'); setShowCompanyInfo(false); }, icon: <span role="img" aria-label="pending" style={{fontSize:'1.5rem',marginRight:'8px'}}>⏳</span>, desc: 'Pending KOTs, Bills, Table Status' },
+            { key: 'table', label: 'Sale Info', onClick: ()=>setActiveTab('table'), icon: <span role="img" aria-label="sale" style={{fontSize:'1.5rem',marginRight:'8px'}}>💰</span>, desc: 'Sales, Pax, Session Sales' },
+            { key: 'account', label: 'Account Setting', onClick: ()=>setActiveTab('account'), icon: <span role="img" aria-label="account" style={{fontSize:'1.5rem',marginRight:'8px'}}>👤</span>, desc: 'Change Password, Account Settings' }
+          ].map((tab, idx) => (
+            <div key={tab.key} style={{display:'flex',flexDirection:'column',alignItems:'center',position:'relative'}}>
+              <button
+                className={`dashboard-tab${activeTab===tab.key ? ' active' : ''}`}
+                onClick={tab.onClick}
+                style={{background:'#ffb300',color:'#fff',fontWeight:'bold',border:'none',borderRadius:'10px',padding:'8px 18px',fontSize:'1rem',boxShadow:'0 2px 8px rgba(0,0,0,0.10)',cursor:'pointer',transition:'all 0.2s',minWidth:'110px',letterSpacing:'0.5px',position:'relative'}}
+              >
+                {tab.label}
+              </button>
+              {activeTab===tab.key && (
+                <div style={{width:'32px',height:'8px',background:'#1976d2',borderRadius:'8px',marginTop:'-2px'}}></div>
+              )}
+            </div>
+          ))}
         </div>
+        {/* Location indicator below tabs removed as per new rule. The highlighted tab at the top is sufficient. */}
       </div>
       <div style={{display:'flex',height:'calc(100vh - 120px)'}}>
         {/* Sidebar vertical panel always visible */}
