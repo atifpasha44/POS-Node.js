@@ -97,6 +97,7 @@ function Dashboard({ user, setUser }) {
   const [activeTab, setActiveTab] = useState('compinfo');
   const [loadingCompany, setLoadingCompany] = useState(false);
   const [companyError, setCompanyError] = useState('');
+  const [propertyRecords, setPropertyRecords] = useState([]); // Persist PropertyCode records
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -230,6 +231,7 @@ function Dashboard({ user, setUser }) {
         setActiveMainMenu(menuItems.find(item => item.submenu && item.submenu.includes(sub))?.label || null);
         setActiveTab(null);
         setChildDirty(false);
+        // Do not reset or clear any child data except dirty state
       }}
     />
         </div>
@@ -237,7 +239,11 @@ function Dashboard({ user, setUser }) {
         <main className="dashboard-content" style={{flex:1}}>
           {activeSubmenu === 'Property Setup' ? (
             <React.Suspense fallback={<div>Loading...</div>}>
-              {React.createElement(require('./PropertyCode').default, { setParentDirty: setChildDirty })}
+              {React.createElement(require('./PropertyCode').default, {
+                setParentDirty: setChildDirty,
+                records: propertyRecords,
+                setRecords: setPropertyRecords
+              })}
             </React.Suspense>
           ) : activeSubmenu === 'Outlet Setup' ? (
             <React.Suspense fallback={<div>Loading...</div>}>

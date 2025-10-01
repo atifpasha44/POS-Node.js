@@ -9,21 +9,28 @@ const initialState = {
   group_name: '', local_currency: '', currency_format: '', symbol: '', decimal: '', date_format: '', round_off: '', property_logo: null
 };
 
-export default function PropertyCode({ setParentDirty }) {
+export default function PropertyCode({ setParentDirty, records, setRecords }) {
   const [isDirty, setIsDirty] = useState(false);
   const [form, setForm] = useState(initialState);
   const [logoPreview, setLogoPreview] = useState(null);
   const [action, setAction] = useState('Add');
   const [showSavePopup, setShowSavePopup] = useState(false);
   const [showSelectModal, setShowSelectModal] = useState(false);
-  const [records, setRecords] = useState([]); // in-memory demo data
   const [selectedRecordIdx, setSelectedRecordIdx] = useState(null);
   const [showNoChangePopup, setShowNoChangePopup] = useState(false);
+  const [selectModalMessage, setSelectModalMessage] = useState('');
   const formRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // Reset message when modal closes
+  useEffect(() => {
+    if (!showSelectModal) setSelectModalMessage('');
+  }, [showSelectModal]);
 
   // Handlers
   // Helper: should fields be disabled (Delete mode, record selected)
   const isDeleteLocked = action === 'Delete' && selectedRecordIdx !== null;
+  const isSearchLocked = action === 'Search' && selectedRecordIdx !== null;
   const handleChange = e => {
     const { name, value, type, files } = e.target;
     if (type === 'file') {
@@ -37,13 +44,14 @@ export default function PropertyCode({ setParentDirty }) {
       if (setParentDirty) setParentDirty(true);
     }
   };
+  // Only clear the form and selection, never touch records array
   const handleClear = () => {
     setForm(initialState);
     setLogoPreview(null);
     setIsDirty(false);
     if (setParentDirty) setParentDirty(false);
     setSelectedRecordIdx(null); // Unlock Delete state if in Delete mode
-    setAction('Add'); // Optionally reset action to Add for a fresh start
+    // Do not reset action to 'Add' if in the middle of Edit/Delete/Search, just clear selection
   };
   const handleSave = () => {
     setRecords(prev => {
@@ -65,16 +73,18 @@ export default function PropertyCode({ setParentDirty }) {
           setSelectedRecordIdx(null);
           setIsDirty(false);
           if (setParentDirty) setParentDirty(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
           return prev;
         }
         const updated = [...prev];
-        updated[selectedRecordIdx] = { ...form };
+        updated[selectedRecordIdx] = { ...form, property_logo: null };
         setShowSavePopup(true);
         setTimeout(() => setShowSavePopup(false), 1800);
         setIsDirty(false);
         if (setParentDirty) setParentDirty(false);
         setSelectedRecordIdx(null);
         setForm(initialState); setLogoPreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         return updated;
       }
       if (action === 'Delete' && selectedRecordIdx !== null) {
@@ -88,6 +98,7 @@ export default function PropertyCode({ setParentDirty }) {
         setIsDirty(false);
         setAction('Add');
         if (setParentDirty) setParentDirty(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         return updated;
       }
       // Add mode: check for duplicate code
@@ -101,7 +112,8 @@ export default function PropertyCode({ setParentDirty }) {
       if (setParentDirty) setParentDirty(false);
       setSelectedRecordIdx(null);
       setForm(initialState); setLogoPreview(null);
-      return [...prev, { ...form }];
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return [...prev, { ...form, property_logo: null }];
     });
   };
   useEffect(() => {
@@ -179,11 +191,37 @@ export default function PropertyCode({ setParentDirty }) {
 
   return (
   <div className="propertycode-panel" style={{background:'#fff',border:'2.5px solid #222',borderRadius:'16px',boxShadow:'0 2px 12px rgba(0,0,0,0.10)',width:'100%',maxWidth:'1200px',margin:'32px auto',padding:'0 0 18px 0',height:'calc(100vh - 120px)',display:'flex',flexDirection:'column',overflowY:'auto',position:'relative'}}>
-      {/* Top Control Bar */}
-  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',borderBottom:'2px solid #e0e0e0',padding:'12px 18px 8px 18px',minWidth:0}}>
+      {/* Top Control Bar - now sticky */}
+  <div style={{
+    display:'flex',alignItems:'center',justifyContent:'space-between',
+    borderBottom:'2px solid #e0e0e0',padding:'12px 18px 8px 18px',minWidth:0,
+    position:'sticky',top:0,zIndex:10,background:'#fff',boxShadow:'0 2px 8px rgba(0,0,0,0.04)'
+  }}>
   <div style={{display:'flex',alignItems:'center',gap:'8px',minWidth:0,flexWrap:'wrap'}}>
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>Property Code</span>
-          <select value={action} onChange={e=>setAction(e.target.value)} style={{fontWeight:'bold',fontSize:'1rem',padding:'4px 12px',borderRadius:'6px',border:'1.5px solid #bbb',marginRight:'8px'}} disabled={isDeleteLocked}>
+          <select
+            value={action}
+            onChange={e => {
+              const val = e.target.value;
+              if (val === 'Add') {
+                handleAdd();
+              } else if (val === 'Edit') {
+                setAction('Edit');
+                setShowSelectModal(true);
+                setSelectModalMessage('Please select a record to edit.');
+              } else if (val === 'Delete') {
+                setAction('Delete');
+                setShowSelectModal(true);
+                setSelectModalMessage('Please select a record to delete.');
+              } else if (val === 'Search') {
+                setAction('Search');
+                setShowSelectModal(true);
+                setSelectModalMessage('Please select a record to view.');
+              }
+            }}
+            style={{fontWeight:'bold',fontSize:'1rem',padding:'4px 12px',borderRadius:'6px',border:'1.5px solid #bbb',marginRight:'8px'}}
+            disabled={isDeleteLocked}
+          >
             <option value="Add">Action</option>
             <option value="Add">Add</option>
             <option value="Edit">Edit</option>
@@ -201,7 +239,8 @@ export default function PropertyCode({ setParentDirty }) {
             style={{background:'#f3e5f5',border:'2px solid #8e24aa',borderRadius:'50%',width:'38px',height:'38px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.5rem',color:'#8e24aa',marginRight:'4px',cursor:'pointer',transition:'0.2s'}}
             onMouseOver={e=>e.currentTarget.style.background='#e1bee7'}
             onMouseOut={e=>e.currentTarget.style.background='#f3e5f5'}
-            disabled={isDeleteLocked}
+            // Always allow Clear button to work, even in Delete mode
+            disabled={false}
           >
             <span role="img" aria-label="Clear">🧹</span>
           </button>
@@ -243,7 +282,7 @@ export default function PropertyCode({ setParentDirty }) {
     {/* Save confirmation popup */}
     {showSavePopup && (
       <div style={{position:'fixed',top:'30%',left:'50%',transform:'translate(-50%,-50%)',background:'#fff',border:'2px solid #43a047',borderRadius:'12px',padding:'32px 48px',zIndex:1000,boxShadow:'0 4px 24px rgba(0,0,0,0.18)',fontSize:'1.25rem',color:'#43a047',fontWeight:'bold'}}>
-        {action === 'Delete' ? 'Records deleted successfully.' : 'Data has been saved successfully.'}
+        {action === 'Delete' ? 'Records have been successfully deleted.' : 'Data has been saved successfully.'}
       </div>
     )}
     {/* No change popup */}
@@ -256,7 +295,7 @@ export default function PropertyCode({ setParentDirty }) {
     {showSelectModal && (
       <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.18)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}}>
         <div style={{background:'#fff',borderRadius:'14px',padding:'32px 24px',minWidth:'520px',boxShadow:'0 4px 24px rgba(0,0,0,0.18)',maxHeight:'80vh',overflowY:'auto'}}>
-          <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>Select a record to edit/delete</div>
+          <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>{selectModalMessage || 'Select a record to edit/delete'}</div>
           {records.length === 0 ? (
             <div style={{color:'#888',fontSize:'1.05rem'}}>No records found.</div>
           ) : (
@@ -293,71 +332,71 @@ export default function PropertyCode({ setParentDirty }) {
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Applicable From</label>
-            <input type="date" name="applicable_from" value={form.applicable_from} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action==='Edit'&&selectedRecordIdx!==null)||isDeleteLocked?'#eee':'#fff'}} disabled={(action==='Edit'&&selectedRecordIdx!==null)||isDeleteLocked} />
+            <input type="date" name="applicable_from" value={form.applicable_from} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action==='Edit'&&selectedRecordIdx!==null)||isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={(action==='Edit'&&selectedRecordIdx!==null)||isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property Code</label>
-            <input type="text" name="property_code" value={form.property_code} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action==='Edit'&&selectedRecordIdx!==null)||isDeleteLocked?'#eee':'#fff'}} disabled={(action==='Edit'&&selectedRecordIdx!==null)||isDeleteLocked} />
+            <input type="text" name="property_code" value={form.property_code} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action==='Edit'&&selectedRecordIdx!==null)||isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={(action==='Edit'&&selectedRecordIdx!==null)||isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property Name</label>
-            <input type="text" name="property_name" value={form.property_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="property_name" value={form.property_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Nick Name</label>
-            <input type="text" name="nick_name" value={form.nick_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="nick_name" value={form.nick_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Owner Name</label>
-            <input type="text" name="owner_name" value={form.owner_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="owner_name" value={form.owner_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Address Name</label>
-            <input type="text" name="address_name" value={form.address_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="address_name" value={form.address_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>GST Number</label>
-            <input type="text" name="gst_number" value={form.gst_number} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="gst_number" value={form.gst_number} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>PAN Number</label>
-            <input type="text" name="pan_number" value={form.pan_number} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="pan_number" value={form.pan_number} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
         </div>
         {/* Right column */}
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Group Name</label>
-            <input type="text" name="group_name" value={form.group_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="group_name" value={form.group_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Local Currency</label>
-            <input type="text" name="local_currency" value={form.local_currency} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="local_currency" value={form.local_currency} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Currency Format</label>
-            <input type="text" name="currency_format" value={form.currency_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="currency_format" value={form.currency_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Symbol</label>
-            <input type="text" name="symbol" value={form.symbol} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="symbol" value={form.symbol} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Decimal</label>
-            <input type="number" name="decimal" value={form.decimal} onChange={handleChange} min="0" max="4" style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="number" name="decimal" value={form.decimal} onChange={handleChange} min="0" max="4" style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Date Format</label>
-            <input type="text" name="date_format" value={form.date_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="date_format" value={form.date_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Round Off</label>
-            <input type="text" name="round_off" value={form.round_off} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked?'#eee':'#fff'}} disabled={isDeleteLocked} />
+            <input type="text" name="round_off" value={form.round_off} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isDeleteLocked||isSearchLocked?'#eee':'#fff'}} disabled={isDeleteLocked||isSearchLocked} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property Logo</label>
-            <input type="file" name="property_logo" onChange={handleChange} style={{marginRight:'8px',width:'80%'}} disabled={isDeleteLocked} />
-            <button type="button" style={{background:'#1976d2',color:'#fff',border:'none',borderRadius:'6px',padding:'8px 18px',marginLeft:'8px',fontWeight:'bold',fontSize:'1.08rem',cursor:'pointer'}} disabled={isDeleteLocked}>UPLOAD</button>
+            <input ref={fileInputRef} type="file" name="property_logo" onChange={handleChange} style={{marginRight:'8px',width:'80%'}} disabled={isDeleteLocked||isSearchLocked} />
+            <button type="button" style={{background:'#1976d2',color:'#fff',border:'none',borderRadius:'6px',padding:'8px 18px',marginLeft:'8px',fontWeight:'bold',fontSize:'1.08rem',cursor:'pointer'}} disabled={isDeleteLocked||isSearchLocked}>UPLOAD</button>
             {logoPreview && <img src={logoPreview} alt="Logo Preview" style={{height:'38px',marginLeft:'12px',borderRadius:'6px'}} />}
           </div>
         </div>
