@@ -227,6 +227,23 @@
   font-weight: 500;
   border-radius: 6px;
   margin: 0 0 0 0;
+  position: relative;
+}
+
+.sidebar-submenu-item.active {
+  color: #1976d2;
+  font-weight: 700;
+}
+.sidebar-submenu-item.active::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 2px;
+  height: 5px;
+  background: #1976d2;
+  border-radius: 8px;
 }
 .sidebar-submenu-item:last-child {
   border-bottom: none;
