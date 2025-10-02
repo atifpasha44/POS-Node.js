@@ -1,6 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import './Dashboard.css';
 
+const mockPriceLevels = [
+  'Regular Price',
+  'Happy Hour Price',
+  'Member Price',
+];
+const mockOutletTypes = [
+  'Restaurant',
+  'Bar',
+  'Coffee Shop',
+  'Bakery',
+];
+
+export default function OutletSetup({ setParentDirty, propertyCodes, records, setRecords }) {
 const initialState = {
   property: '',
   applicable_from: '',
@@ -27,7 +41,8 @@ const initialState = {
 };
 
 
-export default function OutletSetup({ setParentDirty }) {
+  // Track if a delete is pending confirmation
+  const deletePendingRef = useRef(false);
   const [form, setForm] = useState(initialState);
   const [action, setAction] = useState('Add');
   const [isDirty, setIsDirty] = useState(false);
@@ -35,8 +50,12 @@ export default function OutletSetup({ setParentDirty }) {
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [selectedRecordIdx, setSelectedRecordIdx] = useState(null);
   const [showNoChangePopup, setShowNoChangePopup] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectModalMessage, setSelectModalMessage] = useState('');
-  const [records, setRecords] = useState([]);
+  // Use records and setRecords from props (parent Dashboard)
+  // const [records, setRecords] = useState([]);
+  const [priceLevels, setPriceLevels] = useState(mockPriceLevels);
+  const [outletTypes, setOutletTypes] = useState(mockOutletTypes);
   const formRef = useRef(null);
 
   // Reset message when modal closes
@@ -59,13 +78,30 @@ export default function OutletSetup({ setParentDirty }) {
     };
   }, [isDirty]);
 
+  // Set default date for Applicable From on Add
+  useEffect(() => {
+    if (action === 'Add') {
+      setForm(f => ({ ...f, applicable_from: new Date().toISOString().slice(0, 10) }));
+    }
+  }, [action]);
+
   // Handlers
   const handleChange = e => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, maxLength } = e.target;
     if (type === 'checkbox' && name in form.options) {
       setForm(f => ({ ...f, options: { ...f.options, [name]: checked } }));
     } else if (type === 'checkbox' && name === 'inactive') {
       setForm(f => ({ ...f, inactive: checked }));
+    } else if (name === 'outlet_code') {
+      // Only allow 4 alphanumeric chars, uppercase, and block edit if not Add
+      if (action !== 'Add') return;
+      let val = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+      if (val.length > 4) val = val.slice(0, 4);
+      setForm(f => ({ ...f, outlet_code: val }));
+    } else if (name === 'short_name') {
+      setForm(f => ({ ...f, short_name: value.slice(0, 15) }));
+    } else if (name === 'check_prefix') {
+      setForm(f => ({ ...f, check_prefix: value.slice(0, 4) }));
     } else {
       setForm(f => ({ ...f, [name]: value }));
     }
@@ -79,10 +115,61 @@ export default function OutletSetup({ setParentDirty }) {
     setSelectedRecordIdx(null);
     setAction('Add');
   };
-  const handleSave = () => {
+  const handleSave = async () => {
+    // Validate all fields are filled/selected (all mandatory)
+    const requiredFields = [
+      { key: 'property', label: 'Property' },
+      { key: 'applicable_from', label: 'Applicable From' },
+      { key: 'outlet_code', label: 'Outlet Code' },
+      { key: 'outlet_name', label: 'Outlet Name' },
+      { key: 'short_name', label: 'Short Name' },
+      { key: 'outlet_type', label: 'Outlet Type' },
+      { key: 'item_price_level', label: 'Item Price Level' },
+      { key: 'check_prefix', label: 'Check Prefix' },
+      { key: 'check_format', label: 'Check Format' },
+      { key: 'receipt_format', label: 'Receipt Format' },
+      { key: 'kitchen_format', label: 'Kitchen Format' }
+    ];
+    for (const field of requiredFields) {
+      if (!form[field.key] || (typeof form[field.key] === 'string' && form[field.key].trim() === '')) {
+        alert(`Please enter/select ${field.label}.`);
+        return;
+      }
+    }
+    // All options checkboxes must be selected (true or false is fine, but must exist)
+    if (!form.options || Object.keys(form.options).length !== 8) {
+      alert('All options must be set.');
+      return;
+    }
+    // Validation: outlet_code required, 4 chars, unique
+    if (!form.outlet_code || form.outlet_code.length !== 4) {
+      alert('Outlet Code must be exactly 4 alphanumeric characters.');
+      return;
+    }
+    if (records.some((rec, idx) => rec && rec.outlet_code === form.outlet_code && idx !== selectedRecordIdx)) {
+      alert('This Outlet Code already exists. Please enter a unique code.');
+      return;
+    }
+    // Validation: short_name max 15 chars
+    if (form.short_name && form.short_name.length > 15) {
+      alert('Short Name must be 15 characters or less.');
+      return;
+    }
+    // Validation: check_prefix max 4 chars
+    if (form.check_prefix && form.check_prefix.length > 4) {
+      alert('Check Prefix must be 4 characters or less.');
+      return;
+    }
+    if (action === 'Delete' && selectedRecordIdx !== null) {
+      setShowDeleteConfirm(true);
+      deletePendingRef.current = true;
+      return;
+    }
     setRecords(prev => {
+      // Filter out empty/invalid records before saving
+      const filtered = prev.filter(r => r && r.outlet_code && r.options && typeof r.options.cash !== 'undefined');
       if (action === 'Edit' && selectedRecordIdx !== null) {
-        const updated = [...prev];
+        const updated = [...filtered];
         updated[selectedRecordIdx] = { ...form };
         setShowSavePopup(true);
         setTimeout(() => setShowSavePopup(false), 1800);
@@ -92,21 +179,10 @@ export default function OutletSetup({ setParentDirty }) {
         setForm(initialState);
         return updated;
       }
-      if (action === 'Delete' && selectedRecordIdx !== null) {
-        const updated = prev.filter((_, i) => i !== selectedRecordIdx);
-        setShowSavePopup(true);
-        setTimeout(() => setShowSavePopup(false), 1800);
-        setForm(initialState);
-        setSelectedRecordIdx(null);
-        setIsDirty(false);
-        setAction('Add');
-        if (setParentDirty) setParentDirty(false);
-        return updated;
-      }
       // Add mode: check for duplicate outlet_code
-      if (prev.some(rec => rec.outlet_code === form.outlet_code)) {
-        alert('Outlet Code must be unique.');
-        return prev;
+      if (filtered.some(rec => rec.outlet_code === form.outlet_code)) {
+        alert('This Outlet Code already exists. Please enter a unique code.');
+        return filtered;
       }
       setShowSavePopup(true);
       setTimeout(() => setShowSavePopup(false), 1800);
@@ -114,9 +190,44 @@ export default function OutletSetup({ setParentDirty }) {
       if (setParentDirty) setParentDirty(false);
       setSelectedRecordIdx(null);
       setForm(initialState);
-      return [...prev, { ...form }];
+      return [...filtered, { ...form }];
     });
   };
+
+// Confirmed delete handler
+const handleDeleteConfirmed = async () => {
+  deletePendingRef.current = false;
+    if (selectedRecordIdx === null) return;
+    const record = records[selectedRecordIdx];
+    try {
+      // Call backend delete API (adjust endpoint as needed)
+      await axios.delete(`/api/outlets/${record.outlet_code}`);
+    } catch (err) {
+      alert('Failed to delete record from backend.');
+      setShowDeleteConfirm(false);
+      return;
+    }
+    setRecords(prev => prev.filter((_, i) => i !== selectedRecordIdx));
+    setShowSavePopup(true);
+    setTimeout(() => setShowSavePopup(false), 1800);
+    setForm(initialState);
+    setSelectedRecordIdx(null);
+    setIsDirty(false);
+    setAction('Add');
+    if (setParentDirty) setParentDirty(false);
+    setShowDeleteConfirm(false);
+};
+// Cancel delete
+const handleDeleteCancel = () => {
+  setShowDeleteConfirm(false);
+  deletePendingRef.current = false;
+};
+// Guard: On unmount or navigation, clear any pending delete
+useEffect(() => {
+  return () => {
+    deletePendingRef.current = false;
+  };
+}, []);
   const handleSearch = () => {
     setAction('Search');
     setShowSelectModal(true);
@@ -124,7 +235,7 @@ export default function OutletSetup({ setParentDirty }) {
   };
   const handleAdd = () => {
     setAction('Add');
-    setForm(initialState);
+    setForm(f => ({ ...initialState, applicable_from: new Date().toISOString().slice(0, 10) }));
     setIsDirty(false);
     if (setParentDirty) setParentDirty(false);
     setSelectedRecordIdx(null);
@@ -149,11 +260,14 @@ export default function OutletSetup({ setParentDirty }) {
     }
   };
   const handleSelectRecord = idx => {
-    setForm(records[idx]);
+    // Defensive: filter out empty/invalid records
+    const filtered = records.filter(r => r && r.outlet_code && r.options && typeof r.options.cash !== 'undefined');
+    setForm(filtered[idx]);
     setSelectedRecordIdx(idx);
     setShowSelectModal(false);
     setIsDirty(false);
     if (setParentDirty) setParentDirty(false);
+    // Do NOT delete here; wait for explicit Save/Delete confirmation
   };
 
   // UI
@@ -222,6 +336,16 @@ export default function OutletSetup({ setParentDirty }) {
           </span>
         </div>
       </div>
+      {/* Delete confirmation dialog */}
+      {showDeleteConfirm && (
+        <div style={{position:'fixed',top:'30%',left:'50%',transform:'translate(-50%,-50%)',background:'#fff',border:'2px solid #e53935',borderRadius:'12px',padding:'32px 48px',zIndex:2000,boxShadow:'0 4px 24px rgba(0,0,0,0.18)',fontSize:'1.25rem',color:'#e53935',fontWeight:'bold'}}>
+          <div>Are you sure you want to delete this record?</div>
+          <div style={{marginTop:'18px',display:'flex',gap:'24px',justifyContent:'center'}}>
+            <button onClick={handleDeleteConfirmed} style={{background:'#e53935',color:'#fff',border:'none',borderRadius:'6px',padding:'8px 22px',fontWeight:'bold',fontSize:'1.08rem',cursor:'pointer'}}>Yes, Delete</button>
+            <button onClick={handleDeleteCancel} style={{background:'#bbb',color:'#222',border:'none',borderRadius:'6px',padding:'8px 22px',fontWeight:'bold',fontSize:'1.08rem',cursor:'pointer'}}>Cancel</button>
+          </div>
+        </div>
+      )}
       {/* Save confirmation popup */}
       {showSavePopup && (
         <div style={{position:'fixed',top:'30%',left:'50%',transform:'translate(-50%,-50%)',background:'#fff',border:'2px solid #43a047',borderRadius:'12px',padding:'32px 48px',zIndex:1000,boxShadow:'0 4px 24px rgba(0,0,0,0.18)',fontSize:'1.25rem',color:'#43a047',fontWeight:'bold'}}>
@@ -239,55 +363,69 @@ export default function OutletSetup({ setParentDirty }) {
         <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.18)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}}>
           <div style={{background:'#fff',borderRadius:'14px',padding:'32px 24px',minWidth:'520px',boxShadow:'0 4px 24px rgba(0,0,0,0.18)',maxHeight:'80vh',overflowY:'auto'}}>
             <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>{selectModalMessage || 'Select a record to edit/delete'}</div>
-            {records.length === 0 ? (
-              <div style={{color:'#888',fontSize:'1.05rem'}}>No records found.</div>
-            ) : (
-              <table style={{width:'100%',borderCollapse:'collapse',marginBottom:'12px'}}>
-                <thead>
-                  <tr style={{background:'#e3e3e3'}}>
-                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Outlet Code</th>
-                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Outlet Name</th>
-                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Property</th>
-                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {records.map((rec, idx) => (
-                    <tr key={idx} style={{background: idx%2 ? '#f7f7f7' : '#fff'}}>
-                      <td style={{padding:'6px 8px'}}>{rec.outlet_code}</td>
-                      <td style={{padding:'6px 8px'}}>{rec.outlet_name}</td>
-                      <td style={{padding:'6px 8px'}}>{rec.property}</td>
-                      <td style={{padding:'6px 8px'}}>
-                        <button type="button" style={{background:'#1976d2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>Select</button>
-                      </td>
+            {(() => {
+              const filtered = records.filter(r => r && r.outlet_code && r.options && typeof r.options.cash !== 'undefined');
+              if (filtered.length === 0) {
+                return <div style={{color:'#888',fontSize:'1.05rem'}}>No records found.</div>;
+              }
+              return (
+                <table style={{width:'100%',borderCollapse:'collapse',marginBottom:'12px'}}>
+                  <thead>
+                    <tr style={{background:'#e3e3e3'}}>
+                      <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Outlet Code</th>
+                      <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Outlet Name</th>
+                      <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Property</th>
+                      <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                  </thead>
+                  <tbody>
+                    {filtered.map((rec, idx) => (
+                      <tr key={idx} style={{background: idx%2 ? '#f7f7f7' : '#fff'}}>
+                        <td style={{padding:'6px 8px'}}>{rec.outlet_code}</td>
+                        <td style={{padding:'6px 8px'}}>{rec.outlet_name}</td>
+                        <td style={{padding:'6px 8px'}}>{rec.property}</td>
+                        <td style={{padding:'6px 8px'}}>
+                          <button type="button" style={{background:'#1976d2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>Select</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              );
+            })()}
             <button type="button" style={{background:'#e53935',color:'#fff',border:'none',borderRadius:'6px',padding:'8px 22px',fontWeight:'bold',fontSize:'1.08rem',marginTop:'8px',cursor:'pointer'}} onClick={()=>setShowSelectModal(false)}>Close</button>
           </div>
         </div>
       )}
       {/* Form Section - two columns, bold labels */}
-      <form ref={formRef} className="propertycode-form" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 32px',padding:'32px 32px 0 32px'}}>
+      <form ref={formRef} className="propertycode-form" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 32px',padding:'32px 32px 0 32px'}} autoComplete="off">
         {/* Left column */}
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property</label>
-            <input type="text" name="property" value={form.property} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <select name="property" value={form.property} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} required>
+              <option value="">Select Property</option>
+              {propertyCodes && propertyCodes.length > 0 && propertyCodes.map(pc => (
+                <option key={pc.property_code || pc.code} value={pc.property_code || pc.code}>
+                  {(pc.property_code || pc.code) + (pc.property_name ? ' - ' + pc.property_name : (pc.name ? ' - ' + pc.name : ''))}
+                </option>
+              ))}
+            </select>
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Outlet Code</label>
-            <input type="text" name="outlet_code" value={form.outlet_code} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <input type="text" name="outlet_code" value={form.outlet_code} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: action!=='Add'?'#f3f3f3':'#fff'}} maxLength={4} disabled={action!=='Add'} autoComplete="off" required />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Short Name</label>
-            <input type="text" name="short_name" value={form.short_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <input type="text" name="short_name" value={form.short_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} maxLength={15} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Item Price Level</label>
-            <input type="text" name="item_price_level" value={form.item_price_level} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <select name="item_price_level" value={form.item_price_level} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}>
+              <option value="">Select Price Level</option>
+              {priceLevels.map((pl, i) => <option key={i} value={pl}>{pl}</option>)}
+            </select>
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Check Format</label>
@@ -302,7 +440,7 @@ export default function OutletSetup({ setParentDirty }) {
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Applicable From</label>
-            <input type="date" name="applicable_from" value={form.applicable_from} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <input type="date" name="applicable_from" value={form.applicable_from} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} required />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Outlet Name</label>
@@ -310,11 +448,14 @@ export default function OutletSetup({ setParentDirty }) {
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Outlet Type</label>
-            <input type="text" name="outlet_type" value={form.outlet_type} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <select name="outlet_type" value={form.outlet_type} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}>
+              <option value="">Select Outlet Type</option>
+              {outletTypes.map((ot, i) => <option key={i} value={ot}>{ot}</option>)}
+            </select>
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Check Prefix</label>
-            <input type="text" name="check_prefix" value={form.check_prefix} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <input type="text" name="check_prefix" value={form.check_prefix} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} maxLength={4} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Receipt Format</label>

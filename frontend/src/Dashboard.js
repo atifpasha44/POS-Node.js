@@ -247,7 +247,12 @@ function Dashboard({ user, setUser }) {
             </React.Suspense>
           ) : activeSubmenu === 'Outlet Setup' ? (
             <React.Suspense fallback={<div>Loading...</div>}>
-              {React.createElement(require('./OutletSetup').default, { setParentDirty: setChildDirty })}
+              {React.createElement(require('./OutletSetup').default, {
+                setParentDirty: setChildDirty,
+                propertyCodes: propertyRecords,
+                records: propertyRecords, // Use the same array for demo; replace with outletRecords if needed
+                setRecords: setPropertyRecords // Use the same setter for demo; replace with setOutletRecords if needed
+              })}
             </React.Suspense>
           ) : activeTab === 'dashboard' ? (
     <div className="dashboard-summary-panel" style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:'32px',marginTop:'16px'}}>
