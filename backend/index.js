@@ -23,7 +23,7 @@ const createCompanyInfoTableSQL = `CREATE TABLE IF NOT EXISTS company_info (
 const createPropertyTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_PROPERTY (
     id INT AUTO_INCREMENT PRIMARY KEY,
     applicable_from DATE,
-    property_code VARCHAR(32) NOT NULL UNIQUE,
+    property_code VARCHAR(32) NOT NULL,
     property_name VARCHAR(128) NOT NULL,
     nick_name VARCHAR(64),
     owner_name VARCHAR(128),
@@ -39,7 +39,8 @@ const createPropertyTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_PROPERTY (
     round_off VARCHAR(16),
     property_logo VARCHAR(256),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_property_date (property_code, applicable_from)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
 // Place all code that uses 'db' after db is initialized
@@ -60,12 +61,7 @@ app.use(session({
   cookie: { secure: false }
 }));
 
-// Logout endpoint to destroy session
-app.post('/api/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.json({ success: true });
-  });
-});
+
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -113,6 +109,62 @@ db.connect((err) => {
   // Create property table
   db.query(createPropertyTableSQL, (err) => {
     if (err) console.error('Error creating IT_CONF_PROPERTY table:', err);
+    
+    // Migration: Update existing table structure to allow multiple property codes with different dates
+    // Remove old unique constraint on property_code if it exists and add composite unique constraint
+    db.query('SHOW INDEX FROM IT_CONF_PROPERTY WHERE Key_name = "property_code"', (err, results) => {
+      if (err) {
+        console.error('Error checking existing constraints:', err);
+        return;
+      }
+      
+      if (results.length > 0) {
+        console.log('Removing old unique constraint on property_code...');
+        db.query('ALTER TABLE IT_CONF_PROPERTY DROP INDEX property_code', (err) => {
+          if (err) console.error('Error dropping old constraint:', err);
+          else console.log('Old unique constraint removed successfully');
+          
+          // Add composite unique constraint if it doesn't exist
+          db.query('SHOW INDEX FROM IT_CONF_PROPERTY WHERE Key_name = "unique_property_date"', (err, results) => {
+            if (err) {
+              console.error('Error checking composite constraint:', err);
+              return;
+            }
+            
+            if (results.length === 0) {
+              console.log('Adding composite unique constraint...');
+              db.query('ALTER TABLE IT_CONF_PROPERTY ADD UNIQUE KEY unique_property_date (property_code, applicable_from)', (err) => {
+                if (err) console.error('Error adding composite constraint:', err);
+                else console.log('Composite unique constraint added successfully');
+              });
+            }
+          });
+        });
+      }
+    });
+  });
+
+  // Logout endpoint to destroy session
+  app.post('/api/logout', (req, res) => {
+    console.log('Logout request received');
+    try {
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.error('Session destroy error:', err);
+            return res.status(500).json({ success: false, message: 'Session destroy failed' });
+          }
+          console.log('Session destroyed successfully');
+          res.json({ success: true });
+        });
+      } else {
+        console.log('No session to destroy');
+        res.json({ success: true });
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({ success: false, message: 'Logout failed' });
+    }
   });
 
   // Company Info API
@@ -130,7 +182,7 @@ db.connect((err) => {
   // GET all property codes
   app.get('/api/property-codes', (req, res) => {
     console.log('Fetching all property codes...');
-    db.query('SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places as decimal, date_format, round_off FROM IT_CONF_PROPERTY ORDER BY applicable_from DESC', (err, results) => {
+    db.query('SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places as `decimal`, date_format, round_off FROM IT_CONF_PROPERTY ORDER BY applicable_from DESC', (err, results) => {
       if (err) {
         console.error('DB error fetching property codes:', err);
         return res.status(500).json({ success: false, message: 'DB error' });
@@ -152,17 +204,17 @@ db.connect((err) => {
   app.post('/api/property-codes', (req, res) => {
     const { applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal, date_format, round_off } = req.body;
     
-    // Check for duplicate property code
-    console.log('Checking for duplicate property code:', property_code);
-    db.query('SELECT COUNT(*) as count FROM IT_CONF_PROPERTY WHERE property_code = ?', [property_code], (err, results) => {
+    // Check for duplicate property code with same applicable date
+    console.log('Checking for duplicate property code and date:', property_code, applicable_from);
+    db.query('SELECT COUNT(*) as count FROM IT_CONF_PROPERTY WHERE property_code = ? AND applicable_from = ?', [property_code, applicable_from], (err, results) => {
       if (err) {
         console.error('DB error checking duplicate:', err);
         return res.status(500).json({ success: false, message: 'DB error' });
       }
       console.log('Duplicate check result:', results[0]);
       if (results[0].count > 0) {
-        console.log(`Property code '${property_code}' already exists`);
-        return res.status(400).json({ success: false, message: `Property Code '${property_code}' already exists. Please use a different code.` });
+        console.log(`Property code '${property_code}' with date '${applicable_from}' already exists`);
+        return res.status(400).json({ success: false, message: `Property Code '${property_code}' with the same Applicable From date already exists. Please use a different date.` });
       }
       
       // Insert new record
@@ -183,11 +235,11 @@ db.connect((err) => {
     const { id } = req.params;
     const { applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal, date_format, round_off } = req.body;
     
-    // Check for duplicate property code (excluding current record)
-    db.query('SELECT COUNT(*) as count FROM IT_CONF_PROPERTY WHERE property_code = ? AND id != ?', [property_code, id], (err, results) => {
+    // Check for duplicate property code with same applicable date (excluding current record)
+    db.query('SELECT COUNT(*) as count FROM IT_CONF_PROPERTY WHERE property_code = ? AND applicable_from = ? AND id != ?', [property_code, applicable_from, id], (err, results) => {
       if (err) return res.status(500).json({ success: false, message: 'DB error' });
       if (results[0].count > 0) {
-        return res.status(400).json({ success: false, message: 'Property Code must be unique' });
+        return res.status(400).json({ success: false, message: `Property Code '${property_code}' with the same Applicable From date already exists. Please use a different date.` });
       }
       
       // Update record
@@ -401,6 +453,6 @@ app.post('/api/update-password', (req, res) => {
 
 }); // End of db.connect callback
 
-app.listen(5000, () => {
-  console.log('Backend running on port 5000');
+app.listen(3001, () => {
+  console.log('Backend running on port 3001');
 });

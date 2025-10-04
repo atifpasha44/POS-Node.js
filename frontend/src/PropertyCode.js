@@ -3,7 +3,6 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import axios from 'axios';
-import './Dashboard.css';
 
 const initialState = {
   applicable_from: '', property_code: '', property_name: '', nick_name: '', owner_name: '', address_name: '', gst_number: '', pan_number: '',
@@ -60,6 +59,19 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
         setFieldErrors(errors => ({...errors, applicable_from: 'Applicable From cannot be modified after selecting a record.'}));
         return;
       }
+      // Date validation for Applicable From in Add mode
+      if (name === 'applicable_from' && action === 'Add' && value) {
+        const selectedDate = new Date(value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+        
+        if (selectedDate < today) {
+          setFieldErrors(errors => ({...errors, applicable_from: 'Cannot select a past date. Please select today or a future date.'}));
+          return;
+        } else {
+          setFieldErrors(errors => ({...errors, applicable_from: ''}));
+        }
+      }
       // Prevent any editing in Search mode
       if (isFormReadOnly) return;
       setForm(f => ({ ...f, [name]: value }));
@@ -100,6 +112,18 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
         errors[f.key] = 'This field is required.';
       }
     });
+    
+    // Additional date validation for Add mode
+    if (action === 'Add' && form.applicable_from) {
+      const selectedDate = new Date(form.applicable_from);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (selectedDate < today) {
+        errors.applicable_from = 'Cannot select a past date. Please select today or a future date.';
+      }
+    }
+    
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
 
@@ -209,7 +233,10 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [isDirty]);
-  const handleSearch = () => { setShowSelectModal(true); };
+  const handleSearch = () => { 
+    setAction('Search');
+    setShowSelectModal(true); 
+  };
   const handleAdd = () => {
     setAction('Add');
     const today = new Date();
@@ -235,50 +262,19 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     return;
   };
 
-  // Debug function to show current state and test backend
-  const handleDebug = async () => {
-    console.log('=== DEBUG INFORMATION ===');
-    console.log('Current records:', records);
-    console.log('Current form:', form);
-    console.log('Current action:', action);
-    console.log('Selected record index:', selectedRecordIdx);
-    
-    try {
-      // Test backend connection
-      console.log('Testing backend connection...');
-      const response = await axios.get('/api/property-codes');
-      console.log('Backend response:', response.data);
-      
-      // Test debug endpoint
-      const debugResponse = await axios.get('/api/debug/property-codes');
-      console.log('Debug endpoint response:', debugResponse.data);
-      
-      // Show summary in alert
-      const summary = `
-DEBUG SUMMARY:
-• Records in frontend: ${records.length}
-• Records in database: ${response.data.data ? response.data.data.length : 'Error'}
-• Current action: ${action}
-• Current form property code: ${form.property_code || 'None'}
-• Backend connection: ${response.data.success ? 'OK' : 'Failed'}
 
-Check browser console (F12) for detailed logs!
-      `;
-      
-      alert(summary);
-      
-      // Also refresh records
-      await fetchRecords();
-      
-    } catch (error) {
-      console.error('Debug error:', error);
-      alert(`Debug Error: ${error.message}\n\nBackend might not be running on port 5000.\nCheck browser console (F12) for details.`);
-    }
-  };
 
   // When a record is selected from modal
   const handleSelectRecord = idx => {
-    setForm(records[idx]);
+    const selectedRecord = records[idx];
+    // Format the applicable_from date to YYYY-MM-DD for date input
+    const formattedRecord = {
+      ...selectedRecord,
+      applicable_from: selectedRecord.applicable_from ? 
+        new Date(selectedRecord.applicable_from).toISOString().split('T')[0] : 
+        selectedRecord.applicable_from
+    };
+    setForm(formattedRecord);
     setSelectedRecordIdx(idx);
     setShowSelectModal(false);
     setIsDirty(false);
@@ -336,7 +332,9 @@ Check browser console (F12) for detailed logs!
     position:'sticky',top:0,zIndex:10,background:'#fff',boxShadow:'0 2px 8px rgba(0,0,0,0.04)'
   }}>
   <div style={{display:'flex',alignItems:'center',gap:'8px',minWidth:0,flexWrap:'wrap'}}>
-          <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>Property Code</span>
+          <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>
+            Property Code
+          </span>
           <select
             value={action}
             onChange={e => {
@@ -354,7 +352,7 @@ Check browser console (F12) for detailed logs!
               } else if (val === 'Search') {
                 setAction('Search');
                 setShowSelectModal(true);
-                setSelectModalMessage('Please select a record to view.');
+                setSelectModalMessage('Search for Property Code and click "View" to see full details in read-only mode.');
               }
             }}
             style={{fontWeight:'bold',fontSize:'1rem',padding:'4px 12px',borderRadius:'6px',border:'1.5px solid #bbb',marginRight:'8px'}}
@@ -383,7 +381,6 @@ Check browser console (F12) for detailed logs!
             <span role="img" aria-label="Clear">🧹</span>
           </button>
           <button onClick={handleSave} title="Save" style={{background:'#e3f2fd',border:'2px solid #1976d2',borderRadius:'8px',fontWeight:'bold',color:'#1976d2',fontSize:'1.15rem',padding:'4px 18px',marginLeft:'8px',cursor:'pointer',transition:'0.2s'}} onMouseOver={e=>e.currentTarget.style.background='#bbdefb'} onMouseOut={e=>e.currentTarget.style.background='#e3f2fd'}><span style={{fontWeight:'bold'}}><span role="img" aria-label="Save">💾</span> SAVE</span></button>
-          <button onClick={handleDebug} title="Debug - Click to see current data and test backend" style={{background:'#fff3e0',border:'2px solid #f57c00',borderRadius:'8px',fontWeight:'bold',color:'#f57c00',fontSize:'1.15rem',padding:'4px 18px',marginLeft:'8px',cursor:'pointer',transition:'0.2s'}}>🐛 DEBUG</button>
         </div>
         <div style={{display:'flex',alignItems:'center',gap:'16px',minWidth:0,flexWrap:'wrap'}}>
           <span style={{fontSize:'1.08rem',color:'#888',marginRight:'8px',whiteSpace:'nowrap'}}>Export Report to</span>
@@ -416,6 +413,8 @@ Check browser console (F12) for detailed logs!
           </span>
         </div>
       </div>
+      
+      
       {/* Form Section - two columns, bold labels */}
   <form ref={formRef} className="propertycode-form" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 32px',padding:'32px 32px 0 32px'}}>
     {/* Save confirmation popup */}
@@ -433,8 +432,16 @@ Check browser console (F12) for detailed logs!
     {/* Record selection modal for Edit/Delete/Search */}
     {showSelectModal && (
       <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.18)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}}>
-        <div style={{background:'#fff',borderRadius:'14px',padding:'32px 24px',minWidth:'520px',boxShadow:'0 4px 24px rgba(0,0,0,0.18)',maxHeight:'80vh',overflowY:'auto'}}>
-          <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>{selectModalMessage || 'Select a record to edit/delete'}</div>
+        <div style={{background:'#fff',borderRadius:'14px',padding:'32px 24px',minWidth:'720px',boxShadow:'0 4px 24px rgba(0,0,0,0.18)',maxHeight:'80vh',overflowY:'auto'}}>
+          <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>
+            {action === 'Search' ? 'All Property Code Records - Select to View Details' : (selectModalMessage || 'Select a record to edit/delete')}
+          </div>
+          {action === 'Search' && (
+            <div style={{padding:'12px',background:'#e8f5e9',borderRadius:'8px',marginBottom:'16px',fontSize:'0.95rem',color:'#2e7d32'}}>
+              📖 <strong>Search Mode:</strong> View all historical and future configurations for this Property Code. 
+              Selected records will be displayed in read-only mode to prevent accidental changes.
+            </div>
+          )}
           {records.length === 0 ? (
             <div style={{color:'#888',fontSize:'1.05rem'}}>No records found.</div>
           ) : (
@@ -445,21 +452,50 @@ Check browser console (F12) for detailed logs!
                   <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Property Code</th>
                   <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Property Name</th>
                   <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Owner</th>
-                  <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Action</th>
+                  <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>
+                    {action === 'Search' ? 'Status' : 'Action'}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {records.map((rec, idx) => (
-                  <tr key={idx} style={{background: idx%2 ? '#f7f7f7' : '#fff'}}>
-                    <td style={{padding:'6px 8px'}}>{rec.applicable_from}</td>
-                    <td style={{padding:'6px 8px'}}>{rec.property_code}</td>
-                    <td style={{padding:'6px 8px'}}>{rec.property_name}</td>
-                    <td style={{padding:'6px 8px'}}>{rec.owner_name}</td>
-                    <td style={{padding:'6px 8px'}}>
-                      <button type="button" style={{background:'#1976d2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>Select</button>
-                    </td>
-                  </tr>
-                ))}
+                {records.map((rec, idx) => {
+                  const formattedDate = rec.applicable_from ? 
+                    new Date(rec.applicable_from).toLocaleDateString('en-GB', { 
+                      day: '2-digit', month: '2-digit', year: 'numeric' 
+                    }) : rec.applicable_from;
+                  const today = new Date();
+                  const recDate = new Date(rec.applicable_from);
+                  const isActive = recDate <= today;
+                  const isFuture = recDate > today;
+                  
+                  return (
+                    <tr key={idx} style={{background: idx%2 ? '#f7f7f7' : '#fff'}}>
+                      <td style={{padding:'6px 8px'}}>{formattedDate}</td>
+                      <td style={{padding:'6px 8px'}}>{rec.property_code}</td>
+                      <td style={{padding:'6px 8px'}}>{rec.property_name}</td>
+                      <td style={{padding:'6px 8px'}}>{rec.owner_name}</td>
+                      <td style={{padding:'6px 8px',display:'flex',alignItems:'center',gap:'6px'}}>
+                        {action === 'Search' ? (
+                          <>
+                            <span style={{
+                              padding:'2px 6px',
+                              borderRadius:'3px',
+                              fontSize:'0.8rem',
+                              fontWeight:'bold',
+                              color: isActive ? '#2e7d32' : '#f57c00',
+                              background: isActive ? '#e8f5e9' : '#fff3e0'
+                            }}>
+                              {isActive ? 'Active' : 'Future'}
+                            </span>
+                            <button type="button" style={{background:'#7b1fa2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>View</button>
+                          </>
+                        ) : (
+                          <button type="button" style={{background:'#1976d2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>Select</button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -471,7 +507,15 @@ Check browser console (F12) for detailed logs!
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Applicable From</label>
-            <input type="date" name="applicable_from" value={form.applicable_from} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isApplicableFromReadOnly?'#eee':'#fff'}} disabled={isApplicableFromReadOnly} />
+            <input 
+              type="date" 
+              name="applicable_from" 
+              value={form.applicable_from} 
+              onChange={handleChange} 
+              min={action === 'Add' ? new Date().toISOString().split('T')[0] : undefined}
+              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isApplicableFromReadOnly?'#eee':'#fff'}} 
+              disabled={isApplicableFromReadOnly} 
+            />
             {fieldErrors.applicable_from && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.applicable_from}</span>}
           </div>
           <div style={{display:'flex',alignItems:'center'}}>

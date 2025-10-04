@@ -40,6 +40,46 @@ const initialState = {
   }
 };
 
+  // Function to filter Property Codes based on current date logic
+  const getApplicablePropertyCodes = () => {
+    if (!propertyCodes || propertyCodes.length === 0) return [];
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+    
+    // Group property codes by property_code to handle multiple dates
+    const groupedByCodes = propertyCodes.reduce((acc, pc) => {
+      const code = pc.property_code || pc.code;
+      if (!acc[code]) acc[code] = [];
+      acc[code].push(pc);
+      return acc;
+    }, {});
+    
+    const applicableCodes = [];
+    
+    // For each unique property code, find the most recent applicable record
+    Object.keys(groupedByCodes).forEach(code => {
+      const records = groupedByCodes[code];
+      
+      // Filter records that are applicable (applicable_from <= today)
+      const applicableRecords = records.filter(record => {
+        const applicableDate = new Date(record.applicable_from);
+        applicableDate.setHours(0, 0, 0, 0);
+        return applicableDate <= today;
+      });
+      
+      if (applicableRecords.length > 0) {
+        // Sort by applicable_from date (descending) to get the most recent applicable record
+        applicableRecords.sort((a, b) => new Date(b.applicable_from) - new Date(a.applicable_from));
+        
+        // Add the most recent applicable record
+        applicableCodes.push(applicableRecords[0]);
+      }
+    });
+    
+    return applicableCodes;
+  };
+
 
   // Track if a delete is pending confirmation
   const deletePendingRef = useRef(false);
@@ -405,11 +445,14 @@ useEffect(() => {
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property</label>
             <select name="property" value={form.property} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} required>
               <option value="">Select Property</option>
-              {propertyCodes && propertyCodes.length > 0 && propertyCodes.map(pc => (
-                <option key={pc.property_code || pc.code} value={pc.property_code || pc.code}>
-                  {(pc.property_code || pc.code) + (pc.property_name ? ' - ' + pc.property_name : (pc.name ? ' - ' + pc.name : ''))}
-                </option>
-              ))}
+              {(() => {
+                const applicableCodes = getApplicablePropertyCodes();
+                return applicableCodes.map(pc => (
+                  <option key={pc.property_code || pc.code} value={pc.property_code || pc.code}>
+                    {(pc.property_code || pc.code) + (pc.property_name ? ' - ' + pc.property_name : (pc.name ? ' - ' + pc.name : ''))}
+                  </option>
+                ));
+              })()}
             </select>
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
