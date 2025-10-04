@@ -19,6 +19,29 @@ const createCompanyInfoTableSQL = `CREATE TABLE IF NOT EXISTS company_info (
   subscription_expiry DATE
 )`;
 
+// Create IT_CONF_PROPERTY table
+const createPropertyTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_PROPERTY (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    applicable_from DATE,
+    property_code VARCHAR(32) NOT NULL UNIQUE,
+    property_name VARCHAR(128) NOT NULL,
+    nick_name VARCHAR(64),
+    owner_name VARCHAR(128),
+    address_name VARCHAR(256),
+    gst_number VARCHAR(32),
+    pan_number VARCHAR(32),
+    group_name VARCHAR(64),
+    local_currency VARCHAR(16),
+    currency_format VARCHAR(16),
+    symbol VARCHAR(8),
+    decimal_places INT DEFAULT 2,
+    date_format VARCHAR(16),
+    round_off VARCHAR(16),
+    property_logo VARCHAR(256),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
 // Place all code that uses 'db' after db is initialized
 // ...existing code...
 const express = require('express');
@@ -86,6 +109,11 @@ db.connect((err) => {
       }
     });
   });
+  
+  // Create property table
+  db.query(createPropertyTableSQL, (err) => {
+    if (err) console.error('Error creating IT_CONF_PROPERTY table:', err);
+  });
 
   // Company Info API
   app.get('/api/company-info', (req, res) => {
@@ -95,6 +123,98 @@ db.connect((err) => {
         return res.status(404).json({ success: false, message: 'No company info found' });
       }
       res.json({ success: true, ...results[0] });
+    });
+  });
+
+  // Property Codes API endpoints
+  // GET all property codes
+  app.get('/api/property-codes', (req, res) => {
+    console.log('Fetching all property codes...');
+    db.query('SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places as decimal, date_format, round_off FROM IT_CONF_PROPERTY ORDER BY applicable_from DESC', (err, results) => {
+      if (err) {
+        console.error('DB error fetching property codes:', err);
+        return res.status(500).json({ success: false, message: 'DB error' });
+      }
+      console.log(`Found ${results.length} property codes`);
+      res.json(results);
+    });
+  });
+
+  // Debug endpoint to check existing property codes
+  app.get('/api/debug/property-codes', (req, res) => {
+    db.query('SELECT property_code, property_name FROM IT_CONF_PROPERTY', (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      res.json({ message: 'Existing property codes', data: results });
+    });
+  });
+
+  // POST new property code
+  app.post('/api/property-codes', (req, res) => {
+    const { applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal, date_format, round_off } = req.body;
+    
+    // Check for duplicate property code
+    console.log('Checking for duplicate property code:', property_code);
+    db.query('SELECT COUNT(*) as count FROM IT_CONF_PROPERTY WHERE property_code = ?', [property_code], (err, results) => {
+      if (err) {
+        console.error('DB error checking duplicate:', err);
+        return res.status(500).json({ success: false, message: 'DB error' });
+      }
+      console.log('Duplicate check result:', results[0]);
+      if (results[0].count > 0) {
+        console.log(`Property code '${property_code}' already exists`);
+        return res.status(400).json({ success: false, message: `Property Code '${property_code}' already exists. Please use a different code.` });
+      }
+      
+      // Insert new record
+      db.query(`INSERT INTO IT_CONF_PROPERTY 
+        (applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal, date_format, round_off],
+        (err, result) => {
+          if (err) return res.status(500).json({ success: false, message: 'DB error' });
+          res.json({ success: true, id: result.insertId, message: 'Property code created successfully' });
+        }
+      );
+    });
+  });
+
+  // PUT update property code
+  app.put('/api/property-codes/:id', (req, res) => {
+    const { id } = req.params;
+    const { applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal, date_format, round_off } = req.body;
+    
+    // Check for duplicate property code (excluding current record)
+    db.query('SELECT COUNT(*) as count FROM IT_CONF_PROPERTY WHERE property_code = ? AND id != ?', [property_code, id], (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      if (results[0].count > 0) {
+        return res.status(400).json({ success: false, message: 'Property Code must be unique' });
+      }
+      
+      // Update record
+      db.query(`UPDATE IT_CONF_PROPERTY SET 
+        applicable_from=?, property_code=?, property_name=?, nick_name=?, owner_name=?, address_name=?, gst_number=?, pan_number=?, group_name=?, local_currency=?, currency_format=?, symbol=?, decimal_places=?, date_format=?, round_off=? 
+        WHERE id=?`,
+        [applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal, date_format, round_off, id],
+        (err, result) => {
+          if (err) return res.status(500).json({ success: false, message: 'DB error' });
+          if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Property code not found' });
+          }
+          res.json({ success: true, message: 'Property code updated successfully' });
+        }
+      );
+    });
+  });
+
+  // DELETE property code
+  app.delete('/api/property-codes/:id', (req, res) => {
+    const { id } = req.params;
+    db.query('DELETE FROM IT_CONF_PROPERTY WHERE id = ?', [id], (err, result) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Property code not found' });
+      }
+      res.json({ success: true, message: 'Property code deleted successfully' });
     });
   });
 
@@ -123,9 +243,8 @@ db.connect((err) => {
       });
     });
   });
-});
-// ...existing code...
-// (Removed duplicate require and initialization blocks)
+  
+  // Continue with more routes - keep them inside db.connect callback
 function injectTablesIfNeeded(callback) {
   const createUserTableSQL = `CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -272,13 +391,15 @@ app.post('/api/update-password', (req, res) => {
   );
 });
 
-app.get('/api/profile', (req, res) => {
-  if (req.session.user) {
-    res.json({ user: req.session.user });
-  } else {
-    res.status(401).json({ error: 'Not logged in' });
-  }
-});
+  app.get('/api/profile', (req, res) => {
+    if (req.session.user) {
+      res.json({ user: req.session.user });
+    } else {
+      res.status(401).json({ error: 'Not logged in' });
+    }
+  });
+
+}); // End of db.connect callback
 
 app.listen(5000, () => {
   console.log('Backend running on port 5000');

@@ -50,13 +50,18 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
       if (setParentDirty) setParentDirty(true);
       setUploadStatus('');
     } else {
-      // Prevent Property Code modification after save (Edit or Search mode)
+      // Prevent Property Code modification in Edit or Search mode
       if (name === 'property_code' && isPropertyCodeLocked) {
-        setFieldErrors(errors => ({...errors, property_code: 'Property Code cannot be modified or deleted after saving. It is a unique identifier linked to related data.'}));
+        setFieldErrors(errors => ({...errors, property_code: 'Property Code cannot be modified after selecting a record.'}));
         return;
       }
-      // Prevent editing in Search mode
-      if (isSearchLocked) return;
+      // Prevent Applicable From modification in Edit or Search mode
+      if (name === 'applicable_from' && isApplicableFromReadOnly) {
+        setFieldErrors(errors => ({...errors, applicable_from: 'Applicable From cannot be modified after selecting a record.'}));
+        return;
+      }
+      // Prevent any editing in Search mode
+      if (isFormReadOnly) return;
       setForm(f => ({ ...f, [name]: value }));
       setIsDirty(true);
       if (setParentDirty) setParentDirty(true);
@@ -70,9 +75,12 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     setIsDirty(false);
     if (setParentDirty) setParentDirty(false);
     setSelectedRecordIdx(null); // Unlock Delete state if in Delete mode
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setFieldErrors({});
+    setUploadStatus('');
     // Do not reset action to 'Add' if in the middle of Edit/Delete/Search, just clear selection
   };
-  const handleSave = () => {
+  const handleSave = async () => {
     // Clear upload message after save
     setUploadStatus('');
     // Validate required fields
@@ -94,16 +102,11 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     });
     setFieldErrors(errors);
     if (Object.keys(errors).length > 0) return;
-    setRecords(prev => {
-      const code = (form.property_code || '').trim();
-      if (!code) return prev;
+
+    try {
       if (action === 'Edit' && selectedRecordIdx !== null) {
-        if (prev.some((rec, i) => i !== selectedRecordIdx && rec.property_code === code)) {
-          setFieldErrors(errors => ({...errors, property_code: 'Property Code must be unique.'}));
-          return prev;
-        }
         // Check if any data has changed
-        const original = prev[selectedRecordIdx];
+        const original = records[selectedRecordIdx];
         const changed = Object.keys(form).some(key => form[key] !== original[key]);
         if (!changed) {
           setShowNoChangePopup(true);
@@ -114,47 +117,84 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
           setIsDirty(false);
           if (setParentDirty) setParentDirty(false);
           if (fileInputRef.current) fileInputRef.current.value = '';
-          return prev;
+          return;
         }
-        const updated = [...prev];
-        updated[selectedRecordIdx] = { ...form, property_logo: null };
-        setShowSavePopup(true);
-        setTimeout(() => setShowSavePopup(false), 1800);
-        setIsDirty(false);
-        if (setParentDirty) setParentDirty(false);
-        setSelectedRecordIdx(null);
-        setForm(initialState); setLogoPreview(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        return updated;
+        
+        // Update existing record via API
+        const response = await axios.put(`/api/property-codes/${original.id}`, form);
+        if (response.data.success) {
+          setShowSavePopup(true);
+          setTimeout(() => setShowSavePopup(false), 1800);
+          // Refresh data from backend
+          await fetchRecords();
+          resetForm();
+        }
+      } else if (action === 'Delete' && selectedRecordIdx !== null) {
+        // Delete record via API
+        const original = records[selectedRecordIdx];
+        const response = await axios.delete(`/api/property-codes/${original.id}`);
+        if (response.data.success) {
+          setShowSavePopup(true);
+          setTimeout(() => setShowSavePopup(false), 1800);
+          // Refresh data from backend
+          await fetchRecords();
+          resetForm();
+          setAction('Add');
+        }
+      } else {
+        // Add new record via API
+        console.log('Adding new record:', form);
+        const response = await axios.post('/api/property-codes', form);
+        console.log('Add response:', response.data);
+        if (response.data.success) {
+          setShowSavePopup(true);
+          setTimeout(() => setShowSavePopup(false), 1800);
+          // Refresh data from backend
+          await fetchRecords();
+          resetForm();
+        }
       }
-      if (action === 'Delete' && selectedRecordIdx !== null) {
-        // Only delete on Save in Delete mode
-        const updated = prev.filter((_, i) => i !== selectedRecordIdx);
-        setShowSavePopup(true);
-        setTimeout(() => setShowSavePopup(false), 1800);
-        setForm(initialState);
-        setLogoPreview(null);
-        setSelectedRecordIdx(null);
-        setIsDirty(false);
-        setAction('Add');
-        if (setParentDirty) setParentDirty(false);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        return updated;
+    } catch (error) {
+      console.error('Save error:', error);
+      if (error.response && error.response.data && error.response.data.message) {
+        console.log('Error response:', error.response.data);
+        if (error.response.data.message.includes('unique') || error.response.data.message.includes('exists')) {
+          setFieldErrors(errors => ({...errors, property_code: error.response.data.message}));
+        } else {
+          alert('Error: ' + error.response.data.message);
+        }
+      } else {
+        alert('Error saving data. Please try again.');
       }
-      // Add mode: check for duplicate code
-      if (prev.some(rec => rec.property_code === code)) {
-        setFieldErrors(errors => ({...errors, property_code: 'Property Code must be unique.'}));
-        return prev;
+    }
+  };
+
+  // Helper function to reset form
+  const resetForm = () => {
+    setForm(initialState);
+    setLogoPreview(null);
+    setSelectedRecordIdx(null);
+    setIsDirty(false);
+    if (setParentDirty) setParentDirty(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setFieldErrors({});
+    setUploadStatus('');
+    setAction('Add'); // Reset to Add mode after save
+  };
+
+  // Function to fetch records from backend
+  const fetchRecords = async () => {
+    try {
+      console.log('Fetching records from backend...');
+      const response = await axios.get('/api/property-codes');
+      console.log('Fetched records:', response.data);
+      if (setRecords) {
+        setRecords(response.data);
+        console.log('Records set successfully, count:', response.data.length);
       }
-      setShowSavePopup(true);
-      setTimeout(() => setShowSavePopup(false), 1800);
-      setIsDirty(false);
-      if (setParentDirty) setParentDirty(false);
-      setSelectedRecordIdx(null);
-      setForm(initialState); setLogoPreview(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return [...prev, { ...form, property_logo: null }];
-    });
+    } catch (error) {
+      console.error('Error fetching records:', error);
+    }
   };
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -195,6 +235,47 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     return;
   };
 
+  // Debug function to show current state and test backend
+  const handleDebug = async () => {
+    console.log('=== DEBUG INFORMATION ===');
+    console.log('Current records:', records);
+    console.log('Current form:', form);
+    console.log('Current action:', action);
+    console.log('Selected record index:', selectedRecordIdx);
+    
+    try {
+      // Test backend connection
+      console.log('Testing backend connection...');
+      const response = await axios.get('/api/property-codes');
+      console.log('Backend response:', response.data);
+      
+      // Test debug endpoint
+      const debugResponse = await axios.get('/api/debug/property-codes');
+      console.log('Debug endpoint response:', debugResponse.data);
+      
+      // Show summary in alert
+      const summary = `
+DEBUG SUMMARY:
+• Records in frontend: ${records.length}
+• Records in database: ${response.data.data ? response.data.data.length : 'Error'}
+• Current action: ${action}
+• Current form property code: ${form.property_code || 'None'}
+• Backend connection: ${response.data.success ? 'OK' : 'Failed'}
+
+Check browser console (F12) for detailed logs!
+      `;
+      
+      alert(summary);
+      
+      // Also refresh records
+      await fetchRecords();
+      
+    } catch (error) {
+      console.error('Debug error:', error);
+      alert(`Debug Error: ${error.message}\n\nBackend might not be running on port 5000.\nCheck browser console (F12) for details.`);
+    }
+  };
+
   // When a record is selected from modal
   const handleSelectRecord = idx => {
     setForm(records[idx]);
@@ -208,18 +289,17 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     // Do NOT delete here, only on Save
   };
 
-  // --- Backend API integration (scaffold) ---
+  // --- Backend API integration ---
   // Fetch all property codes on mount
   useEffect(() => {
-    async function fetchRecords() {
-      try {
-        const res = await axios.get('/api/property-codes');
-        if (setRecords) setRecords(res.data);
-      } catch (err) {
-        // handle error
-      }
-    }
     fetchRecords();
+  }, []); // Only run once when component mounts
+
+  // Ensure we have fresh data when setRecords function changes
+  useEffect(() => {
+    if (setRecords && records.length === 0) {
+      fetchRecords();
+    }
   }, [setRecords]);
 
 
@@ -303,6 +383,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
             <span role="img" aria-label="Clear">🧹</span>
           </button>
           <button onClick={handleSave} title="Save" style={{background:'#e3f2fd',border:'2px solid #1976d2',borderRadius:'8px',fontWeight:'bold',color:'#1976d2',fontSize:'1.15rem',padding:'4px 18px',marginLeft:'8px',cursor:'pointer',transition:'0.2s'}} onMouseOver={e=>e.currentTarget.style.background='#bbdefb'} onMouseOut={e=>e.currentTarget.style.background='#e3f2fd'}><span style={{fontWeight:'bold'}}><span role="img" aria-label="Save">💾</span> SAVE</span></button>
+          <button onClick={handleDebug} title="Debug - Click to see current data and test backend" style={{background:'#fff3e0',border:'2px solid #f57c00',borderRadius:'8px',fontWeight:'bold',color:'#f57c00',fontSize:'1.15rem',padding:'4px 18px',marginLeft:'8px',cursor:'pointer',transition:'0.2s'}}>🐛 DEBUG</button>
         </div>
         <div style={{display:'flex',alignItems:'center',gap:'16px',minWidth:0,flexWrap:'wrap'}}>
           <span style={{fontSize:'1.08rem',color:'#888',marginRight:'8px',whiteSpace:'nowrap'}}>Export Report to</span>
@@ -390,7 +471,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Applicable From</label>
-            <input type="date" name="applicable_from" value={form.applicable_from} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isFormReadOnly?'#eee':'#fff'}} disabled={isFormReadOnly} />
+            <input type="date" name="applicable_from" value={form.applicable_from} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isApplicableFromReadOnly?'#eee':'#fff'}} disabled={isApplicableFromReadOnly} />
             {fieldErrors.applicable_from && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.applicable_from}</span>}
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
