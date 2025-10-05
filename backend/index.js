@@ -1,4 +1,4 @@
-// ...existing code...
+// POS Backend Server
 // Create company_info table and insert default data if not exists
 const createCompanyInfoTableSQL = `CREATE TABLE IF NOT EXISTS company_info (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -73,7 +73,7 @@ const createItemCategoriesTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_ITEM_CA
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
 // Place all code that uses 'db' after db is initialized
-// ...existing code...
+// Required modules
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -83,6 +83,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+// Express app configuration
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
@@ -690,6 +691,43 @@ db.connect((err) => {
       message: 'File uploaded successfully',
       fileUrl: fileUrl,
       filename: req.file.filename
+    });
+  });
+
+  // Master data API endpoints for Item Master form
+  // GET outlets for multi-select dropdown
+  app.get('/api/outlets', (req, res) => {
+    const sql = 'SELECT outlet_code, outlet_name FROM IT_CONF_OUTSET ORDER BY outlet_name';
+    db.query(sql, (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      res.json({ success: true, data: results });
+    });
+  });
+
+  // GET tax codes for dropdown
+  app.get('/api/tax-codes', (req, res) => {
+    const sql = 'SELECT tax_code, tax_name FROM IT_CONF_TAXCODE ORDER BY tax_name';
+    db.query(sql, (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      res.json({ success: true, data: results });
+    });
+  });
+
+  // GET printers for dropdown
+  app.get('/api/printers', (req, res) => {
+    const sql = 'SELECT printer_code, printer_name FROM IT_CONF_PRINTERS ORDER BY printer_name';
+    db.query(sql, (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      res.json({ success: true, data: results });
+    });
+  });
+
+  // GET units of measurement for dropdown
+  app.get('/api/units', (req, res) => {
+    const sql = 'SELECT unit_code, unit_name FROM IT_CONF_UOM ORDER BY unit_name';
+    db.query(sql, (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      res.json({ success: true, data: results });
     });
   });
 
