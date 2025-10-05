@@ -98,6 +98,8 @@ function Dashboard({ user, setUser }) {
   const [loadingCompany, setLoadingCompany] = useState(false);
   const [companyError, setCompanyError] = useState('');
   const [propertyRecords, setPropertyRecords] = useState([]); // Persist PropertyCode records
+  const [itemDepartmentRecords, setItemDepartmentRecords] = useState([]); // Persist ItemDepartments records
+  const [itemCategoryRecords, setItemCategoryRecords] = useState([]); // Persist ItemCategories records
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -252,6 +254,28 @@ function Dashboard({ user, setUser }) {
                 propertyCodes: propertyRecords,
                 records: propertyRecords, // Use the same array for demo; replace with outletRecords if needed
                 setRecords: setPropertyRecords // Use the same setter for demo; replace with setOutletRecords if needed
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Item Departments' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./ItemDepartments').default, {
+                setParentDirty: setChildDirty,
+                records: itemDepartmentRecords,
+                setRecords: setItemDepartmentRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Item Categories' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./ItemCategories').default, {
+                setParentDirty: setChildDirty,
+                records: itemCategoryRecords,
+                setRecords: setItemCategoryRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Item Master' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./ItemMaster').default, {
+                setParentDirty: setChildDirty
               })}
             </React.Suspense>
           ) : activeTab === 'dashboard' ? (

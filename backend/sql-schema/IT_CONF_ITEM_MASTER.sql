@@ -1,0 +1,106 @@
+-- Item Master Configuration Table
+CREATE TABLE IF NOT EXISTS IT_CONF_ITEM_MASTER (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  select_outlets JSON COMMENT 'JSON array of selected outlet codes',
+  applicable_from DATE NOT NULL COMMENT 'Date from which item is applicable',
+  item_code VARCHAR(20) NOT NULL UNIQUE COMMENT 'Unique item identifier code',
+  inventory_code VARCHAR(20) COMMENT 'Inventory management code',
+  item_name VARCHAR(50) NOT NULL COMMENT 'Item display name (max 50 chars)',
+  short_name VARCHAR(20) COMMENT 'Abbreviated item name (max 20 chars)',
+  alternate_name VARCHAR(100) COMMENT 'Alternative name for item',
+  tax_code VARCHAR(10) COMMENT 'Tax code reference',
+  item_price_1 DECIMAL(10,2) COMMENT 'Primary item price',
+  item_price_2 DECIMAL(10,2) COMMENT 'Secondary item price (e.g., different size)',
+  item_price_3 DECIMAL(10,2) COMMENT 'Tertiary item price',
+  item_price_4 DECIMAL(10,2) COMMENT 'Quaternary item price',
+  item_printer_1 VARCHAR(20) COMMENT 'Primary printer for item',
+  item_printer_2 VARCHAR(20) COMMENT 'Secondary printer for item',
+  item_printer_3 VARCHAR(20) COMMENT 'Tertiary printer for item',
+  print_group VARCHAR(50) COMMENT 'Print grouping classification',
+  item_department VARCHAR(4) NOT NULL COMMENT 'Item department reference',
+  item_category VARCHAR(10) NOT NULL COMMENT 'Item category reference',
+  cost DECIMAL(10,2) COMMENT 'Item cost price',
+  unit VARCHAR(20) COMMENT 'Unit of measurement',
+  set_menu VARCHAR(50) COMMENT 'Set menu association',
+  item_modifier_group VARCHAR(50) COMMENT 'Modifier group association',
+  status ENUM('Active', 'Inactive') DEFAULT 'Active' COMMENT 'Item status',
+  item_logo VARCHAR(255) COMMENT 'Path to item logo/image file',
+  created_by VARCHAR(50) DEFAULT 'admin' COMMENT 'User who created the record',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Creation timestamp',
+  modified_by VARCHAR(50) COMMENT 'User who last modified the record',
+  modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last modification timestamp',
+  
+  -- Indexes for performance
+  INDEX idx_item_code (item_code),
+  INDEX idx_item_name (item_name),
+  INDEX idx_item_department (item_department),
+  INDEX idx_item_category (item_category),
+  INDEX idx_status (status),
+  INDEX idx_applicable_from (applicable_from),
+  
+  -- Foreign key constraints
+  FOREIGN KEY (item_department) REFERENCES IT_CONF_ITEM_DEPARTMENTS(department_code) 
+    ON UPDATE CASCADE ON DELETE RESTRICT,
+  FOREIGN KEY (item_category) REFERENCES IT_CONF_ITEM_CATEGORIES(category_code) 
+    ON UPDATE CASCADE ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Item Master Configuration - Complete item management';
+
+-- Sample data for testing
+INSERT INTO IT_CONF_ITEM_MASTER (
+  select_outlets, applicable_from, item_code, inventory_code, item_name, short_name,
+  alternate_name, tax_code, item_price_1, item_price_2, item_price_3, item_price_4,
+  item_printer_1, item_printer_2, item_printer_3, print_group, item_department,
+  item_category, cost, unit, set_menu, item_modifier_group, status, created_by
+) VALUES 
+(
+  '["OUT001", "OUT002"]', 
+  '2024-01-01', 
+  'ITEM001', 
+  'INV001', 
+  'Chicken Biryani', 
+  'Ch Biryani', 
+  'Special Chicken Biryani',
+  'TAX001',
+  299.00,
+  399.00,
+  499.00,
+  NULL,
+  'PRINTER1',
+  'PRINTER2',
+  NULL,
+  'MAIN_COURSE',
+  'FD01',
+  'CAT001',
+  180.00,
+  'PLATE',
+  NULL,
+  'SPICE_LEVEL',
+  'Active',
+  'admin'
+),
+(
+  '["OUT001"]', 
+  '2024-01-01', 
+  'ITEM002', 
+  'INV002', 
+  'Vegetable Fried Rice', 
+  'Veg Rice', 
+  'Mixed Vegetable Fried Rice',
+  'TAX001',
+  199.00,
+  249.00,
+  NULL,
+  NULL,
+  'PRINTER1',
+  NULL,
+  NULL,
+  'RICE_ITEMS',
+  'FD01',
+  'CAT002',
+  120.00,
+  'PLATE',
+  NULL,
+  NULL,
+  'Active',
+  'admin'
+);

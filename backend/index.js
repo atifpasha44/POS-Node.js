@@ -43,6 +43,35 @@ const createPropertyTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_PROPERTY (
     UNIQUE KEY unique_property_date (property_code, applicable_from)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
+// Create IT_CONF_ITEM_DEPARTMENTS table
+const createItemDepartmentsTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_ITEM_DEPARTMENTS (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    department_code VARCHAR(4) NOT NULL UNIQUE,
+    name VARCHAR(20) NOT NULL,
+    alternate_name VARCHAR(20),
+    inactive BOOLEAN DEFAULT 0,
+    created_by VARCHAR(64),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_by VARCHAR(64),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+// Create IT_CONF_ITEM_CATEGORIES table
+const createItemCategoriesTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_ITEM_CATEGORIES (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category_code VARCHAR(4) NOT NULL UNIQUE,
+    name VARCHAR(20) NOT NULL,
+    alternate_name VARCHAR(20),
+    item_department_code VARCHAR(4) NOT NULL,
+    display_sequence INT,
+    inactive BOOLEAN DEFAULT 0,
+    created_by VARCHAR(64),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_by VARCHAR(64),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (item_department_code) REFERENCES IT_CONF_ITEM_DEPARTMENTS(department_code) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
 // Place all code that uses 'db' after db is initialized
 // ...existing code...
 const express = require('express');
@@ -50,6 +79,9 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const session = require('express-session');
 const mysql = require('mysql2');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
@@ -61,6 +93,41 @@ app.use(session({
   cookie: { secure: false }
 }));
 
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Multer configuration for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadsDir);
+  },
+  filename: function (req, file, cb) {
+    // Generate unique filename with timestamp
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'item-logo-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: function (req, file, cb) {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(uploadsDir));
 
 
 const db = mysql.createConnection({
@@ -142,6 +209,18 @@ db.connect((err) => {
         });
       }
     });
+  });
+
+  // Create item departments table
+  db.query(createItemDepartmentsTableSQL, (err) => {
+    if (err) console.error('Error creating IT_CONF_ITEM_DEPARTMENTS table:', err);
+    else console.log('IT_CONF_ITEM_DEPARTMENTS table created/verified successfully');
+  });
+
+  // Create item categories table
+  db.query(createItemCategoriesTableSQL, (err) => {
+    if (err) console.error('Error creating IT_CONF_ITEM_CATEGORIES table:', err);
+    else console.log('IT_CONF_ITEM_CATEGORIES table created/verified successfully');
   });
 
   // Logout endpoint to destroy session
@@ -267,6 +346,350 @@ db.connect((err) => {
         return res.status(404).json({ success: false, message: 'Property code not found' });
       }
       res.json({ success: true, message: 'Property code deleted successfully' });
+    });
+  });
+
+  // Item Departments API endpoints
+  // GET all item departments
+  app.get('/api/item-departments', (req, res) => {
+    db.query('SELECT * FROM IT_CONF_ITEM_DEPARTMENTS ORDER BY department_code', (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      res.json({ success: true, data: results });
+    });
+  });
+
+  // POST create new item department
+  app.post('/api/item-departments', (req, res) => {
+    const { department_code, name, alternate_name, inactive, created_by } = req.body;
+    
+    // Validation
+    if (!department_code || department_code.length < 1 || department_code.length > 4) {
+      return res.status(400).json({ success: false, message: 'Department Code must be 1-4 characters (alphanumeric allowed).' });
+    }
+    if (!name || name.length > 20) {
+      return res.status(400).json({ success: false, message: 'Department Name cannot exceed 20 characters.' });
+    }
+    if (alternate_name && alternate_name.length > 20) {
+      return res.status(400).json({ success: false, message: 'Alternate Name cannot exceed 20 characters.' });
+    }
+    
+    const sql = 'INSERT INTO IT_CONF_ITEM_DEPARTMENTS (department_code, name, alternate_name, inactive, created_by) VALUES (?, ?, ?, ?, ?)';
+    db.query(sql, [department_code, name, alternate_name || null, inactive || 0, created_by || 'admin'], (err, result) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ success: false, message: 'Department Code already exists' });
+        }
+        return res.status(500).json({ success: false, message: 'DB error' });
+      }
+      res.json({ success: true, message: 'Item Department created successfully', id: result.insertId });
+    });
+  });
+
+  // PUT update item department
+  app.put('/api/item-departments/:id', (req, res) => {
+    const { id } = req.params;
+    const { department_code, name, alternate_name, inactive, modified_by } = req.body;
+    
+    // Validation
+    if (!department_code || department_code.length < 1 || department_code.length > 4) {
+      return res.status(400).json({ success: false, message: 'Department Code must be 1-4 characters (alphanumeric allowed).' });
+    }
+    if (!name || name.length > 20) {
+      return res.status(400).json({ success: false, message: 'Department Name cannot exceed 20 characters.' });
+    }
+    if (alternate_name && alternate_name.length > 20) {
+      return res.status(400).json({ success: false, message: 'Alternate Name cannot exceed 20 characters.' });
+    }
+    
+    const sql = 'UPDATE IT_CONF_ITEM_DEPARTMENTS SET department_code = ?, name = ?, alternate_name = ?, inactive = ?, modified_by = ? WHERE id = ?';
+    db.query(sql, [department_code, name, alternate_name || null, inactive || 0, modified_by || 'admin', id], (err, result) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ success: false, message: 'Department Code already exists' });
+        }
+        return res.status(500).json({ success: false, message: 'DB error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Item Department not found' });
+      }
+      res.json({ success: true, message: 'Item Department updated successfully' });
+    });
+  });
+
+  // DELETE item department
+  app.delete('/api/item-departments/:id', (req, res) => {
+    const { id } = req.params;
+    db.query('DELETE FROM IT_CONF_ITEM_DEPARTMENTS WHERE id = ?', [id], (err, result) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Item Department not found' });
+      }
+      res.json({ success: true, message: 'Item Department deleted successfully' });
+    });
+  });
+
+  // Item Categories API endpoints
+  // GET all item categories
+  app.get('/api/item-categories', (req, res) => {
+    const sql = `
+      SELECT ic.*, id.name as item_department_name 
+      FROM IT_CONF_ITEM_CATEGORIES ic 
+      LEFT JOIN IT_CONF_ITEM_DEPARTMENTS id ON ic.item_department_code = id.department_code 
+      ORDER BY ic.display_sequence ASC, ic.category_code ASC
+    `;
+    db.query(sql, (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      res.json({ success: true, data: results });
+    });
+  });
+
+  // POST create new item category
+  app.post('/api/item-categories', (req, res) => {
+    const { category_code, name, alternate_name, item_department_code, display_sequence, inactive, created_by } = req.body;
+    
+    // Validation
+    if (!category_code || category_code.length !== 4) {
+      return res.status(400).json({ success: false, message: 'Category Code must be exactly 4 characters.' });
+    }
+    if (!name || name.length > 20) {
+      return res.status(400).json({ success: false, message: 'Category Name cannot exceed 20 characters.' });
+    }
+    if (alternate_name && alternate_name.length > 20) {
+      return res.status(400).json({ success: false, message: 'Alternate Name cannot exceed 20 characters.' });
+    }
+    if (!item_department_code) {
+      return res.status(400).json({ success: false, message: 'Item Department Code is required.' });
+    }
+    
+    const sql = 'INSERT INTO IT_CONF_ITEM_CATEGORIES (category_code, name, alternate_name, item_department_code, display_sequence, inactive, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    db.query(sql, [category_code, name, alternate_name || null, item_department_code, display_sequence || null, inactive || 0, created_by || 'admin'], (err, result) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ success: false, message: 'Category Code already exists' });
+        }
+        return res.status(500).json({ success: false, message: 'DB error' });
+      }
+      res.json({ success: true, message: 'Item Category created successfully', id: result.insertId });
+    });
+  });
+
+  // PUT update item category
+  app.put('/api/item-categories/:id', (req, res) => {
+    const { id } = req.params;
+    const { category_code, name, alternate_name, item_department_code, display_sequence, inactive, modified_by } = req.body;
+    
+    // Validation
+    if (!category_code || category_code.length !== 4) {
+      return res.status(400).json({ success: false, message: 'Category Code must be exactly 4 characters.' });
+    }
+    if (!name || name.length > 20) {
+      return res.status(400).json({ success: false, message: 'Category Name cannot exceed 20 characters.' });
+    }
+    if (alternate_name && alternate_name.length > 20) {
+      return res.status(400).json({ success: false, message: 'Alternate Name cannot exceed 20 characters.' });
+    }
+    if (!item_department_code) {
+      return res.status(400).json({ success: false, message: 'Item Department Code is required.' });
+    }
+    
+    const sql = 'UPDATE IT_CONF_ITEM_CATEGORIES SET category_code = ?, name = ?, alternate_name = ?, item_department_code = ?, display_sequence = ?, inactive = ?, modified_by = ? WHERE id = ?';
+    db.query(sql, [category_code, name, alternate_name || null, item_department_code, display_sequence || null, inactive || 0, modified_by || 'admin', id], (err, result) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ success: false, message: 'Category Code already exists' });
+        }
+        return res.status(500).json({ success: false, message: 'DB error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Item Category not found' });
+      }
+      res.json({ success: true, message: 'Item Category updated successfully' });
+    });
+  });
+
+  // DELETE item category
+  app.delete('/api/item-categories/:id', (req, res) => {
+    const { id } = req.params;
+    db.query('DELETE FROM IT_CONF_ITEM_CATEGORIES WHERE id = ?', [id], (err, result) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Item Category not found' });
+      }
+      res.json({ success: true, message: 'Item Category deleted successfully' });
+    });
+  });
+
+  // Item Master API endpoints
+  // GET all item master records
+  app.get('/api/item-master', (req, res) => {
+    const sql = `
+      SELECT im.*, 
+             id.name as item_department_name,
+             ic.name as item_category_name
+      FROM IT_CONF_ITEM_MASTER im 
+      LEFT JOIN IT_CONF_ITEM_DEPARTMENTS id ON im.item_department = id.department_code 
+      LEFT JOIN IT_CONF_ITEM_CATEGORIES ic ON im.item_category = ic.category_code
+      ORDER BY im.item_code ASC
+    `;
+    db.query(sql, (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      res.json({ success: true, data: results });
+    });
+  });
+
+  // POST create new item master record
+  app.post('/api/item-master', (req, res) => {
+    const {
+      select_outlets, applicable_from, item_code, inventory_code, item_name, short_name,
+      alternate_name, tax_code, item_price_1, item_price_2, item_price_3, item_price_4,
+      item_printer_1, item_printer_2, item_printer_3, print_group, item_department,
+      item_category, cost, unit, set_menu, item_modifier_group, status, created_by
+    } = req.body;
+    
+    // Validation
+    if (!item_code || item_code.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Item Code is required.' });
+    }
+    if (!item_name || item_name.length > 50) {
+      return res.status(400).json({ success: false, message: 'Item Name cannot exceed 50 characters.' });
+    }
+    if (!applicable_from) {
+      return res.status(400).json({ success: false, message: 'Applicable From date is required.' });
+    }
+    if (!item_department) {
+      return res.status(400).json({ success: false, message: 'Item Department is required.' });
+    }
+    if (!item_category) {
+      return res.status(400).json({ success: false, message: 'Item Category is required.' });
+    }
+    
+    const sql = `INSERT INTO IT_CONF_ITEM_MASTER (
+      select_outlets, applicable_from, item_code, inventory_code, item_name, short_name,
+      alternate_name, tax_code, item_price_1, item_price_2, item_price_3, item_price_4,
+      item_printer_1, item_printer_2, item_printer_3, print_group, item_department,
+      item_category, cost, unit, set_menu, item_modifier_group, status, created_by
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    
+    const values = [
+      select_outlets || null, applicable_from, item_code, inventory_code || null,
+      item_name, short_name || null, alternate_name || null, tax_code || null,
+      item_price_1 || null, item_price_2 || null, item_price_3 || null, item_price_4 || null,
+      item_printer_1 || null, item_printer_2 || null, item_printer_3 || null, print_group || null,
+      item_department, item_category, cost || null, unit || null, set_menu || null,
+      item_modifier_group || null, status || 'Active', created_by || 'admin'
+    ];
+    
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ success: false, message: 'Item Code already exists' });
+        }
+        return res.status(500).json({ success: false, message: 'DB error' });
+      }
+      res.json({ success: true, message: 'Item Master created successfully', id: result.insertId });
+    });
+  });
+
+  // PUT update item master record
+  app.put('/api/item-master/:id', (req, res) => {
+    const { id } = req.params;
+    const {
+      select_outlets, applicable_from, item_code, inventory_code, item_name, short_name,
+      alternate_name, tax_code, item_price_1, item_price_2, item_price_3, item_price_4,
+      item_printer_1, item_printer_2, item_printer_3, print_group, item_department,
+      item_category, cost, unit, set_menu, item_modifier_group, status, modified_by
+    } = req.body;
+    
+    // Validation
+    if (!item_code || item_code.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Item Code is required.' });
+    }
+    if (!item_name || item_name.length > 50) {
+      return res.status(400).json({ success: false, message: 'Item Name cannot exceed 50 characters.' });
+    }
+    if (!applicable_from) {
+      return res.status(400).json({ success: false, message: 'Applicable From date is required.' });
+    }
+    if (!item_department) {
+      return res.status(400).json({ success: false, message: 'Item Department is required.' });
+    }
+    if (!item_category) {
+      return res.status(400).json({ success: false, message: 'Item Category is required.' });
+    }
+    
+    const sql = `UPDATE IT_CONF_ITEM_MASTER SET 
+      select_outlets = ?, applicable_from = ?, item_code = ?, inventory_code = ?, item_name = ?, short_name = ?,
+      alternate_name = ?, tax_code = ?, item_price_1 = ?, item_price_2 = ?, item_price_3 = ?, item_price_4 = ?,
+      item_printer_1 = ?, item_printer_2 = ?, item_printer_3 = ?, print_group = ?, item_department = ?,
+      item_category = ?, cost = ?, unit = ?, set_menu = ?, item_modifier_group = ?, status = ?, modified_by = ?
+      WHERE id = ?`;
+    
+    const values = [
+      select_outlets || null, applicable_from, item_code, inventory_code || null,
+      item_name, short_name || null, alternate_name || null, tax_code || null,
+      item_price_1 || null, item_price_2 || null, item_price_3 || null, item_price_4 || null,
+      item_printer_1 || null, item_printer_2 || null, item_printer_3 || null, print_group || null,
+      item_department, item_category, cost || null, unit || null, set_menu || null,
+      item_modifier_group || null, status || 'Active', modified_by || 'admin', id
+    ];
+    
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ success: false, message: 'Item Code already exists' });
+        }
+        return res.status(500).json({ success: false, message: 'DB error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Item Master not found' });
+      }
+      res.json({ success: true, message: 'Item Master updated successfully' });
+    });
+  });
+
+  // DELETE item master record
+  app.delete('/api/item-master/:id', (req, res) => {
+    const { id } = req.params;
+    
+    // First get the item to check if it has a logo file to delete
+    db.query('SELECT item_logo FROM IT_CONF_ITEM_MASTER WHERE id = ?', [id], (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'DB error' });
+      
+      const item = results[0];
+      
+      // Delete the record
+      db.query('DELETE FROM IT_CONF_ITEM_MASTER WHERE id = ?', [id], (err, result) => {
+        if (err) return res.status(500).json({ success: false, message: 'DB error' });
+        if (result.affectedRows === 0) {
+          return res.status(404).json({ success: false, message: 'Item Master not found' });
+        }
+        
+        // Delete the logo file if it exists
+        if (item && item.item_logo) {
+          const filePath = path.join(__dirname, 'uploads', path.basename(item.item_logo));
+          fs.unlink(filePath, (err) => {
+            // Ignore file deletion errors, record is already deleted
+            console.log('Logo file deletion:', err ? 'failed' : 'success');
+          });
+        }
+        
+        res.json({ success: true, message: 'Item Master deleted successfully' });
+      });
+    });
+  });
+
+  // File upload endpoint for item logos
+  app.post('/api/upload-item-logo', upload.single('logo'), (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ 
+      success: true, 
+      message: 'File uploaded successfully',
+      fileUrl: fileUrl,
+      filename: req.file.filename
     });
   });
 
