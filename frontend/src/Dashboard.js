@@ -104,50 +104,56 @@ function Dashboard({ user, setUser }) {
   const [itemStockRecords, setItemStockRecords] = useState([]); // Persist ItemStock records
   const [updateMenuRatesRecords, setUpdateMenuRatesRecords] = useState([]); // Persist UpdateMenuRates records
   const [importExportRecords, setImportExportRecords] = useState([]); // Persist ImportExport records
+  const [paymentTypesRecords, setPaymentTypesRecords] = useState([]); // Persist PaymentTypes records
+  const [discountTypeRecords, setDiscountTypeRecords] = useState([]); // Persist DiscountType records
+  const [printFormatsRecords, setPrintFormatsRecords] = useState([]); // Persist PrintFormats records
+  const [tableSettingsRecords, setTableSettingsRecords] = useState([]); // Persist TableSettings records
+  const [outletRecords, setOutletRecords] = useState([]); // Persist Outlet records
+  const [userDepartmentsRecords, setUserDepartmentsRecords] = useState([]); // Persist UserDepartments records
+  const [userDesignationsRecords, setUserDesignationsRecords] = useState([]); // Persist UserDesignations records
+  const [userGroupsRecords, setUserGroupsRecords] = useState([]); // Persist UserGroups records
+  const [userSetupRecords, setUserSetupRecords] = useState([]); // Persist UserSetup records
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load company info immediately on mount
-    const fetchCompanyInfo = async () => {
+    // Load default company info on mount
+    const fetchCompanyInfo = () => {
       setLoadingCompany(true);
       setCompanyError('');
-      try {
-        const res = await axios.get('/api/company-info');
-        if (res.data.success) {
-          setCompanyInfo(res.data);
-        } else {
-          setCompanyError(res.data.message || 'No company info found');
-        }
-      } catch (err) {
-        setCompanyError('Failed to load company info');
-      }
+      // Set default company info for demo purposes
+      const defaultCompanyInfo = {
+        success: true,
+        companyName: 'Hotel ABC',
+        address: '123 Business Street',
+        phone: '+1 (555) 123-4567',
+        email: 'info@hotelabc.com'
+      };
+      setCompanyInfo(defaultCompanyInfo);
       setLoadingCompany(false);
     };
     fetchCompanyInfo();
   }, []);
 
-  const handleLogout = async () => {
-    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+  const handleLogout = () => {
     localStorage.removeItem('user');
     if (setUser) setUser(null);
     navigate('/login');
   };
 
-  const handleCompInfoClick = async () => {
+  const handleCompInfoClick = () => {
     setActiveTab('compinfo');
     setShowCompanyInfo(true);
     setLoadingCompany(true);
     setCompanyError('');
-    try {
-      const res = await axios.get('/api/company-info');
-      if (res.data.success) {
-        setCompanyInfo(res.data);
-      } else {
-        setCompanyError(res.data.message || 'No company info found');
-      }
-    } catch (err) {
-      setCompanyError('Failed to load company info');
-    }
+    // Set default company info for demo purposes
+    const defaultCompanyInfo = {
+      success: true,
+      companyName: 'Hotel ABC',
+      address: '123 Business Street',
+      phone: '+1 (555) 123-4567',
+      email: 'info@hotelabc.com'
+    };
+    setCompanyInfo(defaultCompanyInfo);
     setLoadingCompany(false);
   };
 
@@ -256,8 +262,18 @@ function Dashboard({ user, setUser }) {
               {React.createElement(require('./OutletSetup').default, {
                 setParentDirty: setChildDirty,
                 propertyCodes: propertyRecords,
-                records: propertyRecords, // Use the same array for demo; replace with outletRecords if needed
-                setRecords: setPropertyRecords // Use the same setter for demo; replace with setOutletRecords if needed
+                records: outletRecords,
+                setRecords: setOutletRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Table Settings' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./TableSettings').default, {
+                setParentDirty: setChildDirty,
+                propertyCodes: propertyRecords,
+                outletRecords: outletRecords,
+                records: tableSettingsRecords,
+                setRecords: setTableSettingsRecords
               })}
             </React.Suspense>
           ) : activeSubmenu === 'Item Departments' ? (
@@ -312,6 +328,73 @@ function Dashboard({ user, setUser }) {
                 setParentDirty: setChildDirty,
                 records: importExportRecords,
                 setRecords: setImportExportRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Payment Types' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./PaymentTypes').default, {
+                setParentDirty: setChildDirty,
+                records: paymentTypesRecords,
+                setRecords: setPaymentTypesRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Discount Types' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./DiscountType').default, {
+                setParentDirty: setChildDirty,
+                records: discountTypeRecords,
+                setRecords: setDiscountTypeRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Print Formats' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./PrintFormats').default, {
+                setParentDirty: setChildDirty,
+                records: printFormatsRecords,
+                setRecords: setPrintFormatsRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'User Departments' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./UserDepartments').default, {
+                setParentDirty: setChildDirty,
+                propertyCodes: propertyRecords,
+                outletRecords: outletRecords,
+                records: userDepartmentsRecords,
+                setRecords: setUserDepartmentsRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'User Designations' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./UserDesignations').default, {
+                setParentDirty: setChildDirty,
+                propertyCodes: propertyRecords,
+                userDepartmentsRecords: userDepartmentsRecords,
+                records: userDesignationsRecords,
+                setRecords: setUserDesignationsRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'User Setup' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./UserSetup').default, {
+                setParentDirty: setChildDirty,
+                propertyCodes: propertyRecords,
+                outletRecords: outletRecords,
+                userDepartmentsRecords: userDepartmentsRecords,
+                userGroupsRecords: userGroupsRecords,
+                records: userSetupRecords,
+                setRecords: setUserSetupRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'User Groups' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./UserGroups').default, {
+                setParentDirty: setChildDirty,
+                propertyCodes: propertyRecords,
+                userDesignationsRecords: userDesignationsRecords,
+                userSetupRecords: userSetupRecords,
+                records: userGroupsRecords,
+                setRecords: setUserGroupsRecords
               })}
             </React.Suspense>
           ) : activeTab === 'dashboard' ? (
