@@ -72,6 +72,61 @@ const createItemCategoriesTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_ITEM_CA
     FOREIGN KEY (item_department_code) REFERENCES IT_CONF_ITEM_DEPARTMENTS(department_code) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
+// Create IT_CONF_ITEM_SOLD table
+const createItemSoldTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_ITEM_SOLD (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    property_code VARCHAR(32) NOT NULL,
+    outlet_code VARCHAR(4) NOT NULL,
+    item_code VARCHAR(32) NOT NULL,
+    item_name VARCHAR(128) NOT NULL,
+    item_sold ENUM('Yes', 'No') NOT NULL DEFAULT 'No',
+    reset_at_daily_close ENUM('Yes', 'No') NOT NULL DEFAULT 'No',
+    created_by VARCHAR(64),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_by VARCHAR(64),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_property_outlet_item (property_code, outlet_code, item_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+// Create IT_CONF_ITEM_STOCK table
+const createItemStockTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_ITEM_STOCK (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    property_code VARCHAR(32) NOT NULL,
+    outlet_code VARCHAR(4) NOT NULL,
+    item_code VARCHAR(32) NOT NULL,
+    item_name VARCHAR(128) NOT NULL,
+    original_stock_count INT NOT NULL DEFAULT 0,
+    current_stock_count INT NOT NULL DEFAULT 0,
+    reset_stock_daily_close ENUM('Yes', 'No') NOT NULL DEFAULT 'No',
+    created_by VARCHAR(64),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_by VARCHAR(64),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_property_outlet_item_stock (property_code, outlet_code, item_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+// Create IT_CONF_MENU_RATE_UPDATES table
+const createMenuRateUpdatesTableSQL = `CREATE TABLE IF NOT EXISTS IT_CONF_MENU_RATE_UPDATES (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    property_name VARCHAR(128) NOT NULL,
+    outlet_name VARCHAR(128) NOT NULL,
+    applicable_from DATE NOT NULL,
+    price_level VARCHAR(64) NOT NULL,
+    update_type ENUM('item_department', 'item_master') NOT NULL,
+    from_department VARCHAR(64),
+    to_department VARCHAR(64),
+    from_item VARCHAR(64),
+    to_item VARCHAR(64),
+    calculation_type ENUM('percentage', 'amount') NOT NULL,
+    rate_value DECIMAL(10,2) NOT NULL,
+    operation ENUM('increase', 'decrease') NOT NULL,
+    items_updated INT DEFAULT 0,
+    created_by VARCHAR(64),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_by VARCHAR(64),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
 // Place all code that uses 'db' after db is initialized
 // Required modules
 const express = require('express');
@@ -222,6 +277,24 @@ db.connect((err) => {
   db.query(createItemCategoriesTableSQL, (err) => {
     if (err) console.error('Error creating IT_CONF_ITEM_CATEGORIES table:', err);
     else console.log('IT_CONF_ITEM_CATEGORIES table created/verified successfully');
+  });
+
+  // Create item sold table
+  db.query(createItemSoldTableSQL, (err) => {
+    if (err) console.error('Error creating IT_CONF_ITEM_SOLD table:', err);
+    else console.log('IT_CONF_ITEM_SOLD table created/verified successfully');
+  });
+
+  // Create item stock table
+  db.query(createItemStockTableSQL, (err) => {
+    if (err) console.error('Error creating IT_CONF_ITEM_STOCK table:', err);
+    else console.log('IT_CONF_ITEM_STOCK table created/verified successfully');
+  });
+
+  // Create menu rate updates table
+  db.query(createMenuRateUpdatesTableSQL, (err) => {
+    if (err) console.error('Error creating IT_CONF_MENU_RATE_UPDATES table:', err);
+    else console.log('IT_CONF_MENU_RATE_UPDATES table created/verified successfully');
   });
 
   // Logout endpoint to destroy session
@@ -910,6 +983,183 @@ app.post('/api/update-password', (req, res) => {
     } else {
       res.status(401).json({ error: 'Not logged in' });
     }
+  });
+
+  // Item Stock API endpoints
+  app.get('/api/item-stock', (req, res) => {
+    db.query('SELECT * FROM IT_CONF_ITEM_STOCK ORDER BY created_at DESC', (err, results) => {
+      if (err) {
+        console.error('Error fetching item stock:', err);
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+      res.json({ success: true, data: results });
+    });
+  });
+
+  app.post('/api/item-stock', (req, res) => {
+    const { 
+      property_code, outlet_code, item_code, item_name, 
+      original_stock_count, current_stock_count, reset_stock_daily_close 
+    } = req.body;
+
+    if (!property_code || !outlet_code || !item_code || !item_name || 
+        original_stock_count === undefined || current_stock_count === undefined || !reset_stock_daily_close) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const query = `INSERT INTO IT_CONF_ITEM_STOCK 
+      (property_code, outlet_code, item_code, item_name, original_stock_count, current_stock_count, reset_stock_daily_close) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)`;
+
+    db.query(query, [property_code, outlet_code, item_code, item_name, original_stock_count, current_stock_count, reset_stock_daily_close], (err, result) => {
+      if (err) {
+        console.error('Error creating item stock:', err);
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({ success: false, message: 'Item stock record already exists for this property, outlet, and item combination' });
+        }
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+      res.json({ success: true, id: result.insertId });
+    });
+  });
+
+  app.put('/api/item-stock/:id', (req, res) => {
+    const { id } = req.params;
+    const { 
+      property_code, outlet_code, item_code, item_name, 
+      original_stock_count, current_stock_count, reset_stock_daily_close 
+    } = req.body;
+
+    if (!property_code || !outlet_code || !item_code || !item_name || 
+        original_stock_count === undefined || current_stock_count === undefined || !reset_stock_daily_close) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const query = `UPDATE IT_CONF_ITEM_STOCK SET 
+      property_code = ?, outlet_code = ?, item_code = ?, item_name = ?, 
+      original_stock_count = ?, current_stock_count = ?, reset_stock_daily_close = ?, 
+      updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+
+    db.query(query, [property_code, outlet_code, item_code, item_name, original_stock_count, current_stock_count, reset_stock_daily_close, id], (err, result) => {
+      if (err) {
+        console.error('Error updating item stock:', err);
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({ success: false, message: 'Item stock record already exists for this property, outlet, and item combination' });
+        }
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Item stock record not found' });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  app.delete('/api/item-stock/:id', (req, res) => {
+    const { id } = req.params;
+    
+    db.query('DELETE FROM IT_CONF_ITEM_STOCK WHERE id = ?', [id], (err, result) => {
+      if (err) {
+        console.error('Error deleting item stock:', err);
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Item stock record not found' });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  // Menu Rate Updates API endpoints
+  app.get('/api/menu-rate-updates', (req, res) => {
+    db.query('SELECT * FROM IT_CONF_MENU_RATE_UPDATES ORDER BY created_at DESC', (err, results) => {
+      if (err) {
+        console.error('Error fetching menu rate updates:', err);
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+      res.json({ success: true, data: results });
+    });
+  });
+
+  app.post('/api/menu-rate-updates', (req, res) => {
+    const { 
+      property_name, outlet_name, applicable_from, price_level, update_type,
+      from_department, to_department, from_item, to_item, calculation_type, 
+      rate_value, operation, items_updated 
+    } = req.body;
+
+    if (!property_name || !outlet_name || !applicable_from || !price_level || 
+        !update_type || !calculation_type || !rate_value || !operation) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const query = `INSERT INTO IT_CONF_MENU_RATE_UPDATES 
+      (property_name, outlet_name, applicable_from, price_level, update_type, 
+       from_department, to_department, from_item, to_item, calculation_type, 
+       rate_value, operation, items_updated) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    db.query(query, [
+      property_name, outlet_name, applicable_from, price_level, update_type,
+      from_department || null, to_department || null, from_item || null, 
+      to_item || null, calculation_type, rate_value, operation, items_updated || 0
+    ], (err, result) => {
+      if (err) {
+        console.error('Error creating menu rate update:', err);
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+      res.json({ success: true, id: result.insertId });
+    });
+  });
+
+  app.put('/api/menu-rate-updates/:id', (req, res) => {
+    const { id } = req.params;
+    const { 
+      property_name, outlet_name, applicable_from, price_level, update_type,
+      from_department, to_department, from_item, to_item, calculation_type, 
+      rate_value, operation, items_updated 
+    } = req.body;
+
+    if (!property_name || !outlet_name || !applicable_from || !price_level || 
+        !update_type || !calculation_type || !rate_value || !operation) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const query = `UPDATE IT_CONF_MENU_RATE_UPDATES SET 
+      property_name = ?, outlet_name = ?, applicable_from = ?, price_level = ?, 
+      update_type = ?, from_department = ?, to_department = ?, from_item = ?, 
+      to_item = ?, calculation_type = ?, rate_value = ?, operation = ?, 
+      items_updated = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+
+    db.query(query, [
+      property_name, outlet_name, applicable_from, price_level, update_type,
+      from_department || null, to_department || null, from_item || null, 
+      to_item || null, calculation_type, rate_value, operation, items_updated || 0, id
+    ], (err, result) => {
+      if (err) {
+        console.error('Error updating menu rate update:', err);
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Menu rate update record not found' });
+      }
+      res.json({ success: true });
+    });
+  });
+
+  app.delete('/api/menu-rate-updates/:id', (req, res) => {
+    const { id } = req.params;
+    
+    db.query('DELETE FROM IT_CONF_MENU_RATE_UPDATES WHERE id = ?', [id], (err, result) => {
+      if (err) {
+        console.error('Error deleting menu rate update:', err);
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Menu rate update record not found' });
+      }
+      res.json({ success: true });
+    });
   });
 
 }); // End of db.connect callback

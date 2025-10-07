@@ -100,6 +100,10 @@ function Dashboard({ user, setUser }) {
   const [propertyRecords, setPropertyRecords] = useState([]); // Persist PropertyCode records
   const [itemDepartmentRecords, setItemDepartmentRecords] = useState([]); // Persist ItemDepartments records
   const [itemCategoryRecords, setItemCategoryRecords] = useState([]); // Persist ItemCategories records
+  const [itemSoldRecords, setItemSoldRecords] = useState([]); // Persist ItemSold records
+  const [itemStockRecords, setItemStockRecords] = useState([]); // Persist ItemStock records
+  const [updateMenuRatesRecords, setUpdateMenuRatesRecords] = useState([]); // Persist UpdateMenuRates records
+  const [importExportRecords, setImportExportRecords] = useState([]); // Persist ImportExport records
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -276,6 +280,38 @@ function Dashboard({ user, setUser }) {
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./ItemMaster').default, {
                 setParentDirty: setChildDirty
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Item Sold' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./ItemSold').default, {
+                setParentDirty: setChildDirty,
+                records: itemSoldRecords,
+                setRecords: setItemSoldRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Item Stock' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./ItemStock').default, {
+                setParentDirty: setChildDirty,
+                records: itemStockRecords,
+                setRecords: setItemStockRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Update Menu Rates' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./UpdateMenuRates').default, {
+                setParentDirty: setChildDirty,
+                records: updateMenuRatesRecords,
+                setRecords: setUpdateMenuRatesRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Import and Export' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./ImportExport').default, {
+                setParentDirty: setChildDirty,
+                records: importExportRecords,
+                setRecords: setImportExportRecords
               })}
             </React.Suspense>
           ) : activeTab === 'dashboard' ? (

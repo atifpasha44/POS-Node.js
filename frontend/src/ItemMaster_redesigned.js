@@ -170,54 +170,36 @@ export default function ItemMaster({ setParentDirty }) {
   const isItemCodeLocked = action === 'Edit';
 
   return (
-    <div className="itemmaster-panel" style={{
+    <div style={{
       background: '#fff',
-      border: '2.5px solid #222',
-      borderRadius: '16px',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
-      width: '100%',
-      maxWidth: '1200px',
-      margin: '32px auto',
-      padding: '0 0 18px 0',
-      height: 'calc(100vh - 120px)',
-      display: 'flex',
-      flexDirection: 'column',
-      overflowY: 'auto',
-      position: 'relative',
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      margin: '20px',
+      padding: '20px',
       fontFamily: 'Arial, sans-serif'
     }}>
-      {/* Header - Sticky */}
+      {/* Header */}
       <div style={{
         display: 'flex',
-        alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottom: '2px solid #e0e0e0',
-        padding: '12px 18px 8px 18px',
-        minWidth: 0,
-        position: 'sticky',
-        top: 0,
-        zIndex: 10,
-        background: '#fff',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+        alignItems: 'center',
+        marginBottom: '20px',
+        paddingBottom: '15px',
+        borderBottom: '1px solid #eee'
       }}>
-        <div style={{display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flexWrap: 'wrap'}}>
-          <span style={{fontWeight: 'bold', fontSize: '2rem', color: '#222', marginRight: '18px'}}>
-            Item Master
-          </span>
+        <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
+          <h2 style={{margin: 0, fontSize: '24px', fontWeight: 'bold'}}>Item Master</h2>
           
           <select 
             value={action} 
             onChange={handleActionChange}
             style={{
-              fontWeight: 'bold',
-              fontSize: '1rem',
-              padding: '4px 12px',
-              borderRadius: '6px',
-              border: '1.5px solid #bbb',
-              marginRight: '8px'
+              padding: '6px 12px',
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              fontSize: '14px'
             }}
           >
-            <option value="Add">Action</option>
             <option value="Add">Add</option>
             <option value="Edit">Edit</option>
             <option value="Delete">Delete</option>
@@ -225,214 +207,152 @@ export default function ItemMaster({ setParentDirty }) {
           </select>
 
           {/* Action Buttons */}
-          <button 
-            onClick={handleAdd}
-            title="Add"
-            style={{
-              background: '#e3fcec',
-              border: '2px solid #43a047',
-              borderRadius: '50%',
-              width: '38px',
-              height: '38px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              color: '#43a047',
-              marginRight: '4px',
-              cursor: 'pointer',
-              transition: '0.2s'
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#c8e6c9'}
-            onMouseOut={e => e.currentTarget.style.background = '#e3fcec'}
-          >
-            <span role="img" aria-label="Add">➕</span>
-          </button>
-          <button 
-            onClick={handleEdit}
-            title="Modify/Edit"
-            style={{
-              background: '#e3eafc',
-              border: '2px solid #1976d2',
-              borderRadius: '50%',
-              width: '38px',
-              height: '38px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              color: '#1976d2',
-              marginRight: '4px',
-              cursor: 'pointer',
-              transition: '0.2s'
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#bbdefb'}
-            onMouseOut={e => e.currentTarget.style.background = '#e3eafc'}
-          >
-            <span role="img" aria-label="Edit">✏️</span>
-          </button>
-          <button 
-            onClick={handleDelete}
-            title="Delete"
-            style={{
-              background: '#ffebee',
-              border: '2px solid #e53935',
-              borderRadius: '50%',
-              width: '38px',
-              height: '38px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              color: '#e53935',
-              marginRight: '4px',
-              cursor: 'pointer',
-              transition: '0.2s'
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#ffcdd2'}
-            onMouseOut={e => e.currentTarget.style.background = '#ffebee'}
-          >
-            <span role="img" aria-label="Delete">🗑️</span>
-          </button>
-          <button 
-            onClick={handleSearch}
-            title="Search"
-            style={{
-              background: '#fffde7',
-              border: '2px solid #fbc02d',
-              borderRadius: '50%',
-              width: '38px',
-              height: '38px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              color: '#fbc02d',
-              marginRight: '4px',
-              cursor: 'pointer',
-              transition: '0.2s'
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#fff9c4'}
-            onMouseOut={e => e.currentTarget.style.background = '#fffde7'}
-          >
-            <span role="img" aria-label="Search">🔍</span>
-          </button>
-          <button 
-            onClick={handleClear}
-            title="Clear"
-            style={{
-              background: '#f3e5f5',
-              border: '2px solid #8e24aa',
-              borderRadius: '50%',
-              width: '38px',
-              height: '38px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.5rem',
-              color: '#8e24aa',
-              marginRight: '4px',
-              cursor: 'pointer',
-              transition: '0.2s'
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#e1bee7'}
-            onMouseOut={e => e.currentTarget.style.background = '#f3e5f5'}
-          >
-            <span role="img" aria-label="Clear">🧹</span>
-          </button>
-          <button 
-            onClick={handleSave}
-            title="Save"
-            style={{
-              background: '#e3f2fd',
-              border: '2px solid #1976d2',
-              borderRadius: '8px',
-              fontWeight: 'bold',
-              color: '#1976d2',
-              fontSize: '1.15rem',
-              padding: '4px 18px',
-              marginLeft: '8px',
-              cursor: 'pointer',
-              transition: '0.2s'
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#bbdefb'}
-            onMouseOut={e => e.currentTarget.style.background = '#e3f2fd'}
-          >
-            <span style={{fontWeight: 'bold'}}>
-              <span role="img" aria-label="Save">💾</span> SAVE
-            </span>
-          </button>
+          <div style={{display: 'flex', gap: '8px'}}>
+            <button 
+              onClick={handleAdd}
+              style={{
+                width: '35px',
+                height: '35px',
+                borderRadius: '50%',
+                border: '2px solid #4CAF50',
+                backgroundColor: '#E8F5E8',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Add"
+            >
+              ➕
+            </button>
+            <button 
+              onClick={handleEdit}
+              style={{
+                width: '35px',
+                height: '35px',
+                borderRadius: '50%',
+                border: '2px solid #2196F3',
+                backgroundColor: '#E3F2FD',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Edit"
+            >
+              ✏️
+            </button>
+            <button 
+              onClick={handleDelete}
+              style={{
+                width: '35px',
+                height: '35px',
+                borderRadius: '50%',
+                border: '2px solid #F44336',
+                backgroundColor: '#FFEBEE',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Delete"
+            >
+              🗑️
+            </button>
+            <button 
+              onClick={handleSearch}
+              style={{
+                width: '35px',
+                height: '35px',
+                borderRadius: '50%',
+                border: '2px solid #FF9800',
+                backgroundColor: '#FFF3E0',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Search"
+            >
+              🔍
+            </button>
+            <button 
+              onClick={handleClear}
+              style={{
+                width: '35px',
+                height: '35px',
+                borderRadius: '50%',
+                border: '2px solid #9C27B0',
+                backgroundColor: '#F3E5F5',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              title="Clear"
+            >
+              ❌
+            </button>
+          </div>
         </div>
 
-        <div style={{display: 'flex', alignItems: 'center', gap: '16px', minWidth: 0, flexWrap: 'wrap'}}>
-          <span style={{fontSize: '1.08rem', color: '#888', marginRight: '8px', whiteSpace: 'nowrap'}}>Export Report to</span>
-          <span
-            title="Export to Excel"
+        <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+          <button 
+            onClick={handleSave}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              background: '#e8f5e9',
-              boxShadow: '0 2px 8px rgba(76,175,80,0.10)',
+              padding: '8px 16px',
+              backgroundColor: '#2196F3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
               cursor: 'pointer',
-              border: '2px solid #43a047',
-              marginRight: '6px',
-              transition: 'background 0.2s'
+              fontSize: '14px',
+              fontWeight: 'bold'
             }}
+          >
+            💾 SAVE
+          </button>
+
+          <span style={{fontSize: '14px', color: '#666', marginLeft: '20px'}}>Download Master Data</span>
+          <button 
             onClick={handleExportExcel}
-            onMouseOver={e => e.currentTarget.style.background = '#c8e6c9'}
-            onMouseOut={e => e.currentTarget.style.background = '#e8f5e9'}
-          >
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="32" height="32" rx="8" fill="#43a047"/>
-              <text x="16" y="21" textAnchor="middle" fontSize="15" fontWeight="bold" fill="#fff">X</text>
-              <text x="24" y="21" textAnchor="middle" fontSize="15" fontWeight="bold" fill="#fff">L</text>
-            </svg>
-          </span>
-          
-          <span
-            title="Export to PDF"
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
+              width: '35px',
+              height: '35px',
               borderRadius: '50%',
-              background: '#ffebee',
-              boxShadow: '0 2px 8px rgba(229,57,53,0.10)',
+              border: '2px solid #4CAF50',
+              backgroundColor: '#E8F5E8',
               cursor: 'pointer',
-              border: '2px solid #e53935',
-              marginRight: '6px',
-              transition: 'background 0.2s'
+              fontSize: '12px',
+              fontWeight: 'bold'
             }}
-            onClick={handleExportPDF}
-            onMouseOver={e => e.currentTarget.style.background = '#ffcdd2'}
-            onMouseOut={e => e.currentTarget.style.background = '#ffebee'}
+            title="Export to Excel"
           >
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="32" height="32" rx="8" fill="#e53935"/>
-              <text x="10" y="21" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#fff">P</text>
-              <text x="16" y="21" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#fff">D</text>
-              <text x="22" y="21" textAnchor="middle" fontSize="10" fontWeight="bold" fill="#fff">F</text>
-            </svg>
-          </span>
+            XL
+          </button>
+          <button 
+            onClick={handleExportPDF}
+            style={{
+              width: '35px',
+              height: '35px',
+              borderRadius: '50%',
+              border: '2px solid #F44336',
+              backgroundColor: '#FFEBEE',
+              cursor: 'pointer',
+              fontSize: '10px',
+              fontWeight: 'bold'
+            }}
+            title="Export to PDF"
+          >
+            PDF
+          </button>
         </div>
       </div>
 
-      {/* Scrollable Form Content */}
-      <div style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: '32px 32px 0 32px'
-      }}>
-        <form ref={formRef} onSubmit={handleSubmit} className="itemmaster-form">
+      <form ref={formRef} onSubmit={handleSubmit}>
         {/* FIRST HORIZONTAL SECTION (TOP SECTION) */}
-        <div style={{display: 'flex', gap: '20px', marginBottom: '25px', alignItems: 'flex-start'}}>
-          {/* Left Column - Form Fields */}
+        <div style={{display: 'flex', gap: '20px', marginBottom: '25px'}}>
+          {/* Left Box (32%) - Outlet Code, Item Code, Item Name, Short Name, Item Department */}
           <div style={{
             flex: '0 0 32%',
             display: 'flex',
@@ -440,7 +360,7 @@ export default function ItemMaster({ setParentDirty }) {
             gap: '15px'
           }}>
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '120px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Outlet Code</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Outlet Code</label>
               <select 
                 name="select_outlets"
                 value={form.select_outlets[0] || ''}
@@ -450,13 +370,12 @@ export default function ItemMaster({ setParentDirty }) {
                   setIsDirty(true);
                 }}
                 style={{
-                  width: '250px',
-                  height: '32px',
-                  padding: '5px 10px',
+                  width: '200px',
+                  height: '30px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: '#fff'
+                  fontSize: '14px'
                 }}
                 disabled={isFormReadOnly}
               >
@@ -470,27 +389,27 @@ export default function ItemMaster({ setParentDirty }) {
             </div>
 
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '120px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Item Code</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Item Code</label>
               <input 
                 type="text"
                 name="item_code"
                 value={form.item_code}
                 onChange={handleChange}
                 style={{
-                  width: '235px',
-                  height: '30px',
-                  padding: '5px 10px',
+                  width: '200px',
+                  height: '28px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
                   fontSize: '14px',
-                  backgroundColor: '#fff'
+                  textTransform: 'uppercase'
                 }}
                 disabled={isItemCodeLocked || isFormReadOnly}
               />
             </div>
 
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '120px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Item Name</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Item Name</label>
               <input 
                 type="text"
                 name="item_name"
@@ -498,20 +417,19 @@ export default function ItemMaster({ setParentDirty }) {
                 onChange={handleChange}
                 maxLength={50}
                 style={{
-                  width: '235px',
-                  height: '30px',
-                  padding: '5px 10px',
+                  width: '200px',
+                  height: '28px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: '#fff'
+                  fontSize: '14px'
                 }}
                 disabled={isFormReadOnly}
               />
             </div>
 
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '120px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Short Name</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Short Name</label>
               <input 
                 type="text"
                 name="short_name"
@@ -519,32 +437,30 @@ export default function ItemMaster({ setParentDirty }) {
                 onChange={handleChange}
                 maxLength={20}
                 style={{
-                  width: '235px',
-                  height: '30px',
-                  padding: '5px 10px',
+                  width: '200px',
+                  height: '28px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: '#fff'
+                  fontSize: '14px'
                 }}
                 disabled={isFormReadOnly}
               />
             </div>
 
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '120px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Item Department</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Item Department</label>
               <select 
                 name="item_department"
                 value={form.item_department}
                 onChange={handleChange}
                 style={{
-                  width: '250px',
-                  height: '32px',
-                  padding: '5px 10px',
+                  width: '214px',
+                  height: '30px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: '#fff'
+                  fontSize: '14px'
                 }}
                 disabled={isFormReadOnly}
               >
@@ -558,7 +474,7 @@ export default function ItemMaster({ setParentDirty }) {
             </div>
           </div>
 
-          {/* Middle Column - Additional Fields */}
+          {/* Middle Box (32%) - Applicable From, Inventory Code, Alternate Name, Tax Code, Item Category */}
           <div style={{
             flex: '0 0 32%',
             display: 'flex',
@@ -566,7 +482,7 @@ export default function ItemMaster({ setParentDirty }) {
             gap: '15px'
           }}>
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Applicable From</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Applicable From</label>
               <input 
                 type="date"
                 name="applicable_from"
@@ -575,19 +491,18 @@ export default function ItemMaster({ setParentDirty }) {
                 min={action === 'Add' ? new Date().toISOString().split('T')[0] : ''}
                 style={{
                   width: '200px',
-                  height: '30px',
-                  padding: '5px 10px',
+                  height: '28px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: '#fff'
+                  fontSize: '14px'
                 }}
                 disabled={isFormReadOnly}
               />
             </div>
 
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Inventory Code</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Inventory Code</label>
               <input 
                 type="text"
                 name="inventory_code"
@@ -595,19 +510,18 @@ export default function ItemMaster({ setParentDirty }) {
                 onChange={handleChange}
                 style={{
                   width: '200px',
-                  height: '30px',
-                  padding: '5px 10px',
+                  height: '28px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: '#fff'
+                  fontSize: '14px'
                 }}
                 disabled={isFormReadOnly}
               />
             </div>
 
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Alternate Name</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Alternate Name</label>
               <input 
                 type="text"
                 name="alternate_name"
@@ -615,31 +529,29 @@ export default function ItemMaster({ setParentDirty }) {
                 onChange={handleChange}
                 style={{
                   width: '200px',
-                  height: '30px',
-                  padding: '5px 10px',
+                  height: '28px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: '#fff'
+                  fontSize: '14px'
                 }}
                 disabled={isFormReadOnly}
               />
             </div>
 
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Tax Code</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Tax Code</label>
               <select 
                 name="tax_code"
                 value={form.tax_code}
                 onChange={handleChange}
                 style={{
-                  width: '215px',
-                  height: '32px',
-                  padding: '5px 10px',
+                  width: '214px',
+                  height: '30px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: '#fff'
+                  fontSize: '14px'
                 }}
                 disabled={isFormReadOnly}
               >
@@ -653,19 +565,18 @@ export default function ItemMaster({ setParentDirty }) {
             </div>
 
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Item Category</label>
+              <label style={{width: '130px', fontSize: '14px', fontWeight: 'bold'}}>Item Category</label>
               <select 
                 name="item_category"
                 value={form.item_category}
                 onChange={handleChange}
                 style={{
-                  width: '215px',
-                  height: '32px',
-                  padding: '5px 10px',
+                  width: '214px',
+                  height: '30px',
+                  padding: '5px',
                   border: '1px solid #ccc',
                   borderRadius: '4px',
-                  fontSize: '14px',
-                  backgroundColor: '#fff'
+                  fontSize: '14px'
                 }}
                 disabled={isFormReadOnly}
               >
@@ -679,91 +590,90 @@ export default function ItemMaster({ setParentDirty }) {
             </div>
           </div>
 
-          {/* Right Column - Item Image */}
+          {/* Right Box (32%) - Item Image */}
           <div style={{
             flex: '0 0 32%',
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
+            justifyContent: 'center'
           }}>
             <div style={{
-              textAlign: 'center',
-              marginBottom: '10px'
-            }}>
-              <label style={{fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Item Image</label>
-            </div>
-            
-            {/* Image Display Area */}
-            <div style={{
-              border: '2px dashed #ccc',
+              border: '1px solid #ddd',
               borderRadius: '6px',
-              width: '144px',
-              height: '144px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              padding: '15px',
               backgroundColor: '#f9f9f9',
-              marginBottom: '15px'
+              width: '250px'
             }}>
-              {form.item_logo_url ? (
-                <img 
-                  src={form.item_logo_url} 
-                  alt="Item Logo" 
+              <h4 style={{margin: '0 0 15px 0', fontSize: '14px', fontWeight: 'bold', textAlign: 'center'}}>Item Image</h4>
+              
+              {/* Image Display Area */}
+              <div style={{
+                border: '2px dashed #ccc',
+                borderRadius: '6px',
+                padding: '20px',
+                textAlign: 'center',
+                minHeight: '140px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#fff',
+                marginBottom: '15px'
+              }}>
+                {form.item_logo_url ? (
+                  <img 
+                    src={form.item_logo_url} 
+                    alt="Item Logo" 
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '120px',
+                      objectFit: 'contain'
+                    }}
+                  />
+                ) : (
+                  <div style={{color: '#888', fontSize: '12px'}}>
+                    <div style={{fontSize: '40px', marginBottom: '10px'}}>📷</div>
+                    <div>No image selected</div>
+                  </div>
+                )}
+              </div>
+              
+              {/* File Upload Controls */}
+              <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                <input 
+                  ref={fileInputRef}
+                  type="file" 
+                  name="item_logo" 
+                  onChange={handleChange} 
+                  accept="image/*"
                   style={{
-                    maxWidth: '130px',
-                    maxHeight: '130px',
-                    objectFit: 'contain'
-                  }}
+                    fontSize: '12px',
+                    padding: '5px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px'
+                  }} 
+                  disabled={isFormReadOnly} 
                 />
-              ) : (
-                <div style={{color: '#999', fontSize: '12px', textAlign: 'center'}}>
-                  <div style={{fontSize: '24px', marginBottom: '5px'}}>📷</div>
-                  <div>No image selected</div>
-                </div>
-              )}
-            </div>
-            
-            {/* File Upload Controls */}
-            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', width: '144px'}}>
-              <input 
-                ref={fileInputRef}
-                type="file" 
-                name="item_logo" 
-                onChange={handleChange} 
-                accept="image/*"
-                style={{
-                  width: '100%',
-                  fontSize: '12px',
-                  padding: '5px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  backgroundColor: '#fff'
-                }} 
-                disabled={isFormReadOnly} 
-              />
-              {!isFormReadOnly && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (fileInputRef.current) {
-                      fileInputRef.current.click();
-                    }
-                  }}
-                  style={{
-                    backgroundColor: '#007BFF',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '8px 20px',
-                    fontSize: '14px',
-                    fontWeight: 'bold',
-                    cursor: 'pointer',
-                    width: '100%'
-                  }}
-                >
-                  UPLOAD
-                </button>
-              )}
+                {!isFormReadOnly && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (fileInputRef.current) {
+                        fileInputRef.current.click();
+                      }
+                    }}
+                    style={{
+                      backgroundColor: '#2196F3',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '8px 12px',
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    📁 Choose Image
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -773,15 +683,14 @@ export default function ItemMaster({ setParentDirty }) {
           {/* Left Box (50%) - Item Price Level */}
           <div style={{flex: '1'}}>
             <div style={{
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              padding: '15px',
-              backgroundColor: '#f9f9f9'
+              border: '1px solid #ccc',
+              borderRadius: '6px',
+              padding: '15px'
             }}>
-              <h4 style={{margin: '0 0 15px 0', fontSize: '14px', fontWeight: 'bold', color: '#333'}}>Item Price Level</h4>
+              <h4 style={{margin: '0 0 15px 0', fontSize: '14px', fontWeight: 'bold'}}>Item Price Level</h4>
               <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
                 <div style={{display: 'flex', alignItems: 'center'}}>
-                  <label style={{width: '70px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Price 1</label>
+                  <label style={{width: '60px', fontSize: '14px', fontWeight: 'bold'}}>Price 1</label>
                   <input 
                     type="number"
                     name="item_price_1"
@@ -790,19 +699,18 @@ export default function ItemMaster({ setParentDirty }) {
                     min="0"
                     step="0.01"
                     style={{
-                      width: '130px',
-                      height: '32px',
-                      padding: '5px 8px',
+                      width: '160px',
+                      height: '28px',
+                      padding: '5px',
                       border: '1px solid #ccc',
                       borderRadius: '4px',
-                      fontSize: '14px',
-                      backgroundColor: '#fff'
+                      fontSize: '14px'
                     }}
                     disabled={isFormReadOnly}
                   />
                 </div>
                 <div style={{display: 'flex', alignItems: 'center'}}>
-                  <label style={{width: '70px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Price 2</label>
+                  <label style={{width: '60px', fontSize: '14px', fontWeight: 'bold'}}>Price 2</label>
                   <input 
                     type="number"
                     name="item_price_2"
@@ -811,19 +719,18 @@ export default function ItemMaster({ setParentDirty }) {
                     min="0"
                     step="0.01"
                     style={{
-                      width: '130px',
-                      height: '32px',
-                      padding: '5px 8px',
+                      width: '160px',
+                      height: '28px',
+                      padding: '5px',
                       border: '1px solid #ccc',
                       borderRadius: '4px',
-                      fontSize: '14px',
-                      backgroundColor: '#fff'
+                      fontSize: '14px'
                     }}
                     disabled={isFormReadOnly}
                   />
                 </div>
                 <div style={{display: 'flex', alignItems: 'center'}}>
-                  <label style={{width: '70px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Price 3</label>
+                  <label style={{width: '60px', fontSize: '14px', fontWeight: 'bold'}}>Price 3</label>
                   <input 
                     type="number"
                     name="item_price_3"
@@ -832,19 +739,18 @@ export default function ItemMaster({ setParentDirty }) {
                     min="0"
                     step="0.01"
                     style={{
-                      width: '130px',
-                      height: '32px',
-                      padding: '5px 8px',
+                      width: '160px',
+                      height: '28px',
+                      padding: '5px',
                       border: '1px solid #ccc',
                       borderRadius: '4px',
-                      fontSize: '14px',
-                      backgroundColor: '#fff'
+                      fontSize: '14px'
                     }}
                     disabled={isFormReadOnly}
                   />
                 </div>
                 <div style={{display: 'flex', alignItems: 'center'}}>
-                  <label style={{width: '70px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Price 4</label>
+                  <label style={{width: '60px', fontSize: '14px', fontWeight: 'bold'}}>Price 4</label>
                   <input 
                     type="number"
                     name="item_price_4"
@@ -853,13 +759,12 @@ export default function ItemMaster({ setParentDirty }) {
                     min="0"
                     step="0.01"
                     style={{
-                      width: '130px',
-                      height: '32px',
-                      padding: '5px 8px',
+                      width: '160px',
+                      height: '28px',
+                      padding: '5px',
                       border: '1px solid #ccc',
                       borderRadius: '4px',
-                      fontSize: '14px',
-                      backgroundColor: '#fff'
+                      fontSize: '14px'
                     }}
                     disabled={isFormReadOnly}
                   />
@@ -871,27 +776,25 @@ export default function ItemMaster({ setParentDirty }) {
           {/* Right Box (50%) - Item Printers */}
           <div style={{flex: '1'}}>
             <div style={{
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              padding: '15px',
-              backgroundColor: '#f9f9f9'
+              border: '1px solid #ccc',
+              borderRadius: '6px',
+              padding: '15px'
             }}>
-              <h4 style={{margin: '0 0 15px 0', fontSize: '14px', fontWeight: 'bold', color: '#333'}}>Item Printers</h4>
+              <h4 style={{margin: '0 0 15px 0', fontSize: '14px', fontWeight: 'bold'}}>Item Printers</h4>
               <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
                 <div style={{display: 'flex', alignItems: 'center'}}>
-                  <label style={{width: '80px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Printer 1</label>
+                  <label style={{width: '80px', fontSize: '14px', fontWeight: 'bold'}}>Printer 1</label>
                   <select 
                     name="item_printer_1"
                     value={form.item_printer_1}
                     onChange={handleChange}
                     style={{
                       width: '200px',
-                      height: '32px',
-                      padding: '5px 8px',
+                      height: '30px',
+                      padding: '5px',
                       border: '1px solid #ccc',
                       borderRadius: '4px',
-                      fontSize: '14px',
-                      backgroundColor: '#fff'
+                      fontSize: '14px'
                     }}
                     disabled={isFormReadOnly}
                   >
@@ -904,19 +807,18 @@ export default function ItemMaster({ setParentDirty }) {
                   </select>
                 </div>
                 <div style={{display: 'flex', alignItems: 'center'}}>
-                  <label style={{width: '80px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Printer 2</label>
+                  <label style={{width: '80px', fontSize: '14px', fontWeight: 'bold'}}>Printer 2</label>
                   <select 
                     name="item_printer_2"
                     value={form.item_printer_2}
                     onChange={handleChange}
                     style={{
                       width: '200px',
-                      height: '32px',
-                      padding: '5px 8px',
+                      height: '30px',
+                      padding: '5px',
                       border: '1px solid #ccc',
                       borderRadius: '4px',
-                      fontSize: '14px',
-                      backgroundColor: '#fff'
+                      fontSize: '14px'
                     }}
                     disabled={isFormReadOnly}
                   >
@@ -929,19 +831,18 @@ export default function ItemMaster({ setParentDirty }) {
                   </select>
                 </div>
                 <div style={{display: 'flex', alignItems: 'center'}}>
-                  <label style={{width: '80px', fontSize: '14px', fontWeight: 'bold', color: '#666'}}>Printer 3</label>
+                  <label style={{width: '80px', fontSize: '14px', fontWeight: 'bold'}}>Printer 3</label>
                   <select 
                     name="item_printer_3"
                     value={form.item_printer_3}
                     onChange={handleChange}
                     style={{
                       width: '200px',
-                      height: '32px',
-                      padding: '5px 8px',
+                      height: '30px',
+                      padding: '5px',
                       border: '1px solid #ccc',
                       borderRadius: '4px',
-                      fontSize: '14px',
-                      backgroundColor: '#fff'
+                      fontSize: '14px'
                     }}
                     disabled={isFormReadOnly}
                   >
@@ -1110,8 +1011,7 @@ export default function ItemMaster({ setParentDirty }) {
             </div>
           </div>
         </div>
-        </form>
-      </div>
+      </form>
 
       {/* Modals and Popups */}
       {showSavePopup && (
