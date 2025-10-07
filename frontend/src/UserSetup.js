@@ -356,7 +356,7 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
   };
 
   return (
-    <div className="propertycode-panel" style={{background:'#fff',border:'2.5px solid #222',borderRadius:'16px',boxShadow:'0 2px 12px rgba(0,0,0,0.10)',width:'100%',maxWidth:'1200px',margin:'32px auto',padding:'0 0 18px 0',height:'calc(100vh - 120px)',display:'flex',flexDirection:'column',overflowY:'auto',position:'relative'}}>
+    <div className="propertycode-panel" style={{background:'#fff',border:'2.5px solid #222',borderRadius:'16px',boxShadow:'0 2px 12px rgba(0,0,0,0.10)',width:'100%',maxWidth:'1200px',margin:'32px auto',padding:'0',height:'calc(100vh - 120px)',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
       {/* Top Control Bar - sticky */}
       <div style={{
         display:'flex',alignItems:'center',justifyContent:'space-between',
@@ -477,33 +477,33 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
         {/* Left column */}
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Login Name *</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Login Name *</label>
             <input 
               type="text" 
               name="login_name" 
               value={form.login_name} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
               maxLength="50"
             />
             {fieldErrors.login_name && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.login_name}</span>}
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Password *</label>
-            <div style={{width:'80%',position:'relative'}}>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Password *</label>
+            <div style={{width:'75%',position:'relative',display:'flex',alignItems:'center'}}>
               <input 
                 type={showPassword ? "text" : "password"}
                 name="password" 
                 value={form.password} 
                 onChange={handleChange} 
-                style={{width:'100%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px 0 8px',paddingRight:'40px',background:'#fff'}} 
+                style={{width:'100%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 40px 0 8px',background:'#fff',boxSizing:'border-box'}} 
                 minLength="8"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                style={{position:'absolute',right:'8px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:'#666'}}
+                style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:'#666',zIndex:1}}
               >
                 {showPassword ? '👁️' : '👁️‍🗨️'}
               </button>
@@ -512,19 +512,19 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Re-type Password *</label>
-            <div style={{width:'80%',position:'relative'}}>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Re-type Password *</label>
+            <div style={{width:'75%',position:'relative',display:'flex',alignItems:'center'}}>
               <input 
                 type={showRePassword ? "text" : "password"}
                 name="re_password" 
                 value={form.re_password} 
                 onChange={handleChange} 
-                style={{width:'100%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px 0 8px',paddingRight:'40px',background:'#fff'}} 
+                style={{width:'100%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 40px 0 8px',background:'#fff',boxSizing:'border-box'}} 
               />
               <button
                 type="button"
                 onClick={() => setShowRePassword(!showRePassword)}
-                style={{position:'absolute',right:'8px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:'#666'}}
+                style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:'#666',zIndex:1}}
               >
                 {showRePassword ? '👁️' : '👁️‍🗨️'}
               </button>
@@ -533,21 +533,21 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User PIN *</label>
-            <div style={{width:'80%',position:'relative'}}>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User PIN *</label>
+            <div style={{width:'75%',position:'relative',display:'flex',alignItems:'center'}}>
               <input 
                 type={showPin ? "text" : "password"}
                 name="user_pin" 
                 value={form.user_pin} 
                 onChange={handleChange} 
-                style={{width:'100%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px 0 8px',paddingRight:'40px',background:'#fff'}} 
+                style={{width:'100%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 40px 0 8px',background:'#fff',boxSizing:'border-box'}} 
                 pattern="[0-9]{4,6}"
                 maxLength="6"
               />
               <button
                 type="button"
                 onClick={() => setShowPin(!showPin)}
-                style={{position:'absolute',right:'8px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:'#666'}}
+                style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:'#666',zIndex:1}}
               >
                 {showPin ? '👁️' : '👁️‍🗨️'}
               </button>
@@ -556,21 +556,21 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Re-type PIN *</label>
-            <div style={{width:'80%',position:'relative'}}>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Re-type PIN *</label>
+            <div style={{width:'75%',position:'relative',display:'flex',alignItems:'center'}}>
               <input 
                 type={showRePin ? "text" : "password"}
                 name="re_user_pin" 
                 value={form.re_user_pin} 
                 onChange={handleChange} 
-                style={{width:'100%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px 0 8px',paddingRight:'40px',background:'#fff'}} 
+                style={{width:'100%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 40px 0 8px',background:'#fff',boxSizing:'border-box'}} 
                 pattern="[0-9]{4,6}"
                 maxLength="6"
               />
               <button
                 type="button"
                 onClick={() => setShowRePin(!showRePin)}
-                style={{position:'absolute',right:'8px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:'#666'}}
+                style={{position:'absolute',right:'10px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'16px',color:'#666',zIndex:1}}
               >
                 {showRePin ? '👁️' : '👁️‍🗨️'}
               </button>
@@ -579,38 +579,38 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Full Name *</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Full Name *</label>
             <input 
               type="text" 
               name="full_name" 
               value={form.full_name} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
               maxLength="100"
             />
             {fieldErrors.full_name && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.full_name}</span>}
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Short Name</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Short Name</label>
             <input 
               type="text" 
               name="short_name" 
               value={form.short_name} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
               maxLength="20"
             />
             {fieldErrors.short_name && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.short_name}</span>}
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property Code *</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property Code *</label>
             <select 
               name="property_code" 
               value={form.property_code} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
             >
               <option value="">Select Property Code</option>
               {propertyCodes && propertyCodes.map((property, index) => (
@@ -623,13 +623,13 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User No *</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User No *</label>
             <input 
               type="text" 
               name="user_no" 
               value={form.user_no} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
               maxLength="20"
             />
             {fieldErrors.user_no && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.user_no}</span>}
@@ -639,12 +639,12 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
         {/* Right column */}
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Role *</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Role *</label>
             <select 
               name="role" 
               value={form.role} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
             >
               <option value="General User">General User</option>
               <option value="System Administrator">System Administrator</option>
@@ -653,12 +653,12 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Department *</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Department *</label>
             <select 
               name="department_id" 
               value={form.department_id} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
               disabled={!form.property_code}
             >
               <option value="">Select Department</option>
@@ -672,12 +672,12 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User Group</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User Group</label>
             <select 
               name="user_group_id" 
               value={form.user_group_id} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
               disabled={!form.property_code}
             >
               <option value="">Select User Group</option>
@@ -690,24 +690,24 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User Email</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User Email</label>
             <input 
               type="email" 
               name="email" 
               value={form.email} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
             />
             {fieldErrors.email && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.email}</span>}
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Gender</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Gender</label>
             <select 
               name="gender" 
               value={form.gender} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
             >
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
@@ -717,27 +717,33 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User Card No</label>
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>User Card No</label>
             <input 
               type="text" 
               name="user_card_no" 
               value={form.user_card_no} 
               onChange={handleChange} 
-              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
+              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} 
               maxLength="50"
             />
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Active User</label>
-            <input 
-              type="checkbox" 
-              name="is_active" 
-              checked={form.is_active} 
-              onChange={handleChange} 
-              style={{width:'24px',height:'24px',marginLeft:'8px'}} 
-            />
+            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Active User</label>
+            <div style={{display:'flex',alignItems:'center',marginLeft:'8px'}}>
+              <input 
+                type="checkbox" 
+                name="is_active" 
+                checked={form.is_active} 
+                onChange={handleChange} 
+                style={{width:'24px',height:'24px'}} 
+              />
+            </div>
           </div>
+
+          {/* Add empty div to match left column height */}
+          <div style={{height:'36px'}}></div>
+          <div style={{height:'36px'}}></div>
         </div>
       </form>
 
@@ -762,49 +768,50 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
       )}
 
       {/* Records Table */}
-      <div style={{padding:'24px 32px 18px 32px',flex:1,overflowY:'auto'}}>
+      <div style={{padding:'24px 32px 18px 32px',flex:1,display:'flex',flexDirection:'column',minHeight:0}}>
         <div style={{fontWeight:'bold',fontSize:'1.5rem',color:'#222',marginBottom:'16px'}}>
           User Records ({records.length})
         </div>
-        <div style={{overflowX:'auto'}}>
-          <table style={{width:'100%',borderCollapse:'collapse',fontSize:'0.9rem'}}>
+        <div style={{flex:1,overflowY:'auto',overflowX:'auto',border:'1px solid #ddd',borderRadius:'8px'}}>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:'0.9rem',minWidth:'800px'}}>
             <thead>
-              <tr style={{background:'#f5f5f5'}}>
-                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold'}}>S.No</th>
-                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold'}}>Login Name</th>
-                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold'}}>Full Name</th>
-                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold'}}>Property Code</th>
-                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold'}}>User No</th>
-                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold'}}>Role</th>
-                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold'}}>Department</th>
-                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold'}}>Email</th>
-                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold'}}>Status</th>
+              <tr style={{background:'#f5f5f5',position:'sticky',top:0,zIndex:1}}>
+                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold',background:'#f5f5f5',minWidth:'60px'}}>S.No</th>
+                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold',background:'#f5f5f5',minWidth:'120px'}}>Login Name</th>
+                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold',background:'#f5f5f5',minWidth:'150px'}}>Full Name</th>
+                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold',background:'#f5f5f5',minWidth:'120px'}}>Property Code</th>
+                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold',background:'#f5f5f5',minWidth:'100px'}}>User No</th>
+                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold',background:'#f5f5f5',minWidth:'120px'}}>Role</th>
+                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold',background:'#f5f5f5',minWidth:'120px'}}>Department</th>
+                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold',background:'#f5f5f5',minWidth:'180px'}}>Email</th>
+                <th style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'left',fontWeight:'bold',background:'#f5f5f5',minWidth:'80px'}}>Status</th>
               </tr>
             </thead>
             <tbody>
               {records.length === 0 ? (
                 <tr>
-                  <td colSpan="9" style={{border:'1px solid #ddd',padding:'20px',textAlign:'center',color:'#888',fontStyle:'italic'}}>No user records found</td>
+                  <td colSpan="9" style={{border:'1px solid #ddd',padding:'20px',textAlign:'center',color:'#888',fontStyle:'italic',background:'#fff'}}>No user records found</td>
                 </tr>
               ) : (
                 records.map((record, index) => (
-                  <tr key={index} style={{background: index % 2 === 0 ? '#fff' : '#f9f9f9'}}>
-                    <td style={{border:'1px solid #ddd',padding:'10px 8px'}}>{index + 1}</td>
-                    <td style={{border:'1px solid #ddd',padding:'10px 8px'}}>{record.login_name}</td>
-                    <td style={{border:'1px solid #ddd',padding:'10px 8px'}}>{record.full_name}</td>
-                    <td style={{border:'1px solid #ddd',padding:'10px 8px'}}>{record.property_code}</td>
-                    <td style={{border:'1px solid #ddd',padding:'10px 8px'}}>{record.user_no}</td>
-                    <td style={{border:'1px solid #ddd',padding:'10px 8px'}}>{record.role}</td>
-                    <td style={{border:'1px solid #ddd',padding:'10px 8px'}}>{record.department_name}</td>
-                    <td style={{border:'1px solid #ddd',padding:'10px 8px'}}>{record.email}</td>
-                    <td style={{border:'1px solid #ddd',padding:'10px 8px'}}>
+                  <tr key={index} style={{background: index % 2 === 0 ? '#fff' : '#f9f9f9',transition:'background-color 0.2s'}} onMouseOver={e=>e.currentTarget.style.background='#e3f2fd'} onMouseOut={e=>e.currentTarget.style.background=index % 2 === 0 ? '#fff' : '#f9f9f9'}>
+                    <td style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'center'}}>{index + 1}</td>
+                    <td style={{border:'1px solid #ddd',padding:'12px 8px',wordBreak:'break-word'}}>{record.login_name}</td>
+                    <td style={{border:'1px solid #ddd',padding:'12px 8px',wordBreak:'break-word'}}>{record.full_name}</td>
+                    <td style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'center'}}>{record.property_code}</td>
+                    <td style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'center'}}>{record.user_no}</td>
+                    <td style={{border:'1px solid #ddd',padding:'12px 8px',wordBreak:'break-word'}}>{record.role}</td>
+                    <td style={{border:'1px solid #ddd',padding:'12px 8px',wordBreak:'break-word'}}>{record.department_name}</td>
+                    <td style={{border:'1px solid #ddd',padding:'12px 8px',wordBreak:'break-all'}}>{record.email}</td>
+                    <td style={{border:'1px solid #ddd',padding:'12px 8px',textAlign:'center'}}>
                       <span style={{
-                        padding:'2px 8px',
+                        padding:'4px 8px',
                         borderRadius:'4px',
                         fontSize:'0.8rem',
                         fontWeight:'bold',
                         color: record.is_active ? '#2e7d32' : '#f57c00',
-                        background: record.is_active ? '#e8f5e9' : '#fff3e0'
+                        background: record.is_active ? '#e8f5e9' : '#fff3e0',
+                        whiteSpace:'nowrap'
                       }}>
                         {record.is_active ? 'Active' : 'Inactive'}
                       </span>
