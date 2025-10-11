@@ -115,6 +115,211 @@ function Dashboard({ user, setUser }) {
   const [userSetupRecords, setUserSetupRecords] = useState([]); // Persist UserSetup records
   const navigate = useNavigate();
 
+  // Flag to track if initial data loading is complete
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Helper function to safely parse JSON data from localStorage
+  const safeJsonParse = (data, fallback = []) => {
+    try {
+      if (!data) return fallback;
+      const parsed = JSON.parse(data);
+      return Array.isArray(parsed) ? parsed : fallback;
+    } catch (error) {
+      console.error('Error parsing JSON data:', error);
+      return fallback;
+    }
+  };
+
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    const loadPersistedData = () => {
+      try {
+        // Load all form records from localStorage with safe parsing
+        const savedPropertyRecords = localStorage.getItem('propertyRecords');
+        const savedItemDepartmentRecords = localStorage.getItem('itemDepartmentRecords');
+        const savedItemCategoryRecords = localStorage.getItem('itemCategoryRecords');
+        const savedItemSoldRecords = localStorage.getItem('itemSoldRecords');
+        const savedItemStockRecords = localStorage.getItem('itemStockRecords');
+        const savedUpdateMenuRatesRecords = localStorage.getItem('updateMenuRatesRecords');
+        const savedImportExportRecords = localStorage.getItem('importExportRecords');
+        const savedPaymentTypesRecords = localStorage.getItem('paymentTypesRecords');
+        const savedDiscountTypeRecords = localStorage.getItem('discountTypeRecords');
+        const savedPrintFormatsRecords = localStorage.getItem('printFormatsRecords');
+        const savedTableSettingsRecords = localStorage.getItem('tableSettingsRecords');
+        const savedOutletRecords = localStorage.getItem('outletRecords');
+        const savedUserDepartmentsRecords = localStorage.getItem('userDepartmentsRecords');
+        const savedUserDesignationsRecords = localStorage.getItem('userDesignationsRecords');
+        const savedUserGroupsRecords = localStorage.getItem('userGroupsRecords');
+        const savedUserSetupRecords = localStorage.getItem('userSetupRecords');
+
+        // Parse and set the data with safe parsing
+        const loadedPropertyRecords = safeJsonParse(savedPropertyRecords);
+        const loadedItemDepartmentRecords = safeJsonParse(savedItemDepartmentRecords);
+        const loadedItemCategoryRecords = safeJsonParse(savedItemCategoryRecords);
+        const loadedItemSoldRecords = safeJsonParse(savedItemSoldRecords);
+        const loadedItemStockRecords = safeJsonParse(savedItemStockRecords);
+        const loadedUpdateMenuRatesRecords = safeJsonParse(savedUpdateMenuRatesRecords);
+        const loadedImportExportRecords = safeJsonParse(savedImportExportRecords);
+        const loadedPaymentTypesRecords = safeJsonParse(savedPaymentTypesRecords);
+        const loadedDiscountTypeRecords = safeJsonParse(savedDiscountTypeRecords);
+        const loadedPrintFormatsRecords = safeJsonParse(savedPrintFormatsRecords);
+        const loadedTableSettingsRecords = safeJsonParse(savedTableSettingsRecords);
+        const loadedOutletRecords = safeJsonParse(savedOutletRecords);
+        const loadedUserDepartmentsRecords = safeJsonParse(savedUserDepartmentsRecords);
+        const loadedUserDesignationsRecords = safeJsonParse(savedUserDesignationsRecords);
+        const loadedUserGroupsRecords = safeJsonParse(savedUserGroupsRecords);
+        const loadedUserSetupRecords = safeJsonParse(savedUserSetupRecords);
+
+        // Log loaded data for debugging
+        console.log('Loading saved data:');
+        console.log('UserDepartments records:', loadedUserDepartmentsRecords.length, 'items');
+        console.log('UserDesignations records:', loadedUserDesignationsRecords.length, 'items');
+        console.log('UserSetup records:', loadedUserSetupRecords.length, 'items');
+
+        // Set the state
+        setPropertyRecords(loadedPropertyRecords);
+        setItemDepartmentRecords(loadedItemDepartmentRecords);
+        setItemCategoryRecords(loadedItemCategoryRecords);
+        setItemSoldRecords(loadedItemSoldRecords);
+        setItemStockRecords(loadedItemStockRecords);
+        setUpdateMenuRatesRecords(loadedUpdateMenuRatesRecords);
+        setImportExportRecords(loadedImportExportRecords);
+        setPaymentTypesRecords(loadedPaymentTypesRecords);
+        setDiscountTypeRecords(loadedDiscountTypeRecords);
+        setPrintFormatsRecords(loadedPrintFormatsRecords);
+        setTableSettingsRecords(loadedTableSettingsRecords);
+        setOutletRecords(loadedOutletRecords);
+        setUserDepartmentsRecords(loadedUserDepartmentsRecords);
+        setUserDesignationsRecords(loadedUserDesignationsRecords);
+        setUserGroupsRecords(loadedUserGroupsRecords);
+        setUserSetupRecords(loadedUserSetupRecords);
+
+        console.log('Data loaded from localStorage successfully');
+        setDataLoaded(true); // Mark data as loaded
+      } catch (error) {
+        console.error('Error loading data from localStorage:', error);
+        setDataLoaded(true); // Set flag even on error to allow normal operation
+        // If there's a critical error, we could show a notification to the user
+      }
+    };
+
+    loadPersistedData();
+  }, []);
+
+  // Helper function to safely save data to localStorage
+  const saveToLocalStorage = (key, data) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+      console.error(`Error saving ${key} to localStorage:`, error);
+      // Handle storage quota exceeded or other localStorage errors
+      if (error.name === 'QuotaExceededError') {
+        console.warn('localStorage quota exceeded. Consider implementing data cleanup.');
+      }
+    }
+  };
+
+  // Save data to localStorage whenever records change (only after initial load)
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('propertyRecords', propertyRecords);
+    }
+  }, [propertyRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('itemDepartmentRecords', itemDepartmentRecords);
+    }
+  }, [itemDepartmentRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('itemCategoryRecords', itemCategoryRecords);
+    }
+  }, [itemCategoryRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('itemSoldRecords', itemSoldRecords);
+    }
+  }, [itemSoldRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('itemStockRecords', itemStockRecords);
+    }
+  }, [itemStockRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('updateMenuRatesRecords', updateMenuRatesRecords);
+    }
+  }, [updateMenuRatesRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('importExportRecords', importExportRecords);
+    }
+  }, [importExportRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('paymentTypesRecords', paymentTypesRecords);
+    }
+  }, [paymentTypesRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('discountTypeRecords', discountTypeRecords);
+    }
+  }, [discountTypeRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('printFormatsRecords', printFormatsRecords);
+    }
+  }, [printFormatsRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('tableSettingsRecords', tableSettingsRecords);
+    }
+  }, [tableSettingsRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('outletRecords', outletRecords);
+    }
+  }, [outletRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('userDepartmentsRecords', userDepartmentsRecords);
+      console.log('Saving userDepartmentsRecords to localStorage:', userDepartmentsRecords);
+    }
+  }, [userDepartmentsRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('userDesignationsRecords', userDesignationsRecords);
+      console.log('Saving userDesignationsRecords to localStorage:', userDesignationsRecords);
+    }
+  }, [userDesignationsRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('userGroupsRecords', userGroupsRecords);
+      console.log('Saving userGroupsRecords to localStorage:', userGroupsRecords);
+    }
+  }, [userGroupsRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('userSetupRecords', userSetupRecords);
+      console.log('Saving userSetupRecords to localStorage:', userSetupRecords);
+    }
+  }, [userSetupRecords, dataLoaded]);
+
   useEffect(() => {
     // Load default company info on mount
     const fetchCompanyInfo = () => {
@@ -135,10 +340,179 @@ function Dashboard({ user, setUser }) {
   }, []);
 
   const handleLogout = () => {
+    // Only remove user authentication data, keep form records
     localStorage.removeItem('user');
     if (setUser) setUser(null);
     navigate('/login');
   };
+
+  // Optional function to clear all stored data (for admin purposes)
+  const clearAllStoredData = () => {
+    if (window.confirm('Are you sure you want to clear all stored data? This action cannot be undone.')) {
+      localStorage.removeItem('propertyRecords');
+      localStorage.removeItem('itemDepartmentRecords');
+      localStorage.removeItem('itemCategoryRecords');
+      localStorage.removeItem('itemSoldRecords');
+      localStorage.removeItem('itemStockRecords');
+      localStorage.removeItem('updateMenuRatesRecords');
+      localStorage.removeItem('importExportRecords');
+      localStorage.removeItem('paymentTypesRecords');
+      localStorage.removeItem('discountTypeRecords');
+      localStorage.removeItem('printFormatsRecords');
+      localStorage.removeItem('tableSettingsRecords');
+      localStorage.removeItem('outletRecords');
+      localStorage.removeItem('userDepartmentsRecords');
+      localStorage.removeItem('userDesignationsRecords');
+      localStorage.removeItem('userGroupsRecords');
+      localStorage.removeItem('userSetupRecords');
+      
+      // Reset all state arrays
+      setPropertyRecords([]);
+      setItemDepartmentRecords([]);
+      setItemCategoryRecords([]);
+      setItemSoldRecords([]);
+      setItemStockRecords([]);
+      setUpdateMenuRatesRecords([]);
+      setImportExportRecords([]);
+      setPaymentTypesRecords([]);
+      setDiscountTypeRecords([]);
+      setPrintFormatsRecords([]);
+      setTableSettingsRecords([]);
+      setOutletRecords([]);
+      setUserDepartmentsRecords([]);
+      setUserDesignationsRecords([]);
+      setUserGroupsRecords([]);
+      setUserSetupRecords([]);
+      
+      alert('All stored data has been cleared successfully.');
+    }
+  };
+
+  // Export all data as JSON for backup purposes
+  const exportAllData = () => {
+    try {
+      const allData = {
+        propertyRecords,
+        itemDepartmentRecords,
+        itemCategoryRecords,
+        itemSoldRecords,
+        itemStockRecords,
+        updateMenuRatesRecords,
+        importExportRecords,
+        paymentTypesRecords,
+        discountTypeRecords,
+        printFormatsRecords,
+        tableSettingsRecords,
+        outletRecords,
+        userDepartmentsRecords,
+        userDesignationsRecords,
+        userGroupsRecords,
+        userSetupRecords,
+        exportDate: new Date().toISOString(),
+        version: '1.0'
+      };
+
+      const dataBlob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `pos-data-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      alert('Data exported successfully!');
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      alert('Error exporting data. Please try again.');
+    }
+  };
+
+  // Import data from JSON backup
+  const importAllData = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        
+        // Validate data structure
+        if (importedData.version && importedData.exportDate) {
+          if (window.confirm('This will replace all existing data. Are you sure you want to continue?')) {
+            // Import all data
+            if (importedData.propertyRecords) setPropertyRecords(importedData.propertyRecords);
+            if (importedData.itemDepartmentRecords) setItemDepartmentRecords(importedData.itemDepartmentRecords);
+            if (importedData.itemCategoryRecords) setItemCategoryRecords(importedData.itemCategoryRecords);
+            if (importedData.itemSoldRecords) setItemSoldRecords(importedData.itemSoldRecords);
+            if (importedData.itemStockRecords) setItemStockRecords(importedData.itemStockRecords);
+            if (importedData.updateMenuRatesRecords) setUpdateMenuRatesRecords(importedData.updateMenuRatesRecords);
+            if (importedData.importExportRecords) setImportExportRecords(importedData.importExportRecords);
+            if (importedData.paymentTypesRecords) setPaymentTypesRecords(importedData.paymentTypesRecords);
+            if (importedData.discountTypeRecords) setDiscountTypeRecords(importedData.discountTypeRecords);
+            if (importedData.printFormatsRecords) setPrintFormatsRecords(importedData.printFormatsRecords);
+            if (importedData.tableSettingsRecords) setTableSettingsRecords(importedData.tableSettingsRecords);
+            if (importedData.outletRecords) setOutletRecords(importedData.outletRecords);
+            if (importedData.userDepartmentsRecords) setUserDepartmentsRecords(importedData.userDepartmentsRecords);
+            if (importedData.userDesignationsRecords) setUserDesignationsRecords(importedData.userDesignationsRecords);
+            if (importedData.userGroupsRecords) setUserGroupsRecords(importedData.userGroupsRecords);
+            if (importedData.userSetupRecords) setUserSetupRecords(importedData.userSetupRecords);
+
+            alert('Data imported successfully!');
+          }
+        } else {
+          alert('Invalid file format. Please select a valid backup file.');
+        }
+      } catch (error) {
+        console.error('Error importing data:', error);
+        alert('Error importing data. Please check the file format.');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // Reset file input
+  };
+
+  // Check localStorage usage (for debugging)
+  const checkStorageUsage = () => {
+    let totalSize = 0;
+    const details = {};
+    for (let key in localStorage) {
+      if (localStorage.hasOwnProperty(key)) {
+        const size = localStorage[key].length;
+        totalSize += size;
+        if (key.includes('Records')) {
+          details[key] = {
+            size: `${(size / 1024).toFixed(2)} KB`,
+            records: safeJsonParse(localStorage[key]).length
+          };
+        }
+      }
+    }
+    console.log(`Total localStorage usage: ${(totalSize / 1024).toFixed(2)} KB`);
+    console.log('Records details:', details);
+    return { totalSize, details };
+  };
+
+  // Debugging function to check current data
+  const debugCurrentData = () => {
+    console.log('Current data in memory:');
+    console.log('UserDepartments:', userDepartmentsRecords.length, userDepartmentsRecords);
+    console.log('UserDesignations:', userDesignationsRecords.length, userDesignationsRecords);
+    console.log('UserSetup:', userSetupRecords.length, userSetupRecords);
+    console.log('UserGroups:', userGroupsRecords.length, userGroupsRecords);
+    checkStorageUsage();
+  };
+
+  // Make debug functions available globally for console testing
+  React.useEffect(() => {
+    window.posDebug = {
+      checkStorage: checkStorageUsage,
+      checkData: debugCurrentData,
+      clearAll: clearAllStoredData
+    };
+  }, [userDepartmentsRecords, userDesignationsRecords, userSetupRecords, userGroupsRecords]);
 
   const handleCompInfoClick = () => {
     setActiveTab('compinfo');

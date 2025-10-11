@@ -17,6 +17,7 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
   const [form, setForm] = useState(initialState);
   const [action, setAction] = useState('Add');
   const [showSavePopup, setShowSavePopup] = useState(false);
+  const [lastAction, setLastAction] = useState('Add');
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [selectedRecordIdx, setSelectedRecordIdx] = useState(null);
   const [selectModalMessage, setSelectModalMessage] = useState('');
@@ -79,14 +80,24 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
   };
 
   const handleEdit = () => {
-    if (selectedRecordIdx === null) {
+    if (selectedRecordIdx === null || !records || selectedRecordIdx >= records.length) {
       setSelectModalMessage('Please select a record to edit.');
       setShowSelectModal(true);
       return;
     }
     setAction('Edit');
-    setForm(records[selectedRecordIdx]);
+    const selectedRecord = records[selectedRecordIdx];
+    setForm({
+      table_no: selectedRecord.table_no || '',
+      outlet_code: selectedRecord.outlet_code || '',
+      table_name: selectedRecord.table_name || '',
+      table_size: selectedRecord.table_size || '',
+      table_shape: selectedRecord.table_shape || 'rectangle',
+      inactive: selectedRecord.inactive || false
+    });
     setFieldErrors({});
+    setIsDirty(true);
+    if (setParentDirty) setParentDirty(true);
   };
 
   const handleDelete = () => {
@@ -95,17 +106,56 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
       setShowSelectModal(true);
       return;
     }
-    setAction('Delete');
+    
+    // Show confirmation dialog
+    const selectedRecord = records[selectedRecordIdx];
+    const confirmMessage = `Are you sure you want to delete Table ${selectedRecord.table_no} (${selectedRecord.table_name})?`;
+    
+    if (window.confirm(confirmMessage)) {
+      try {
+        // Delete record immediately
+        const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
+        setRecords(updatedRecords);
+        
+        // Clear selection and form
+        setSelectedRecordIdx(null);
+        setForm(initialState);
+        setAction('Add');
+        setFieldErrors({});
+        
+        // Show success message
+        setLastAction('Delete');
+        setShowSavePopup(true);
+        setIsDirty(false);
+        if (setParentDirty) setParentDirty(false);
+        
+        setTimeout(() => {
+          setShowSavePopup(false);
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Error deleting table setting:', error);
+      }
+    }
   };
 
   const handleSearch = () => {
-    if (selectedRecordIdx === null) {
+    if (selectedRecordIdx === null || !records || selectedRecordIdx >= records.length) {
       setSelectModalMessage('Please select a record to search.');
       setShowSelectModal(true);
       return;
     }
     setAction('Search');
-    setForm(records[selectedRecordIdx]);
+    const selectedRecord = records[selectedRecordIdx];
+    setForm({
+      table_no: selectedRecord.table_no || '',
+      outlet_code: selectedRecord.outlet_code || '',
+      table_name: selectedRecord.table_name || '',
+      table_size: selectedRecord.table_size || '',
+      table_shape: selectedRecord.table_shape || 'rectangle',
+      inactive: selectedRecord.inactive || false
+    });
+    setFieldErrors({});
   };
 
   const handleClear = () => {
@@ -122,14 +172,64 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
       return;
     }
 
-    setShowSavePopup(true);
-    setIsDirty(false);
-    if (setParentDirty) setParentDirty(false);
-    
-    // Auto-hide popup after 2 seconds
-    setTimeout(() => {
-      setShowSavePopup(false);
-    }, 2000);
+    try {
+      // Create a new record object
+      const newRecord = {
+        table_no: form.table_no,
+        outlet_code: form.outlet_code,
+        table_name: form.table_name,
+        table_size: form.table_size,
+        table_shape: form.table_shape,
+        inactive: form.inactive,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      let updatedRecords;
+
+      if (action === 'Add') {
+        // Add new record
+        updatedRecords = [...(records || []), newRecord];
+      } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
+        // Update existing record
+        updatedRecords = [...records];
+        updatedRecords[selectedRecordIdx] = { 
+          ...newRecord, 
+          created_at: records[selectedRecordIdx].created_at || new Date().toISOString()
+        };
+      } else if (action === 'Delete' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
+        // Delete record
+        updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
+      } else {
+        updatedRecords = records || [];
+      }
+
+      // Update the records array
+      setRecords(updatedRecords);
+
+      // Clear the form after successful save (except for Search action)
+      if (action !== 'Search') {
+        setForm(initialState);
+        setSelectedRecordIdx(null);
+        setAction('Add');
+        setFieldErrors({});
+      }
+
+      // Show success popup
+      setLastAction(action);
+      setShowSavePopup(true);
+      setIsDirty(false);
+      if (setParentDirty) setParentDirty(false);
+      
+      // Auto-hide popup after 2 seconds
+      setTimeout(() => {
+        setShowSavePopup(false);
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error saving table setting:', error);
+      // You could add error handling here
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -290,7 +390,10 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
           fontSize: '1.1rem',
           fontWeight: 'bold'
         }}>
-          ✅ Table Setting saved successfully!
+          ✅ {lastAction === 'Add' ? 'Table Setting added successfully!' : 
+               lastAction === 'Edit' ? 'Table Setting updated successfully!' : 
+               lastAction === 'Delete' ? 'Table Setting deleted successfully!' : 
+               'Table Setting saved successfully!'}
         </div>
       )}
 
