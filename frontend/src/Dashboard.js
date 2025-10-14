@@ -113,19 +113,68 @@ function Dashboard({ user, setUser }) {
   const [userDesignationsRecords, setUserDesignationsRecords] = useState([]); // Persist UserDesignations records
   const [userGroupsRecords, setUserGroupsRecords] = useState([]); // Persist UserGroups records
   const [userSetupRecords, setUserSetupRecords] = useState([]); // Persist UserSetup records
+  const [businessPeriodsRecords, setBusinessPeriodsRecords] = useState([]); // Persist Business Periods records
+  const [pantryMessageRecords, setPantryMessageRecords] = useState([]); // Persist Pantry Message records
+  const [taxCodesRecords, setTaxCodesRecords] = useState([]); // Persist Tax Codes records
+  const [taxStructureRecords, setTaxStructureRecords] = useState([]); // Persist Tax Structure records
+  const [creditCardRecords, setCreditCardRecords] = useState([]); // Persist Credit Card records
   const navigate = useNavigate();
 
   // Flag to track if initial data loading is complete
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  // Helper function to safely parse JSON data from localStorage
-  const safeJsonParse = (data, fallback = []) => {
+  // Helper function to safely parse JSON data from localStorage with integrity checking
+  const safeJsonParse = (data, fallback = [], key = null) => {
     try {
       if (!data) return fallback;
+      
       const parsed = JSON.parse(data);
+      
+      // Verify data integrity if key is provided
+      if (key) {
+        const storedHash = localStorage.getItem(`${key}_hash`);
+        const currentHash = btoa(data.length.toString());
+        
+        if (storedHash && storedHash !== currentHash) {
+          console.warn(`Data integrity check failed for ${key}. Attempting recovery...`);
+          
+          // Try to recover from backup
+          const backupData = localStorage.getItem(`${key}_backup`);
+          if (backupData) {
+            console.log(`Recovering ${key} from backup`);
+            const backupParsed = JSON.parse(backupData);
+            if (Array.isArray(backupParsed)) {
+              // Update main storage with backup data
+              localStorage.setItem(key, backupData);
+              localStorage.setItem(`${key}_hash`, btoa(backupData.length.toString()));
+              localStorage.setItem(`${key}_recovered`, new Date().toISOString());
+              return backupParsed;
+            }
+          }
+        }
+      }
+      
       return Array.isArray(parsed) ? parsed : fallback;
     } catch (error) {
-      console.error('Error parsing JSON data:', error);
+      console.error(`Error parsing JSON data${key ? ` for ${key}` : ''}:`, error);
+      
+      // Try backup recovery on parse error
+      if (key) {
+        const backupData = localStorage.getItem(`${key}_backup`);
+        if (backupData) {
+          try {
+            console.log(`Parse failed for ${key}, trying backup...`);
+            const backupParsed = JSON.parse(backupData);
+            if (Array.isArray(backupParsed)) {
+              localStorage.setItem(key, backupData);
+              return backupParsed;
+            }
+          } catch (backupError) {
+            console.error(`Backup recovery also failed for ${key}:`, backupError);
+          }
+        }
+      }
+      
       return fallback;
     }
   };
@@ -151,30 +200,57 @@ function Dashboard({ user, setUser }) {
         const savedUserDesignationsRecords = localStorage.getItem('userDesignationsRecords');
         const savedUserGroupsRecords = localStorage.getItem('userGroupsRecords');
         const savedUserSetupRecords = localStorage.getItem('userSetupRecords');
+        const savedBusinessPeriodsRecords = localStorage.getItem('businessPeriodsRecords');
+        const savedPantryMessageRecords = localStorage.getItem('pantryMessageRecords');
+        const savedTaxCodesRecords = localStorage.getItem('taxCodesRecords');
+        const savedTaxStructureRecords = localStorage.getItem('taxStructureRecords');
+        const savedCreditCardRecords = localStorage.getItem('creditCardRecords');
 
-        // Parse and set the data with safe parsing
-        const loadedPropertyRecords = safeJsonParse(savedPropertyRecords);
-        const loadedItemDepartmentRecords = safeJsonParse(savedItemDepartmentRecords);
-        const loadedItemCategoryRecords = safeJsonParse(savedItemCategoryRecords);
-        const loadedItemSoldRecords = safeJsonParse(savedItemSoldRecords);
-        const loadedItemStockRecords = safeJsonParse(savedItemStockRecords);
-        const loadedUpdateMenuRatesRecords = safeJsonParse(savedUpdateMenuRatesRecords);
-        const loadedImportExportRecords = safeJsonParse(savedImportExportRecords);
-        const loadedPaymentTypesRecords = safeJsonParse(savedPaymentTypesRecords);
-        const loadedDiscountTypeRecords = safeJsonParse(savedDiscountTypeRecords);
-        const loadedPrintFormatsRecords = safeJsonParse(savedPrintFormatsRecords);
-        const loadedTableSettingsRecords = safeJsonParse(savedTableSettingsRecords);
-        const loadedOutletRecords = safeJsonParse(savedOutletRecords);
-        const loadedUserDepartmentsRecords = safeJsonParse(savedUserDepartmentsRecords);
-        const loadedUserDesignationsRecords = safeJsonParse(savedUserDesignationsRecords);
-        const loadedUserGroupsRecords = safeJsonParse(savedUserGroupsRecords);
-        const loadedUserSetupRecords = safeJsonParse(savedUserSetupRecords);
+        // Parse and set the data with safe parsing and integrity checking
+        const loadedPropertyRecords = safeJsonParse(savedPropertyRecords, [], 'propertyRecords');
+        const loadedItemDepartmentRecords = safeJsonParse(savedItemDepartmentRecords, [], 'itemDepartmentRecords');
+        const loadedItemCategoryRecords = safeJsonParse(savedItemCategoryRecords, [], 'itemCategoryRecords');
+        const loadedItemSoldRecords = safeJsonParse(savedItemSoldRecords, [], 'itemSoldRecords');
+        const loadedItemStockRecords = safeJsonParse(savedItemStockRecords, [], 'itemStockRecords');
+        const loadedUpdateMenuRatesRecords = safeJsonParse(savedUpdateMenuRatesRecords, [], 'updateMenuRatesRecords');
+        const loadedImportExportRecords = safeJsonParse(savedImportExportRecords, [], 'importExportRecords');
+        const loadedPaymentTypesRecords = safeJsonParse(savedPaymentTypesRecords, [], 'paymentTypesRecords');
+        const loadedDiscountTypeRecords = safeJsonParse(savedDiscountTypeRecords, [], 'discountTypeRecords');
+        const loadedPrintFormatsRecords = safeJsonParse(savedPrintFormatsRecords, [], 'printFormatsRecords');
+        const loadedTableSettingsRecords = safeJsonParse(savedTableSettingsRecords, [], 'tableSettingsRecords');
+        const loadedOutletRecords = safeJsonParse(savedOutletRecords, [], 'outletRecords');
+        const loadedUserDepartmentsRecords = safeJsonParse(savedUserDepartmentsRecords, [], 'userDepartmentsRecords');
+        const loadedUserDesignationsRecords = safeJsonParse(savedUserDesignationsRecords, [], 'userDesignationsRecords');
+        const loadedUserGroupsRecords = safeJsonParse(savedUserGroupsRecords, [], 'userGroupsRecords');
+        const loadedUserSetupRecords = safeJsonParse(savedUserSetupRecords, [], 'userSetupRecords');
+        const loadedBusinessPeriodsRecords = safeJsonParse(savedBusinessPeriodsRecords, [], 'businessPeriodsRecords');
+        const loadedPantryMessageRecords = safeJsonParse(savedPantryMessageRecords, [], 'pantryMessageRecords');
+        const loadedTaxCodesRecords = safeJsonParse(savedTaxCodesRecords, [], 'taxCodesRecords');
+        const loadedTaxStructureRecords = safeJsonParse(savedTaxStructureRecords, [], 'taxStructureRecords');
+        const loadedCreditCardRecords = safeJsonParse(savedCreditCardRecords, [], 'creditCardRecords');
 
-        // Log loaded data for debugging
-        console.log('Loading saved data:');
-        console.log('UserDepartments records:', loadedUserDepartmentsRecords.length, 'items');
-        console.log('UserDesignations records:', loadedUserDesignationsRecords.length, 'items');
-        console.log('UserSetup records:', loadedUserSetupRecords.length, 'items');
+        // Log loaded data for debugging with special attention to critical records
+        console.log('========== DATA LOADING REPORT ==========');
+        console.log('✅ Outlet Setup records:', loadedOutletRecords.length, 'items', loadedOutletRecords.length > 0 ? '(DATA FOUND)' : '(NO DATA)');
+        console.log('✅ UserDepartments records:', loadedUserDepartmentsRecords.length, 'items');
+        console.log('✅ UserDesignations records:', loadedUserDesignationsRecords.length, 'items');
+        console.log('✅ UserSetup records:', loadedUserSetupRecords.length, 'items');
+        console.log('✅ Business Periods records:', loadedBusinessPeriodsRecords.length, 'items');
+        console.log('✅ Pantry Message records:', loadedPantryMessageRecords.length, 'items');
+        console.log('✅ Tax Codes records:', loadedTaxCodesRecords.length, 'items');
+        console.log('✅ Tax Structure records:', loadedTaxStructureRecords.length, 'items');
+        console.log('✅ Credit Card records:', loadedCreditCardRecords.length, 'items');
+        console.log('✅ Property records:', loadedPropertyRecords.length, 'items');
+        console.log('✅ Table Settings records:', loadedTableSettingsRecords.length, 'items');
+        console.log('==========================================');
+        
+        // Special logging for outlet records
+        if (loadedOutletRecords.length > 0) {
+          console.log('🏢 OUTLET SETUP DATA PROTECTED AND LOADED:');
+          loadedOutletRecords.forEach((outlet, index) => {
+            console.log(`   ${index + 1}. ${outlet.outlet_code} - ${outlet.outlet_name}`);
+          });
+        }
 
         // Set the state
         setPropertyRecords(loadedPropertyRecords);
@@ -193,6 +269,11 @@ function Dashboard({ user, setUser }) {
         setUserDesignationsRecords(loadedUserDesignationsRecords);
         setUserGroupsRecords(loadedUserGroupsRecords);
         setUserSetupRecords(loadedUserSetupRecords);
+        setBusinessPeriodsRecords(loadedBusinessPeriodsRecords);
+        setPantryMessageRecords(loadedPantryMessageRecords);
+        setTaxCodesRecords(loadedTaxCodesRecords);
+        setTaxStructureRecords(loadedTaxStructureRecords);
+        setCreditCardRecords(loadedCreditCardRecords);
 
         console.log('Data loaded from localStorage successfully');
         setDataLoaded(true); // Mark data as loaded
@@ -206,16 +287,75 @@ function Dashboard({ user, setUser }) {
     loadPersistedData();
   }, []);
 
-  // Helper function to safely save data to localStorage
+  // Helper function to safely save data to localStorage with backup protection
   const saveToLocalStorage = (key, data) => {
     try {
+      // Create a backup of existing data before overwriting
+      const existingData = localStorage.getItem(key);
+      if (existingData && existingData !== 'null' && existingData !== '[]') {
+        localStorage.setItem(`${key}_backup`, existingData);
+        localStorage.setItem(`${key}_backup_timestamp`, new Date().toISOString());
+      }
+      
+      // Save the new data
       localStorage.setItem(key, JSON.stringify(data));
+      
+      // Store data integrity hash and timestamp
+      localStorage.setItem(`${key}_hash`, btoa(JSON.stringify(data).length.toString()));
+      localStorage.setItem(`${key}_last_modified`, new Date().toISOString());
+      
+      // Keep a record of successful saves
+      localStorage.setItem(`${key}_save_count`, (parseInt(localStorage.getItem(`${key}_save_count`) || '0') + 1).toString());
+      
     } catch (error) {
       console.error(`Error saving ${key} to localStorage:`, error);
+      
+      // Try to restore from backup if save failed
+      const backupData = localStorage.getItem(`${key}_backup`);
+      if (backupData) {
+        console.log(`Attempting to restore ${key} from backup`);
+        try {
+          localStorage.setItem(key, backupData);
+        } catch (restoreError) {
+          console.error(`Failed to restore ${key} from backup:`, restoreError);
+        }
+      }
+      
       // Handle storage quota exceeded or other localStorage errors
       if (error.name === 'QuotaExceededError') {
         console.warn('localStorage quota exceeded. Consider implementing data cleanup.');
+        // Attempt to clean old backups to free space
+        cleanOldBackups();
       }
+    }
+  };
+
+  // Function to clean old backup data to free storage space
+  const cleanOldBackups = () => {
+    try {
+      const keysToClean = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.includes('_backup_timestamp')) {
+          const timestamp = localStorage.getItem(key);
+          const backupDate = new Date(timestamp);
+          const daysSinceBackup = (new Date() - backupDate) / (1000 * 60 * 60 * 24);
+          
+          // Remove backups older than 7 days
+          if (daysSinceBackup > 7) {
+            const baseKey = key.replace('_backup_timestamp', '');
+            keysToClean.push(`${baseKey}_backup`);
+            keysToClean.push(key);
+          }
+        }
+      }
+      
+      keysToClean.forEach(key => {
+        localStorage.removeItem(key);
+        console.log(`Cleaned old backup: ${key}`);
+      });
+    } catch (error) {
+      console.error('Error cleaning old backups:', error);
     }
   };
 
@@ -288,7 +428,36 @@ function Dashboard({ user, setUser }) {
 
   useEffect(() => {
     if (dataLoaded) {
+      console.log('🏢 SAVING OUTLET RECORDS:', outletRecords.length, 'records');
+      if (outletRecords.length > 0) {
+        console.log('   Outlet records being saved:', outletRecords.map(o => `${o.outlet_code} - ${o.outlet_name}`));
+      }
       saveToLocalStorage('outletRecords', outletRecords);
+      
+      // Create an additional backup specifically for outlet data
+      try {
+        const outletBackupKey = `outletRecords_critical_backup_${Date.now()}`;
+        localStorage.setItem(outletBackupKey, JSON.stringify(outletRecords));
+        console.log('🔒 Critical outlet backup created:', outletBackupKey);
+        
+        // Keep only the 3 most recent critical backups
+        const criticalBackupKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('outletRecords_critical_backup_')) {
+            criticalBackupKeys.push(key);
+          }
+        }
+        
+        if (criticalBackupKeys.length > 3) {
+          criticalBackupKeys.sort().slice(0, -3).forEach(oldKey => {
+            localStorage.removeItem(oldKey);
+            console.log('🗑️ Removed old critical backup:', oldKey);
+          });
+        }
+      } catch (error) {
+        console.error('Error creating critical outlet backup:', error);
+      }
     }
   }, [outletRecords, dataLoaded]);
 
@@ -319,6 +488,41 @@ function Dashboard({ user, setUser }) {
       console.log('Saving userSetupRecords to localStorage:', userSetupRecords);
     }
   }, [userSetupRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('businessPeriodsRecords', businessPeriodsRecords);
+      console.log('Saving businessPeriodsRecords to localStorage:', businessPeriodsRecords);
+    }
+  }, [businessPeriodsRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('pantryMessageRecords', pantryMessageRecords);
+      console.log('Saving pantryMessageRecords to localStorage:', pantryMessageRecords);
+    }
+  }, [pantryMessageRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('taxCodesRecords', taxCodesRecords);
+      console.log('Saving taxCodesRecords to localStorage:', taxCodesRecords);
+    }
+  }, [taxCodesRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('taxStructureRecords', taxStructureRecords);
+      console.log('Saving taxStructureRecords to localStorage:', taxStructureRecords);
+    }
+  }, [taxStructureRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('creditCardRecords', creditCardRecords);
+      console.log('Saving creditCardRecords to localStorage:', creditCardRecords);
+    }
+  }, [creditCardRecords, dataLoaded]);
 
   useEffect(() => {
     // Load default company info on mount
@@ -365,6 +569,9 @@ function Dashboard({ user, setUser }) {
       localStorage.removeItem('userDesignationsRecords');
       localStorage.removeItem('userGroupsRecords');
       localStorage.removeItem('userSetupRecords');
+      localStorage.removeItem('businessPeriodsRecords');
+      localStorage.removeItem('pantryMessageRecords');
+      localStorage.removeItem('taxCodesRecords');
       
       // Reset all state arrays
       setPropertyRecords([]);
@@ -383,6 +590,9 @@ function Dashboard({ user, setUser }) {
       setUserDesignationsRecords([]);
       setUserGroupsRecords([]);
       setUserSetupRecords([]);
+      setBusinessPeriodsRecords([]);
+      setPantryMessageRecords([]);
+      setTaxCodesRecords([]);
       
       alert('All stored data has been cleared successfully.');
     }
@@ -408,6 +618,9 @@ function Dashboard({ user, setUser }) {
         userDesignationsRecords,
         userGroupsRecords,
         userSetupRecords,
+        businessPeriodsRecords,
+        pantryMessageRecords,
+        taxCodesRecords,
         exportDate: new Date().toISOString(),
         version: '1.0'
       };
@@ -459,6 +672,11 @@ function Dashboard({ user, setUser }) {
             if (importedData.userDesignationsRecords) setUserDesignationsRecords(importedData.userDesignationsRecords);
             if (importedData.userGroupsRecords) setUserGroupsRecords(importedData.userGroupsRecords);
             if (importedData.userSetupRecords) setUserSetupRecords(importedData.userSetupRecords);
+            if (importedData.businessPeriodsRecords) setBusinessPeriodsRecords(importedData.businessPeriodsRecords);
+            if (importedData.pantryMessageRecords) setPantryMessageRecords(importedData.pantryMessageRecords);
+            if (importedData.taxCodesRecords) setTaxCodesRecords(importedData.taxCodesRecords);
+            if (importedData.taxStructureRecords) setTaxStructureRecords(importedData.taxStructureRecords);
+            if (importedData.creditCardRecords) setCreditCardRecords(importedData.creditCardRecords);
 
             alert('Data imported successfully!');
           }
@@ -497,22 +715,172 @@ function Dashboard({ user, setUser }) {
 
   // Debugging function to check current data
   const debugCurrentData = () => {
-    console.log('Current data in memory:');
-    console.log('UserDepartments:', userDepartmentsRecords.length, userDepartmentsRecords);
-    console.log('UserDesignations:', userDesignationsRecords.length, userDesignationsRecords);
-    console.log('UserSetup:', userSetupRecords.length, userSetupRecords);
-    console.log('UserGroups:', userGroupsRecords.length, userGroupsRecords);
+    console.log('========== CURRENT DATA STATUS ==========');
+    console.log('🏢 Outlet Setup:', outletRecords.length, outletRecords);
+    console.log('👥 UserDepartments:', userDepartmentsRecords.length, userDepartmentsRecords);
+    console.log('🏷️ UserDesignations:', userDesignationsRecords.length, userDesignationsRecords);
+    console.log('👤 UserSetup:', userSetupRecords.length, userSetupRecords);
+    console.log('🔐 UserGroups:', userGroupsRecords.length, userGroupsRecords);
+    console.log('🏢 Property Records:', propertyRecords.length, propertyRecords);
+    console.log('🍽️ Table Settings:', tableSettingsRecords.length, tableSettingsRecords);
+    console.log('========================================');
     checkStorageUsage();
+  };
+
+  // Critical data recovery function
+  const recoverCriticalData = () => {
+    console.log('🔧 INITIATING CRITICAL DATA RECOVERY...');
+    let recoveredCount = 0;
+    
+    // Recovery for outlet records
+    try {
+      const criticalBackupKeys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('outletRecords_critical_backup_')) {
+          criticalBackupKeys.push(key);
+        }
+      }
+      
+      if (criticalBackupKeys.length > 0) {
+        // Use the most recent backup
+        const latestBackup = criticalBackupKeys.sort().pop();
+        const backupData = localStorage.getItem(latestBackup);
+        if (backupData) {
+          const recoveredOutlets = JSON.parse(backupData);
+          setOutletRecords(recoveredOutlets);
+          console.log('🏢 Recovered outlet records from:', latestBackup, '- Count:', recoveredOutlets.length);
+          recoveredCount++;
+        }
+      }
+      
+      // Recovery for other records
+      const recordTypes = [
+        'propertyRecords', 'userDepartmentsRecords', 'userDesignationsRecords',
+        'userSetupRecords', 'userGroupsRecords', 'tableSettingsRecords', 'businessPeriodsRecords', 'pantryMessageRecords', 'taxCodesRecords'
+      ];
+      
+      recordTypes.forEach(recordType => {
+        const backupKey = `${recordType}_backup`;
+        const backupData = localStorage.getItem(backupKey);
+        if (backupData) {
+          try {
+            const recoveredData = JSON.parse(backupData);
+            if (Array.isArray(recoveredData) && recoveredData.length > 0) {
+              console.log(`📦 Recovered ${recordType}:`, recoveredData.length, 'items');
+              
+              // Apply recovery based on record type
+              switch (recordType) {
+                case 'propertyRecords': setPropertyRecords(recoveredData); break;
+                case 'userDepartmentsRecords': setUserDepartmentsRecords(recoveredData); break;
+                case 'userDesignationsRecords': setUserDesignationsRecords(recoveredData); break;
+                case 'userSetupRecords': setUserSetupRecords(recoveredData); break;
+                case 'userGroupsRecords': setUserGroupsRecords(recoveredData); break;
+                case 'tableSettingsRecords': setTableSettingsRecords(recoveredData); break;
+                case 'businessPeriodsRecords': setBusinessPeriodsRecords(recoveredData); break;
+                case 'pantryMessageRecords': setPantryMessageRecords(recoveredData); break;
+                case 'taxCodesRecords': setTaxCodesRecords(recoveredData); break;
+              }
+              recoveredCount++;
+            }
+          } catch (error) {
+            console.error(`Error recovering ${recordType}:`, error);
+          }
+        }
+      });
+      
+      console.log(`✅ Recovery complete. Recovered ${recoveredCount} data types.`);
+      if (recoveredCount > 0) {
+        alert(`Successfully recovered ${recoveredCount} data types from backups!`);
+      } else {
+        alert('No backup data found for recovery.');
+      }
+      
+    } catch (error) {
+      console.error('Error during data recovery:', error);
+      alert('Error during data recovery. Check console for details.');
+    }
+  };
+
+  // Function to create manual backup
+  const createManualBackup = () => {
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const backupData = {
+        timestamp,
+        outletRecords,
+        propertyRecords,
+        userDepartmentsRecords,
+        userDesignationsRecords,
+        userSetupRecords,
+        userGroupsRecords,
+        tableSettingsRecords,
+        businessPeriodsRecords,
+        pantryMessageRecords,
+        taxCodesRecords,
+        taxStructureRecords,
+        creditCardRecords,
+        version: '1.0'
+      };
+      
+      const backupKey = `manual_backup_${timestamp}`;
+      localStorage.setItem(backupKey, JSON.stringify(backupData));
+      console.log('📁 Manual backup created:', backupKey);
+      alert(`Manual backup created successfully! Key: ${backupKey}`);
+      
+      return backupKey;
+    } catch (error) {
+      console.error('Error creating manual backup:', error);
+      alert('Error creating manual backup. Check console for details.');
+    }
   };
 
   // Make debug functions available globally for console testing
   React.useEffect(() => {
     window.posDebug = {
+      // Data monitoring
       checkStorage: checkStorageUsage,
       checkData: debugCurrentData,
-      clearAll: clearAllStoredData
+      
+      // Data protection
+      createBackup: createManualBackup,
+      recoverData: recoverCriticalData,
+      
+      // Data management
+      clearAll: clearAllStoredData,
+      exportData: exportAllData,
+      
+      // Quick outlet check
+      checkOutlets: () => {
+        console.log('🏢 OUTLET SETUP STATUS:');
+        console.log('Records in memory:', outletRecords.length);
+        console.log('Records in localStorage:', safeJsonParse(localStorage.getItem('outletRecords'), []).length);
+        console.log('Outlet data:', outletRecords);
+        
+        // Check for critical backups
+        const criticalBackups = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('outletRecords_critical_backup_')) {
+            criticalBackups.push(key);
+          }
+        }
+        console.log('Critical backups available:', criticalBackups.length);
+        return { memory: outletRecords.length, localStorage: safeJsonParse(localStorage.getItem('outletRecords'), []).length, backups: criticalBackups.length };
+      }
     };
-  }, [userDepartmentsRecords, userDesignationsRecords, userSetupRecords, userGroupsRecords]);
+    
+    // Display available debug commands
+    console.log('🔧 POS Debug Tools Available:');
+    console.log('  window.posDebug.checkStorage() - Check storage usage');
+    console.log('  window.posDebug.checkData() - View all current data');
+    console.log('  window.posDebug.checkOutlets() - Check outlet setup status');
+    console.log('  window.posDebug.createBackup() - Create manual backup');
+    console.log('  window.posDebug.recoverData() - Recover from backups');
+    console.log('  window.posDebug.exportData() - Export all data');
+    console.log('  window.posDebug.clearAll() - Clear all data (admin only)');
+    
+  }, [outletRecords, userDepartmentsRecords, userDesignationsRecords, userSetupRecords, userGroupsRecords]);
 
   const handleCompInfoClick = () => {
     setActiveTab('compinfo');
@@ -631,6 +999,31 @@ function Dashboard({ user, setUser }) {
                 setRecords: setPropertyRecords
               })}
             </React.Suspense>
+          ) : activeSubmenu === 'Tax codes' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./TaxCodes').default, {
+                setParentDirty: setChildDirty,
+                records: taxCodesRecords,
+                setRecords: setTaxCodesRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Tax Structure' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./TaxStructure').default, {
+                setParentDirty: setChildDirty,
+                records: taxStructureRecords,
+                setRecords: setTaxStructureRecords,
+                taxCodesRecords: taxCodesRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Credit Card Manager' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./CreditCardManager').default, {
+                setParentDirty: setChildDirty,
+                records: creditCardRecords,
+                setRecords: setCreditCardRecords
+              })}
+            </React.Suspense>
           ) : activeSubmenu === 'Outlet Setup' ? (
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./OutletSetup').default, {
@@ -648,6 +1041,23 @@ function Dashboard({ user, setUser }) {
                 outletRecords: outletRecords,
                 records: tableSettingsRecords,
                 setRecords: setTableSettingsRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Outlet Business Periods' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./OutletBusinessPeriods').default, {
+                setParentDirty: setChildDirty,
+                records: businessPeriodsRecords,
+                setRecords: setBusinessPeriodsRecords,
+                outletRecords: outletRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Pantry Message' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./PantryMessage').default, {
+                setParentDirty: setChildDirty,
+                records: pantryMessageRecords,
+                setRecords: setPantryMessageRecords
               })}
             </React.Suspense>
           ) : activeSubmenu === 'Item Departments' ? (
