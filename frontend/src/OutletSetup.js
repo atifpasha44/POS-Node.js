@@ -3,9 +3,10 @@ import axios from 'axios';
 import './Dashboard.css';
 
 const mockPriceLevels = [
-  'Regular Price',
-  'Happy Hour Price',
-  'Member Price',
+  'Price 1',
+  'Price 2',
+  'Price 3',
+  'Price 4',
 ];
 const mockOutletTypes = [
   'Restaurant',
@@ -121,7 +122,13 @@ const initialState = {
   // Set default date for Applicable From on Add
   useEffect(() => {
     if (action === 'Add') {
-      setForm(f => ({ ...f, applicable_from: new Date().toISOString().slice(0, 10) }));
+      // Use timezone-safe date formatting
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+      setForm(f => ({ ...f, applicable_from: todayStr }));
     }
   }, [action]);
 
@@ -271,17 +278,18 @@ useEffect(() => {
   const handleSearch = () => {
     setAction('Search');
     setShowSelectModal(true);
-    setSelectModalMessage('Please select a record to view.');
+    setSelectModalMessage('All Outlet Setup Records - Select to View Details');
   };
   const handleAdd = () => {
     setAction('Add');
-    setForm(f => ({ ...initialState, applicable_from: new Date().toISOString().slice(0, 10) }));
+    setForm(f => ({ ...initialState, applicable_from: new Date().toISOString().split('T')[0] }));
     setIsDirty(false);
     if (setParentDirty) setParentDirty(false);
     setSelectedRecordIdx(null);
   };
-  const handleEdit = () => {
+  const handleEdit = async () => {
     setAction('Edit');
+    setSelectedRecordIdx(null);
     setShowSelectModal(true);
     setSelectModalMessage('Please select a record to edit.');
   };
@@ -302,7 +310,20 @@ useEffect(() => {
   const handleSelectRecord = idx => {
     // Defensive: filter out empty/invalid records
     const filtered = records.filter(r => r && r.outlet_code && r.options && typeof r.options.cash !== 'undefined');
-    setForm(filtered[idx]);
+    const selectedRecord = filtered[idx];
+    
+    // Format the applicable_from date to YYYY-MM-DD for date input
+    let formattedDate = selectedRecord.applicable_from;
+    if (selectedRecord.applicable_from) {
+      formattedDate = selectedRecord.applicable_from.split('T')[0];
+    }
+    
+    const formattedRecord = {
+      ...selectedRecord,
+      applicable_from: formattedDate
+    };
+    
+    setForm(formattedRecord);
     setSelectedRecordIdx(idx);
     setShowSelectModal(false);
     setIsDirty(false);
@@ -402,12 +423,24 @@ useEffect(() => {
       {showSelectModal && (
         <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.18)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}}>
           <div style={{background:'#fff',borderRadius:'14px',padding:'32px 24px',minWidth:'520px',boxShadow:'0 4px 24px rgba(0,0,0,0.18)',maxHeight:'80vh',overflowY:'auto'}}>
-            <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>{selectModalMessage || 'Select a record to edit/delete'}</div>
+            <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>
+              {action === 'Search' ? 'All Outlet Setup Records - Select to View Details' : (selectModalMessage || 'Select a record to edit/delete')}
+              <div style={{fontSize:'0.8rem',color:'#666',marginTop:'4px'}}>
+                Current Date: {new Date().toLocaleDateString('en-GB')} | Records sorted: Latest → Future → Past
+              </div>
+            </div>
+            {action === 'Search' && (
+              <div style={{padding:'12px',background:'#e8f5e9',borderRadius:'8px',marginBottom:'16px',fontSize:'0.95rem',color:'#2e7d32'}}>
+                📖 <strong>Search Mode:</strong> View all historical and future configurations for this Outlet Setup. 
+                Selected records will be displayed in read-only mode to prevent accidental changes.
+              </div>
+            )}
             {(() => {
               const filtered = records.filter(r => r && r.outlet_code && r.options && typeof r.options.cash !== 'undefined');
               if (filtered.length === 0) {
                 return <div style={{color:'#888',fontSize:'1.05rem'}}>No records found.</div>;
               }
+              
               return (
                 <table style={{width:'100%',borderCollapse:'collapse',marginBottom:'12px'}}>
                   <thead>
@@ -420,12 +453,12 @@ useEffect(() => {
                   </thead>
                   <tbody>
                     {filtered.map((rec, idx) => (
-                      <tr key={idx} style={{background: idx%2 ? '#f7f7f7' : '#fff'}}>
+                      <tr key={idx} style={{background: idx % 2 ? '#f7f7f7' : '#fff'}}>
                         <td style={{padding:'6px 8px'}}>{rec.outlet_code}</td>
                         <td style={{padding:'6px 8px'}}>{rec.outlet_name}</td>
                         <td style={{padding:'6px 8px'}}>{rec.property}</td>
                         <td style={{padding:'6px 8px'}}>
-                          <button type="button" style={{background:'#1976d2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>Select</button>
+                          <button type="button" style={{background:'#7b1fa2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>Select</button>
                         </td>
                       </tr>
                     ))}
@@ -443,7 +476,7 @@ useEffect(() => {
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property</label>
-            <select name="property" value={form.property} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}} required>
+            <select name="property" value={form.property} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action === 'Edit' || action === 'Search') ? '#f3f3f3' : '#fff'}} disabled={action === 'Edit' || action === 'Search'} required>
               <option value="">Select Property</option>
               {(() => {
                 const applicableCodes = getApplicablePropertyCodes();
@@ -457,70 +490,78 @@ useEffect(() => {
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Outlet Code</label>
-            <input type="text" name="outlet_code" value={form.outlet_code} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: action!=='Add'?'#f3f3f3':'#fff'}} maxLength={4} disabled={action!=='Add'} autoComplete="off" required />
+            <input type="text" name="outlet_code" value={form.outlet_code} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action === 'Edit' || action === 'Search') ? '#f3f3f3' : '#fff'}} maxLength={4} disabled={action === 'Edit' || action === 'Search'} autoComplete="off" required />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Short Name</label>
-            <input type="text" name="short_name" value={form.short_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} maxLength={15} />
+            <input type="text" name="short_name" value={form.short_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: action === 'Search' ? '#f3f3f3' : '#fff'}} disabled={action === 'Search'} maxLength={15} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Item Price Level</label>
-            <select name="item_price_level" value={form.item_price_level} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}>
+            <select name="item_price_level" value={form.item_price_level} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: action === 'Search' ? '#f3f3f3' : '#fff'}} disabled={action === 'Search'}>
               <option value="">Select Price Level</option>
               {priceLevels.map((pl, i) => <option key={i} value={pl}>{pl}</option>)}
             </select>
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Check Format</label>
-            <input type="text" name="check_format" value={form.check_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <input type="text" name="check_format" value={form.check_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: action === 'Search' ? '#f3f3f3' : '#fff'}} disabled={action === 'Search'} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Kitchen Format</label>
-            <input type="text" name="kitchen_format" value={form.kitchen_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <input type="text" name="kitchen_format" value={form.kitchen_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: action === 'Search' ? '#f3f3f3' : '#fff'}} disabled={action === 'Search'} />
           </div>
         </div>
         {/* Right column */}
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Applicable From</label>
-            <input type="date" name="applicable_from" value={form.applicable_from} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} required />
+            <input 
+              type="date" 
+              name="applicable_from" 
+              value={form.applicable_from} 
+              onChange={handleChange} 
+              style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action === 'Edit' || action === 'Search') ? '#f3f3f3' : '#fff'}} 
+              disabled={action === 'Edit' || action === 'Search'}
+              required 
+            />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Outlet Name</label>
-            <input type="text" name="outlet_name" value={form.outlet_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <input type="text" name="outlet_name" value={form.outlet_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: action === 'Search' ? '#f3f3f3' : '#fff'}} disabled={action === 'Search'} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Outlet Type</label>
-            <select name="outlet_type" value={form.outlet_type} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}>
+            <select name="outlet_type" value={form.outlet_type} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action === 'Edit' || action === 'Search') ? '#f3f3f3' : '#fff'}} disabled={action === 'Edit' || action === 'Search'}>
               <option value="">Select Outlet Type</option>
               {outletTypes.map((ot, i) => <option key={i} value={ot}>{ot}</option>)}
             </select>
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Check Prefix</label>
-            <input type="text" name="check_prefix" value={form.check_prefix} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} maxLength={4} />
+            <input type="text" name="check_prefix" value={form.check_prefix} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: action === 'Search' ? '#f3f3f3' : '#fff'}} disabled={action === 'Search'} maxLength={4} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Receipt Format</label>
-            <input type="text" name="receipt_format" value={form.receipt_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px'}} />
+            <input type="text" name="receipt_format" value={form.receipt_format} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: action === 'Search' ? '#f3f3f3' : '#fff'}} disabled={action === 'Search'} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>In Active</label>
-            <input type="checkbox" name="inactive" checked={form.inactive} onChange={handleChange} style={{width:'24px',height:'24px',marginLeft:'8px'}} />
+            <input type="checkbox" name="inactive" checked={form.inactive} onChange={handleChange} style={{width:'24px',height:'24px',marginLeft:'8px'}} disabled={action === 'Search'} />
           </div>
         </div>
       </form>
       {/* Options Section - checkboxes */}
       <div style={{display:'flex',flexWrap:'wrap',gap:'32px',padding:'24px 32px 0 32px'}}>
         <div style={{display:'flex',gap:'24px',flexWrap:'wrap'}}>
-          <label style={{fontWeight:'bold'}}><input type="checkbox" name="cash" checked={form.options.cash} onChange={handleChange} style={{marginRight:'6px'}} />Cash</label>
-          <label style={{fontWeight:'bold'}}><input type="checkbox" name="card" checked={form.options.card} onChange={handleChange} style={{marginRight:'6px'}} />Card</label>
-          <label style={{fontWeight:'bold'}}><input type="checkbox" name="company" checked={form.options.company} onChange={handleChange} style={{marginRight:'6px'}} />Company</label>
-          <label style={{fontWeight:'bold'}}><input type="checkbox" name="room_guest" checked={form.options.room_guest} onChange={handleChange} style={{marginRight:'6px'}} />Room Guest</label>
-          <label style={{fontWeight:'bold'}}><input type="checkbox" name="staff" checked={form.options.staff} onChange={handleChange} style={{marginRight:'6px'}} />Staff</label>
-          <label style={{fontWeight:'bold'}}><input type="checkbox" name="bill_on_hold" checked={form.options.bill_on_hold} onChange={handleChange} style={{marginRight:'6px'}} />Bill on Hold</label>
-          <label style={{fontWeight:'bold'}}><input type="checkbox" name="credit" checked={form.options.credit} onChange={handleChange} style={{marginRight:'6px'}} />Credit</label>
-          <label style={{fontWeight:'bold'}}><input type="checkbox" name="void" checked={form.options.void} onChange={handleChange} style={{marginRight:'6px'}} />Void</label>
+          <label style={{fontWeight:'bold'}}><input type="checkbox" name="cash" checked={form.options.cash} onChange={handleChange} style={{marginRight:'6px'}} disabled={action === 'Search'} />Cash</label>
+          <label style={{fontWeight:'bold'}}><input type="checkbox" name="card" checked={form.options.card} onChange={handleChange} style={{marginRight:'6px'}} disabled={action === 'Search'} />Card</label>
+          <label style={{fontWeight:'bold'}}><input type="checkbox" name="company" checked={form.options.company} onChange={handleChange} style={{marginRight:'6px'}} disabled={action === 'Search'} />Company</label>
+          <label style={{fontWeight:'bold'}}><input type="checkbox" name="room_guest" checked={form.options.room_guest} onChange={handleChange} style={{marginRight:'6px'}} disabled={action === 'Search'} />Room Guest</label>
+          <label style={{fontWeight:'bold'}}><input type="checkbox" name="staff" checked={form.options.staff} onChange={handleChange} style={{marginRight:'6px'}} disabled={action === 'Search'} />Staff</label>
+          <label style={{fontWeight:'bold'}}><input type="checkbox" name="bill_on_hold" checked={form.options.bill_on_hold} onChange={handleChange} style={{marginRight:'6px'}} disabled={action === 'Search'} />Bill on Hold</label>
+          <label style={{fontWeight:'bold'}}><input type="checkbox" name="credit" checked={form.options.credit} onChange={handleChange} style={{marginRight:'6px'}} disabled={action === 'Search'} />Credit</label>
+          <label style={{fontWeight:'bold'}}><input type="checkbox" name="void" checked={form.options.void} onChange={handleChange} style={{marginRight:'6px'}} disabled={action === 'Search'} />Void</label>
         </div>
       </div>
     </div>

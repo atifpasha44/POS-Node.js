@@ -351,35 +351,42 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
       today.setHours(0, 0, 0, 0);
       console.log('Today (for comparison):', today.toISOString());
       
+      // First find the latest date across all records
+      const latestDate = freshData.reduce((latest, record) => {
+        const recordDate = new Date(record.applicable_from);
+        recordDate.setHours(0, 0, 0, 0);
+        return recordDate > latest ? recordDate : latest;
+      }, new Date('1900-01-01'));
+      
+      console.log('Latest date in dataset:', latestDate.toISOString());
+      
       const sortedRecords = freshData.sort((a, b) => {
         let dateA = new Date(a.applicable_from);
         let dateB = new Date(b.applicable_from);
         
-        console.log(`Comparing: ${a.applicable_from} (${dateA.toISOString()}) vs ${b.applicable_from} (${dateB.toISOString()})`);
-        
         dateA.setHours(0, 0, 0, 0);
         dateB.setHours(0, 0, 0, 0);
         
-        // Categorize dates
-        const isCurrentA = dateA.getTime() === today.getTime();
-        const isCurrentB = dateB.getTime() === today.getTime();
+        // Check if records are the latest record
+        const isLatestA = dateA.getTime() === latestDate.getTime();
+        const isLatestB = dateB.getTime() === latestDate.getTime();
         const isFutureA = dateA > today;
         const isFutureB = dateB > today;
         const isPastA = dateA < today;
         const isPastB = dateB < today;
         
-        console.log(`${a.applicable_from}: Current=${isCurrentA}, Future=${isFutureA}, Past=${isPastA}`);
+        console.log(`${a.applicable_from}: Latest=${isLatestA}, Future=${isFutureA}, Past=${isPastA}`);
         
-        // Priority order: Current (0) → Future (1) → Past (2)
-        const getPriority = (isCurrent, isFuture, isPast) => {
-          if (isCurrent) return 0;
-          if (isFuture) return 1;
-          if (isPast) return 2;
+        // Priority order: Latest (0) → Future (1) → Past (2)
+        const getPriority = (isLatest, isFuture, isPast) => {
+          if (isLatest) return 0;  // Latest record always first
+          if (isFuture) return 1;  // Future dates second
+          if (isPast) return 2;    // Past dates last
           return 3;
         };
         
-        const priorityA = getPriority(isCurrentA, isFutureA, isPastA);
-        const priorityB = getPriority(isCurrentB, isFutureB, isPastB);
+        const priorityA = getPriority(isLatestA, isFutureA, isPastA);
+        const priorityB = getPriority(isLatestB, isFutureB, isPastB);
         
         // If different priorities, sort by priority
         if (priorityA !== priorityB) {
@@ -388,11 +395,11 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
         
         // If same priority, sort within category
         if (priorityA === 0) {
-          return 0; // Current dates
+          return 0; // Latest dates (should be unique)
         } else if (priorityA === 1) {
-          return dateA - dateB; // Future dates: nearest first
+          return dateA - dateB; // Future dates: nearest future first
         } else {
-          return dateB - dateA; // Past dates: most recent first
+          return dateB - dateA; // Past dates: most recent past first
         }
       });
       
@@ -416,13 +423,26 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
   // When a record is selected from modal
   const handleSelectRecord = idx => {
     const selectedRecord = records[idx];
+    
     // Format the applicable_from date to YYYY-MM-DD for date input
+    // Using timezone-safe formatting to avoid date shifting issues
+    let formattedDate = selectedRecord.applicable_from;
+    if (selectedRecord.applicable_from) {
+      const date = new Date(selectedRecord.applicable_from);
+      // Use local date components to avoid timezone shifts
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      formattedDate = `${year}-${month}-${day}`;
+      
+      console.log(`Original date: ${selectedRecord.applicable_from}, Formatted for form: ${formattedDate}`);
+    }
+    
     const formattedRecord = {
       ...selectedRecord,
-      applicable_from: selectedRecord.applicable_from ? 
-        new Date(selectedRecord.applicable_from).toISOString().split('T')[0] : 
-        selectedRecord.applicable_from
+      applicable_from: formattedDate
     };
+    
     setForm(formattedRecord);
     setSelectedRecordIdx(idx);
     setShowSelectModal(false);
@@ -610,157 +630,171 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
                 </tr>
               </thead>
               <tbody>
-                {records.map((rec, idx) => {
-                  const formattedDate = rec.applicable_from ? 
-                    new Date(rec.applicable_from).toLocaleDateString('en-GB', { 
-                      day: '2-digit', month: '2-digit', year: 'numeric' 
-                    }) : rec.applicable_from;
+                {(() => {
+                  // First pass: Find the latest date in all records
+                  const latestDate = records.reduce((latest, record) => {
+                    const recordDate = new Date(record.applicable_from);
+                    recordDate.setHours(0, 0, 0, 0);
+                    return recordDate > latest ? recordDate : latest;
+                  }, new Date('1900-01-01'));
                   
-                  // Enhanced date categorization with debugging
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  
-                  // Parse the date more carefully - ensure proper format
-                  let recDate;
-                  if (rec.applicable_from) {
-                    // Handle different date formats
-                    if (typeof rec.applicable_from === 'string') {
-                      // If it's in YYYY-MM-DD format
-                      if (rec.applicable_from.includes('-')) {
-                        recDate = new Date(rec.applicable_from);
-                      } else {
-                        // If it's in other format, try to parse it
-                        recDate = new Date(rec.applicable_from);
-                      }
-                    } else {
+                  return records.map((rec, idx) => {
+                    const formattedDate = rec.applicable_from ? 
+                      new Date(rec.applicable_from).toLocaleDateString('en-GB', { 
+                        day: '2-digit', month: '2-digit', year: 'numeric' 
+                      }) : rec.applicable_from;
+                    
+                    // Enhanced date categorization
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
+                    // Parse the date
+                    let recDate;
+                    if (rec.applicable_from) {
                       recDate = new Date(rec.applicable_from);
+                      recDate.setHours(0, 0, 0, 0);
+                    } else {
+                      recDate = new Date();
                     }
-                    recDate.setHours(0, 0, 0, 0);
-                  } else {
-                    recDate = new Date();
-                  }
+                    
+                    const isCurrent = recDate.getTime() === today.getTime();
+                    const isFuture = recDate > today;
+                    const isPast = recDate < today;
+                    const isLatestRecord = recDate.getTime() === latestDate.getTime();
+                    
+                    // Determine if this record should have a Select button
+                    const showSelectButton = isLatestRecord || isFuture;
+                    
+                    console.log(`Record ${idx}: ${rec.applicable_from} -> Latest: ${isLatestRecord}, Future: ${isFuture}, ShowSelect: ${showSelectButton}`);
                   
-                  const isCurrent = recDate.getTime() === today.getTime();
-                  const isFuture = recDate > today;
-                  const isPast = recDate < today;
-                  
-                  // Debug logging
-                  console.log(`Record ${idx}: ${rec.applicable_from} -> Parsed: ${recDate.toDateString()}, Today: ${today.toDateString()}, isCurrent: ${isCurrent}, isFuture: ${isFuture}, isPast: ${isPast}`);
-                  
-                  // Determine row styling based on date category
-                  const getRowStyle = () => {
-                    let baseStyle = { padding: '6px 8px' };
-                    if (isPast) {
-                      return { 
-                        ...baseStyle, 
-                        background: idx % 2 ? '#f0f0f0' : '#f8f8f8', 
-                        color: '#888', 
-                        opacity: 0.7 
-                      };
-                    }
-                    return { ...baseStyle, background: idx % 2 ? '#f7f7f7' : '#fff' };
-                  };
-                  
-                  const rowCellStyle = getRowStyle();
-                  
-                  return (
-                    <tr key={idx} style={{ background: rowCellStyle.background, opacity: rowCellStyle.opacity || 1 }}>
-                      <td style={rowCellStyle}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {formattedDate}
-                          {isCurrent && (
-                            <span style={{
-                              background: '#4caf50',
-                              color: '#fff',
-                              fontSize: '0.7rem',
-                              padding: '2px 6px',
-                              borderRadius: '10px',
-                              fontWeight: 'bold'
-                            }}>
-                              TODAY
-                            </span>
-                          )}
-                          {isFuture && (
-                            <span style={{
-                              background: '#2196f3',
-                              color: '#fff',
-                              fontSize: '0.7rem',
-                              padding: '2px 6px',
-                              borderRadius: '10px',
-                              fontWeight: 'bold'
-                            }}>
-                              FUTURE
-                            </span>
-                          )}
-                          {isPast && (
-                            <span style={{
-                              background: '#757575',
-                              color: '#fff',
-                              fontSize: '0.7rem',
-                              padding: '2px 6px',
-                              borderRadius: '10px',
-                              fontWeight: 'bold'
-                            }}>
-                              PAST
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td style={rowCellStyle}>{rec.property_code}</td>
-                      <td style={rowCellStyle}>{rec.property_name}</td>
-                      <td style={rowCellStyle}>{rec.owner_name}</td>
-                      <td style={{...rowCellStyle, display:'flex', alignItems:'center', gap:'6px'}}>
-                        {action === 'Search' ? (
-                          <>
-                            <span style={{
-                              padding:'2px 6px',
-                              borderRadius:'3px',
-                              fontSize:'0.8rem',
-                              fontWeight:'bold',
-                              color: isCurrent ? '#2e7d32' : isFuture ? '#1976d2' : '#757575',
-                              background: isCurrent ? '#e8f5e9' : isFuture ? '#e3f2fd' : '#f5f5f5'
-                            }}>
-                              {isCurrent ? 'Current' : isFuture ? 'Future' : 'Past'}
-                            </span>
-                            <button type="button" style={{background:'#7b1fa2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>View</button>
-                          </>
-                        ) : (
-                          // Show Select button for current and future records only
-                          (isCurrent || isFuture) ? (
-                            <button 
-                              type="button" 
-                              style={{
-                                background: isCurrent ? '#4caf50' : '#2196f3',
-                                color:'#fff',
-                                border:'none',
-                                borderRadius:'6px',
-                                padding:'4px 12px',
+                    // Determine row styling based on date category and selectability
+                    const getRowStyle = () => {
+                      let baseStyle = { padding: '6px 8px' };
+                      if (isPast && !isLatestRecord) {
+                        // Non-latest past records are grayed out
+                        return { 
+                          ...baseStyle, 
+                          background: idx % 2 ? '#f0f0f0' : '#f8f8f8', 
+                          color: '#888', 
+                          opacity: 0.7 
+                        };
+                      }
+                      return { ...baseStyle, background: idx % 2 ? '#f7f7f7' : '#fff' };
+                    };
+                    
+                    const rowCellStyle = getRowStyle();
+                    
+                    return (
+                      <tr key={idx} style={{ background: rowCellStyle.background, opacity: rowCellStyle.opacity || 1 }}>
+                        <td style={rowCellStyle}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {formattedDate}
+                            {isCurrent && (
+                              <span style={{
+                                background: '#4caf50',
+                                color: '#fff',
+                                fontSize: '0.7rem',
+                                padding: '2px 6px',
+                                borderRadius: '10px',
+                                fontWeight: 'bold'
+                              }}>
+                                TODAY
+                              </span>
+                            )}
+                            {isFuture && (
+                              <span style={{
+                                background: '#2196f3',
+                                color: '#fff',
+                                fontSize: '0.7rem',
+                                padding: '2px 6px',
+                                borderRadius: '10px',
+                                fontWeight: 'bold'
+                              }}>
+                                FUTURE
+                              </span>
+                            )}
+                            {isLatestRecord && isPast && (
+                              <span style={{
+                                background: '#ff9800',
+                                color: '#fff',
+                                fontSize: '0.7rem',
+                                padding: '2px 6px',
+                                borderRadius: '10px',
+                                fontWeight: 'bold'
+                              }}>
+                                LATEST
+                              </span>
+                            )}
+                            {isPast && !isLatestRecord && (
+                              <span style={{
+                                background: '#757575',
+                                color: '#fff',
+                                fontSize: '0.7rem',
+                                padding: '2px 6px',
+                                borderRadius: '10px',
+                                fontWeight: 'bold'
+                              }}>
+                                PAST
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td style={rowCellStyle}>{rec.property_code}</td>
+                        <td style={rowCellStyle}>{rec.property_name}</td>
+                        <td style={rowCellStyle}>{rec.owner_name}</td>
+                        <td style={{...rowCellStyle, display:'flex', alignItems:'center', gap:'6px'}}>
+                          {action === 'Search' ? (
+                            <>
+                              <span style={{
+                                padding:'2px 6px',
+                                borderRadius:'3px',
+                                fontSize:'0.8rem',
                                 fontWeight:'bold',
-                                cursor:'pointer'
-                              }} 
-                              onClick={()=>handleSelectRecord(idx)}
-                            >
-                              Select
-                            </button>
+                                color: isLatestRecord ? '#ff9800' : isCurrent ? '#2e7d32' : isFuture ? '#1976d2' : '#757575',
+                                background: isLatestRecord ? '#fff3e0' : isCurrent ? '#e8f5e9' : isFuture ? '#e3f2fd' : '#f5f5f5'
+                              }}>
+                                {isLatestRecord && isPast ? 'Latest' : isCurrent ? 'Current' : isFuture ? 'Future' : 'Past'}
+                              </span>
+                              <button type="button" style={{background:'#7b1fa2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>View</button>
+                            </>
                           ) : (
-                            <span style={{
-                              padding:'2px 6px',
-                              borderRadius:'3px',
-                              fontSize:'0.8rem',
-                              fontWeight:'bold',
-                              color: '#999',
-                              background: '#f0f0f0',
-                              fontStyle: 'italic',
-                              cursor: 'not-allowed'
-                            }}>
-                              Read Only
-                            </span>
-                          )
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                            // Show Select button for latest record OR future records
+                            showSelectButton ? (
+                              <button 
+                                type="button" 
+                                style={{
+                                  background: isLatestRecord && isPast ? '#ff9800' : isCurrent ? '#4caf50' : '#2196f3',
+                                  color:'#fff',
+                                  border:'none',
+                                  borderRadius:'6px',
+                                  padding:'4px 12px',
+                                  fontWeight:'bold',
+                                  cursor:'pointer'
+                                }} 
+                                onClick={()=>handleSelectRecord(idx)}
+                              >
+                                Select
+                              </button>
+                            ) : (
+                              <span style={{
+                                padding:'2px 6px',
+                                borderRadius:'3px',
+                                fontSize:'0.8rem',
+                                fontWeight:'bold',
+                                color: '#999',
+                                background: '#f0f0f0',
+                                fontStyle: 'italic',
+                                cursor: 'not-allowed'
+                              }}>
+                                Read Only
+                              </span>
+                            )
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()}
               </tbody>
             </table>
           )}
@@ -777,7 +811,13 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
               name="applicable_from" 
               value={form.applicable_from} 
               onChange={handleChange} 
-              min={action === 'Add' ? new Date().toISOString().split('T')[0] : undefined}
+              min={action === 'Add' ? (() => {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+              })() : undefined}
               style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isApplicableFromReadOnly?'#eee':'#fff'}} 
               disabled={isApplicableFromReadOnly} 
             />
