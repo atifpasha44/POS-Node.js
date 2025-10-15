@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import axios from 'axios';
@@ -469,14 +471,179 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
 
 
   // Export handlers
-  const handleExport = type => {
+  const handleExport = async (type) => {
     // Prepare data for export (all records)
     const exportData = records.length ? records : [form];
+    
     if (type === 'Excel') {
-      const ws = XLSX.utils.json_to_sheet(exportData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'PropertyCodes');
-      XLSX.writeFile(wb, 'PropertyCodes.xlsx');
+      try {
+        // Create a new workbook using ExcelJS
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Property Setup Data');
+        
+        // Add report title
+        const titleRow = worksheet.addRow(['Property Setup Export Report']);
+        worksheet.mergeCells('A1:O1'); // Merge across all columns
+        
+        // Style the title
+        titleRow.getCell(1).font = {
+          bold: true,
+          size: 16,
+          color: { argb: 'FF000000' },
+          name: 'Calibri'
+        };
+        titleRow.getCell(1).alignment = {
+          horizontal: 'center',
+          vertical: 'middle'
+        };
+        titleRow.getCell(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE7E6E6' }
+        };
+        titleRow.height = 25;
+        
+        // Add empty row for spacing
+        worksheet.addRow([]);
+        
+        // Define headers
+        const headers = [
+          'ID',
+          'Applicable From',
+          'Property Code',
+          'Property Name',
+          'Nick Name',
+          'Owner Name',
+          'Address Name',
+          'GST Number',
+          'PAN Number',
+          'Group Name',
+          'Local Currency',
+          'Currency Format',
+          'Symbol',
+          'Decimal',
+          'Date Format',
+          'Round Off'
+        ];
+        
+        // Add header row
+        const headerRow = worksheet.addRow(headers);
+        
+        // Style header row
+        headerRow.eachCell((cell, colNumber) => {
+          cell.font = {
+            bold: true,
+            color: { argb: 'FFFFFFFF' },
+            size: 12,
+            name: 'Calibri'
+          };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF366092' }
+          };
+          cell.alignment = {
+            horizontal: 'center',
+            vertical: 'middle'
+          };
+          cell.border = {
+            top: { style: 'medium', color: { argb: 'FF000000' } },
+            left: { style: 'medium', color: { argb: 'FF000000' } },
+            bottom: { style: 'medium', color: { argb: 'FF000000' } },
+            right: { style: 'medium', color: { argb: 'FF000000' } }
+          };
+        });
+        
+        // Add data rows
+        exportData.forEach((record, index) => {
+          const row = [
+            record.id || '',
+            record.applicable_from ? new Date(record.applicable_from).toLocaleDateString('en-GB', { 
+              day: '2-digit', month: '2-digit', year: 'numeric' 
+            }) : '',
+            record.property_code || '',
+            record.property_name || '',
+            record.nick_name || '',
+            record.owner_name || '',
+            record.address_name || '',
+            record.gst_number || '',
+            record.pan_number || '',
+            record.group_name || '',
+            record.local_currency || '',
+            record.currency_format || '',
+            record.symbol || '',
+            record.decimal || '',
+            record.date_format || '',
+            record.round_off || ''
+          ];
+          
+          const dataRow = worksheet.addRow(row);
+          
+          // Style data rows with alternating colors
+          const isEvenRow = (index + 4) % 2 === 0; // +4 because title(1) + empty(1) + header(1) + first data row(1)
+          const fillColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
+          
+          dataRow.eachCell((cell, colNumber) => {
+            cell.font = {
+              color: { argb: 'FF000000' },
+              size: 10,
+              name: 'Calibri'
+            };
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: fillColor }
+            };
+            cell.alignment = {
+              horizontal: colNumber <= 4 ? 'center' : 'left',
+              vertical: 'middle'
+            };
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+              left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+              bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+              right: { style: 'thin', color: { argb: 'FFCCCCCC' } }
+            };
+          });
+        });
+        
+        // Auto-fit columns
+        worksheet.columns.forEach((column, index) => {
+          let maxLength = 0;
+          column.eachCell({ includeEmpty: true }, (cell) => {
+            const cellValue = cell.value ? cell.value.toString() : '';
+            maxLength = Math.max(maxLength, cellValue.length);
+          });
+          column.width = Math.min(Math.max(maxLength + 2, 12), 30);
+        });
+        
+        // Generate filename with timestamp
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const filename = `Property_Setup_Export_${year}${month}${day}_${hours}${minutes}${seconds}.xlsx`;
+        
+        // Generate buffer and save file
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { 
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        });
+        
+        saveAs(blob, filename);
+        
+        console.log('✅ Property Setup Excel file exported successfully:', filename);
+        alert(`✅ Formatted Property Setup Excel Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Report heading at top\n• Professional blue headers\n• Alternating row colors\n• Complete table formatting\n• Auto-sized columns`);
+        
+      } catch (error) {
+        console.error('Property Setup Excel export error:', error);
+        alert('❌ Error exporting Property Setup to Excel. Please try again.\n\nError: ' + error.message);
+      }
+      
     } else if (type === 'PDF') {
       const doc = new jsPDF();
       const columns = [
@@ -487,7 +654,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
         rec.applicable_from, rec.property_code, rec.property_name, rec.nick_name, rec.owner_name, rec.address_name, rec.gst_number, rec.pan_number,
         rec.group_name, rec.local_currency, rec.currency_format, rec.symbol, rec.decimal, rec.date_format, rec.round_off
       ]);
-  autoTable(doc, { head: [columns], body: rows });
+      autoTable(doc, { head: [columns], body: rows });
       doc.save('PropertyCodes.pdf');
     }
   };
