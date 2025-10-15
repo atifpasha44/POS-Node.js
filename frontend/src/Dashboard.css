@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 120px);
+  padding: 20px;
 }
 .compinfo-card {
   background: #fff;
@@ -14,6 +15,109 @@
   width: 100%;
   margin: 0 auto;
   border: 1.5px solid #bbb;
+}
+
+/* New Scrollable Company Info Card */
+.compinfo-card-with-scroll {
+  background: #fff;
+  border-radius: 32px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  border: 1.5px solid #bbb;
+  max-height: calc(100vh - 160px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Fixed Header Section */
+.compinfo-header-section {
+  background: #fff;
+  padding: 48px 32px 24px 32px;
+  border-bottom: 1px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+/* Scrollable Content Section */
+.compinfo-scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 32px 32px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+/* Custom Scrollbar for Webkit Browsers */
+.compinfo-scrollable-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.compinfo-scrollable-content::-webkit-scrollbar-track {
+  background: #f7fafc;
+  border-radius: 4px;
+}
+
+.compinfo-scrollable-content::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.compinfo-scrollable-content::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Version Details Styling */
+.compinfo-version-details {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  transition: box-shadow 0.3s ease;
+}
+
+.compinfo-version-details:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.compinfo-version-header {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compinfo-version-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.compinfo-version-release {
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: #e8f5e9;
+  border-radius: 6px;
+  border-left: 4px solid #4caf50;
+}
+
+.compinfo-version-copyright {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
 }
 .compinfo-logo-row {
   display: flex;
@@ -45,16 +149,48 @@
 .compinfo-info-row {
   display: flex;
   justify-content: center;
-  gap: 32px;
-  margin-top: 18px;
+  gap: 24px;
+  margin-top: 0;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .compinfo-info-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .compinfo-version-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .compinfo-card-with-scroll {
+    margin: 10px;
+    max-height: calc(100vh - 140px);
+  }
+  
+  .compinfo-header-section {
+    padding: 32px 24px 20px 24px;
+  }
+  
+  .compinfo-scrollable-content {
+    padding: 16px 24px 24px 24px;
+  }
 }
 .compinfo-table {
   background: #f7f7f7;
-  border-radius: 8px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   padding: 0;
   min-width: 260px;
   flex: 1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.compinfo-table:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 }
 .compinfo-table-header {
   background: #ededed;

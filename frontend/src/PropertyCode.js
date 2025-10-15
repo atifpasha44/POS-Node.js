@@ -4,6 +4,31 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import axios from 'axios';
 
+// Standard currency symbols dropdown options
+const CURRENCY_SYMBOLS = [
+  { value: '$', label: '$ - US Dollar' },
+  { value: '€', label: '€ - Euro' },
+  { value: '£', label: '£ - British Pound' },
+  { value: '¥', label: '¥ - Japanese Yen' },
+  { value: '₹', label: '₹ - Indian Rupee' },
+  { value: '₽', label: '₽ - Russian Ruble' },
+  { value: '¢', label: '¢ - Cent' },
+  { value: 'C$', label: 'C$ - Canadian Dollar' },
+  { value: 'A$', label: 'A$ - Australian Dollar' },
+  { value: 'CHF', label: 'CHF - Swiss Franc' },
+  { value: '₩', label: '₩ - South Korean Won' },
+  { value: '₨', label: '₨ - Pakistani Rupee' },
+  { value: 'R$', label: 'R$ - Brazilian Real' },
+  { value: 'MX$', label: 'MX$ - Mexican Peso' },
+  { value: 'S$', label: 'S$ - Singapore Dollar' },
+  { value: 'HK$', label: 'HK$ - Hong Kong Dollar' },
+  { value: 'NZ$', label: 'NZ$ - New Zealand Dollar' },
+  { value: '₪', label: '₪ - Israeli Shekel' },
+  { value: '₦', label: '₦ - Nigerian Naira' },
+  { value: '₡', label: '₡ - Costa Rican Colón' },
+  { value: '₵', label: '₵ - Ghanaian Cedi' }
+];
+
 const initialState = {
   applicable_from: '', property_code: '', property_name: '', nick_name: '', owner_name: '', address_name: '', gst_number: '', pan_number: '',
   group_name: '', local_currency: '', currency_format: '', symbol: '', decimal: '', date_format: '', round_off: '', property_logo: null
@@ -213,8 +238,67 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
       const response = await axios.get('/api/property-codes');
       console.log('Fetched records:', response.data);
       if (setRecords) {
-        setRecords(response.data);
-        console.log('Records set successfully, count:', response.data.length);
+        // Custom sorting: Current Date → Future Dates → Past Dates
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+        
+        const sortedRecords = response.data.sort((a, b) => {
+          // More robust date parsing
+          let dateA = new Date(a.applicable_from);
+          let dateB = new Date(b.applicable_from);
+          
+          // Validate dates
+          if (isNaN(dateA.getTime())) {
+            console.error('Invalid date A:', a.applicable_from);
+            dateA = new Date();
+          }
+          if (isNaN(dateB.getTime())) {
+            console.error('Invalid date B:', b.applicable_from);
+            dateB = new Date();
+          }
+          
+          dateA.setHours(0, 0, 0, 0);
+          dateB.setHours(0, 0, 0, 0);
+          
+          // Categorize dates
+          const isCurrentA = dateA.getTime() === today.getTime();
+          const isCurrentB = dateB.getTime() === today.getTime();
+          const isFutureA = dateA > today;
+          const isFutureB = dateB > today;
+          const isPastA = dateA < today;
+          const isPastB = dateB < today;
+          
+          // Priority order: Current (0) → Future (1) → Past (2)
+          const getPriority = (isCurrent, isFuture, isPast) => {
+            if (isCurrent) return 0;
+            if (isFuture) return 1;
+            if (isPast) return 2;
+            return 3;
+          };
+          
+          const priorityA = getPriority(isCurrentA, isFutureA, isPastA);
+          const priorityB = getPriority(isCurrentB, isFutureB, isPastB);
+          
+          // If different priorities, sort by priority
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
+          
+          // If same priority, sort within category
+          if (priorityA === 0) {
+            // Current dates: no sub-sorting needed (should be unique)
+            return 0;
+          } else if (priorityA === 1) {
+            // Future dates: nearest future first
+            return dateA - dateB;
+          } else {
+            // Past dates: most recent past first
+            return dateB - dateA;
+          }
+        });
+        
+        setRecords(sortedRecords);
+        console.log('Records sorted by Current→Future→Past, count:', sortedRecords.length);
       }
     } catch (error) {
       console.error('Error fetching records:', error);
@@ -250,9 +334,74 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     if (setParentDirty) setParentDirty(false);
     setSelectedRecordIdx(null);
   };
-  const handleEdit = () => {
+  const handleEdit = async () => {
     setAction('Edit');
     setSelectedRecordIdx(null);
+    
+    // Fetch fresh data and apply sorting
+    try {
+      console.log('Fetching fresh records for edit modal...');
+      const response = await axios.get('/api/property-codes');
+      const freshData = response.data;
+      
+      console.log('Fresh data received:', freshData);
+      
+      // Apply sorting logic
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      console.log('Today (for comparison):', today.toISOString());
+      
+      const sortedRecords = freshData.sort((a, b) => {
+        let dateA = new Date(a.applicable_from);
+        let dateB = new Date(b.applicable_from);
+        
+        console.log(`Comparing: ${a.applicable_from} (${dateA.toISOString()}) vs ${b.applicable_from} (${dateB.toISOString()})`);
+        
+        dateA.setHours(0, 0, 0, 0);
+        dateB.setHours(0, 0, 0, 0);
+        
+        // Categorize dates
+        const isCurrentA = dateA.getTime() === today.getTime();
+        const isCurrentB = dateB.getTime() === today.getTime();
+        const isFutureA = dateA > today;
+        const isFutureB = dateB > today;
+        const isPastA = dateA < today;
+        const isPastB = dateB < today;
+        
+        console.log(`${a.applicable_from}: Current=${isCurrentA}, Future=${isFutureA}, Past=${isPastA}`);
+        
+        // Priority order: Current (0) → Future (1) → Past (2)
+        const getPriority = (isCurrent, isFuture, isPast) => {
+          if (isCurrent) return 0;
+          if (isFuture) return 1;
+          if (isPast) return 2;
+          return 3;
+        };
+        
+        const priorityA = getPriority(isCurrentA, isFutureA, isPastA);
+        const priorityB = getPriority(isCurrentB, isFutureB, isPastB);
+        
+        // If different priorities, sort by priority
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+        
+        // If same priority, sort within category
+        if (priorityA === 0) {
+          return 0; // Current dates
+        } else if (priorityA === 1) {
+          return dateA - dateB; // Future dates: nearest first
+        } else {
+          return dateB - dateA; // Past dates: most recent first
+        }
+      });
+      
+      console.log('Sorted records:', sortedRecords);
+      setRecords(sortedRecords);
+    } catch (error) {
+      console.error('Error fetching records for edit:', error);
+    }
+    
     setShowSelectModal(true);
   };
   // Prevent deletion of Property Code records after save
@@ -435,6 +584,9 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
         <div style={{background:'#fff',borderRadius:'14px',padding:'32px 24px',minWidth:'720px',boxShadow:'0 4px 24px rgba(0,0,0,0.18)',maxHeight:'80vh',overflowY:'auto'}}>
           <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>
             {action === 'Search' ? 'All Property Code Records - Select to View Details' : (selectModalMessage || 'Select a record to edit/delete')}
+            <div style={{fontSize:'0.8rem',color:'#666',marginTop:'4px'}}>
+              Current Date: {new Date().toLocaleDateString('en-GB')} | Records sorted: Current → Future → Past
+            </div>
           </div>
           {action === 'Search' && (
             <div style={{padding:'12px',background:'#e8f5e9',borderRadius:'8px',marginBottom:'16px',fontSize:'0.95rem',color:'#2e7d32'}}>
@@ -463,18 +615,101 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
                     new Date(rec.applicable_from).toLocaleDateString('en-GB', { 
                       day: '2-digit', month: '2-digit', year: 'numeric' 
                     }) : rec.applicable_from;
+                  
+                  // Enhanced date categorization with debugging
                   const today = new Date();
-                  const recDate = new Date(rec.applicable_from);
-                  const isActive = recDate <= today;
+                  today.setHours(0, 0, 0, 0);
+                  
+                  // Parse the date more carefully - ensure proper format
+                  let recDate;
+                  if (rec.applicable_from) {
+                    // Handle different date formats
+                    if (typeof rec.applicable_from === 'string') {
+                      // If it's in YYYY-MM-DD format
+                      if (rec.applicable_from.includes('-')) {
+                        recDate = new Date(rec.applicable_from);
+                      } else {
+                        // If it's in other format, try to parse it
+                        recDate = new Date(rec.applicable_from);
+                      }
+                    } else {
+                      recDate = new Date(rec.applicable_from);
+                    }
+                    recDate.setHours(0, 0, 0, 0);
+                  } else {
+                    recDate = new Date();
+                  }
+                  
+                  const isCurrent = recDate.getTime() === today.getTime();
                   const isFuture = recDate > today;
+                  const isPast = recDate < today;
+                  
+                  // Debug logging
+                  console.log(`Record ${idx}: ${rec.applicable_from} -> Parsed: ${recDate.toDateString()}, Today: ${today.toDateString()}, isCurrent: ${isCurrent}, isFuture: ${isFuture}, isPast: ${isPast}`);
+                  
+                  // Determine row styling based on date category
+                  const getRowStyle = () => {
+                    let baseStyle = { padding: '6px 8px' };
+                    if (isPast) {
+                      return { 
+                        ...baseStyle, 
+                        background: idx % 2 ? '#f0f0f0' : '#f8f8f8', 
+                        color: '#888', 
+                        opacity: 0.7 
+                      };
+                    }
+                    return { ...baseStyle, background: idx % 2 ? '#f7f7f7' : '#fff' };
+                  };
+                  
+                  const rowCellStyle = getRowStyle();
                   
                   return (
-                    <tr key={idx} style={{background: idx%2 ? '#f7f7f7' : '#fff'}}>
-                      <td style={{padding:'6px 8px'}}>{formattedDate}</td>
-                      <td style={{padding:'6px 8px'}}>{rec.property_code}</td>
-                      <td style={{padding:'6px 8px'}}>{rec.property_name}</td>
-                      <td style={{padding:'6px 8px'}}>{rec.owner_name}</td>
-                      <td style={{padding:'6px 8px',display:'flex',alignItems:'center',gap:'6px'}}>
+                    <tr key={idx} style={{ background: rowCellStyle.background, opacity: rowCellStyle.opacity || 1 }}>
+                      <td style={rowCellStyle}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {formattedDate}
+                          {isCurrent && (
+                            <span style={{
+                              background: '#4caf50',
+                              color: '#fff',
+                              fontSize: '0.7rem',
+                              padding: '2px 6px',
+                              borderRadius: '10px',
+                              fontWeight: 'bold'
+                            }}>
+                              TODAY
+                            </span>
+                          )}
+                          {isFuture && (
+                            <span style={{
+                              background: '#2196f3',
+                              color: '#fff',
+                              fontSize: '0.7rem',
+                              padding: '2px 6px',
+                              borderRadius: '10px',
+                              fontWeight: 'bold'
+                            }}>
+                              FUTURE
+                            </span>
+                          )}
+                          {isPast && (
+                            <span style={{
+                              background: '#757575',
+                              color: '#fff',
+                              fontSize: '0.7rem',
+                              padding: '2px 6px',
+                              borderRadius: '10px',
+                              fontWeight: 'bold'
+                            }}>
+                              PAST
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td style={rowCellStyle}>{rec.property_code}</td>
+                      <td style={rowCellStyle}>{rec.property_name}</td>
+                      <td style={rowCellStyle}>{rec.owner_name}</td>
+                      <td style={{...rowCellStyle, display:'flex', alignItems:'center', gap:'6px'}}>
                         {action === 'Search' ? (
                           <>
                             <span style={{
@@ -482,15 +717,45 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
                               borderRadius:'3px',
                               fontSize:'0.8rem',
                               fontWeight:'bold',
-                              color: isActive ? '#2e7d32' : '#f57c00',
-                              background: isActive ? '#e8f5e9' : '#fff3e0'
+                              color: isCurrent ? '#2e7d32' : isFuture ? '#1976d2' : '#757575',
+                              background: isCurrent ? '#e8f5e9' : isFuture ? '#e3f2fd' : '#f5f5f5'
                             }}>
-                              {isActive ? 'Active' : 'Future'}
+                              {isCurrent ? 'Current' : isFuture ? 'Future' : 'Past'}
                             </span>
                             <button type="button" style={{background:'#7b1fa2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>View</button>
                           </>
                         ) : (
-                          <button type="button" style={{background:'#1976d2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>Select</button>
+                          // Show Select button for current and future records only
+                          (isCurrent || isFuture) ? (
+                            <button 
+                              type="button" 
+                              style={{
+                                background: isCurrent ? '#4caf50' : '#2196f3',
+                                color:'#fff',
+                                border:'none',
+                                borderRadius:'6px',
+                                padding:'4px 12px',
+                                fontWeight:'bold',
+                                cursor:'pointer'
+                              }} 
+                              onClick={()=>handleSelectRecord(idx)}
+                            >
+                              Select
+                            </button>
+                          ) : (
+                            <span style={{
+                              padding:'2px 6px',
+                              borderRadius:'3px',
+                              fontSize:'0.8rem',
+                              fontWeight:'bold',
+                              color: '#999',
+                              background: '#f0f0f0',
+                              fontStyle: 'italic',
+                              cursor: 'not-allowed'
+                            }}>
+                              Read Only
+                            </span>
+                          )
                         )}
                       </td>
                     </tr>
@@ -569,7 +834,29 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Symbol</label>
-            <input type="text" name="symbol" value={form.symbol} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isFormReadOnly?'#eee':'#fff'}} disabled={isFormReadOnly} />
+            <select 
+              name="symbol" 
+              value={form.symbol} 
+              onChange={handleChange} 
+              style={{
+                width:'80%',
+                height:'36px',
+                fontSize:'1.08rem',
+                border:'2px solid #bbb',
+                borderRadius:'6px',
+                padding:'0 8px',
+                background: isFormReadOnly?'#eee':'#fff',
+                cursor: isFormReadOnly ? 'not-allowed' : 'pointer'
+              }} 
+              disabled={isFormReadOnly}
+            >
+              <option value="">Select Currency Symbol</option>
+              {CURRENCY_SYMBOLS.map((currency, index) => (
+                <option key={index} value={currency.value}>
+                  {currency.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Decimal</label>

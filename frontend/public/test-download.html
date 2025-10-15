@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Download Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f0f0f0; 
+        }
+        .btn { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            margin: 10px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+        }
+        .btn:hover { background: #0056b3; }
+        .status { 
+            margin: 20px 0; 
+            padding: 10px; 
+            border-radius: 5px; 
+            font-weight: bold; 
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Download Test Page</h1>
+    <p>This is a simple test to check if browser downloads work.</p>
+    
+    <button class="btn" onclick="testTextDownload()">📝 Test Text Download</button>
+    <button class="btn" onclick="testJSONDownload()">📊 Test JSON Download</button>
+    <button class="btn" onclick="copyToClipboard()">📋 Test Copy to Clipboard</button>
+    
+    <div id="status"></div>
+    <div id="output" style="background: white; border: 1px solid #ccc; padding: 15px; margin: 20px 0; border-radius: 5px; display: none;">
+        <h3>Sample Content:</h3>
+        <pre id="content">POS System Database Documentation
+=====================================
+Generated: October 15, 2025
+
+This is a test download with sample content.
+The actual documentation contains:
+- Table structures
+- API endpoints  
+- Field mappings
+- Relationships
+- Implementation notes</pre>
+        <button class="btn" onclick="copyContent()">📋 Copy This Content</button>
+    </div>
+
+    <script>
+        function showStatus(message, type = 'success') {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => status.innerHTML = '', 5000);
+        }
+
+        function testTextDownload() {
+            try {
+                console.log('🔧 Starting text download test...');
+                
+                const content = `POS System Database Documentation Test
+==========================================
+Generated: ${new Date().toLocaleString()}
+Browser: ${navigator.userAgent}
+
+This is a test download to verify browser functionality.
+
+Test Results:
+✅ File creation: Working
+✅ Blob API: Working  
+✅ URL creation: Working
+✅ Download trigger: ${navigator.platform}
+
+If you can download this file, the download mechanism is working correctly.`;
+
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                
+                link.href = url;
+                link.download = `download-test-${Date.now()}.txt`;
+                
+                // Debug info
+                console.log('📁 Blob created:', blob);
+                console.log('🔗 URL created:', url);
+                console.log('📎 Link element:', link);
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                showStatus('✅ Text download initiated! Check your Downloads folder.', 'success');
+            } catch (error) {
+                console.error('❌ Download error:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testJSONDownload() {
+            try {
+                console.log('🔧 Starting JSON download test...');
+                
+                const data = {
+                    test: "POS Database Documentation Download Test",
+                    timestamp: new Date().toISOString(),
+                    browser: navigator.userAgent,
+                    platform: navigator.platform,
+                    status: "Testing download functionality",
+                    modules: [
+                        "Property Code Management",
+                        "Outlet Setup", 
+                        "Item Master",
+                        "User Setup"
+                    ]
+                };
+
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                
+                link.href = url;
+                link.download = `download-test-${Date.now()}.json`;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                showStatus('✅ JSON download initiated! Check your Downloads folder.', 'success');
+            } catch (error) {
+                console.error('❌ Download error:', error);
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function copyToClipboard() {
+            const content = document.getElementById('content').textContent;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(content).then(() => {
+                    showStatus('✅ Content copied to clipboard!', 'success');
+                }).catch(err => {
+                    console.error('Clipboard error:', err);
+                    fallbackCopy(content);
+                });
+            } else {
+                fallbackCopy(content);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showStatus('✅ Content copied using fallback method!', 'success');
+            } catch (err) {
+                showStatus('❌ Copy failed. Please copy manually.', 'error');
+                document.getElementById('output').style.display = 'block';
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        function copyContent() {
+            copyToClipboard();
+        }
+
+        // Log browser info on page load
+        console.log('🌐 Browser Info:');
+        console.log('User Agent:', navigator.userAgent);
+        console.log('Platform:', navigator.platform);
+        console.log('Clipboard API available:', !!navigator.clipboard);
+        
+        // Show sample content
+        document.getElementById('output').style.display = 'block';
+    </script>
+</body>
+</html>

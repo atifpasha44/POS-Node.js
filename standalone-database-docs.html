@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Database Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .download-section {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .btn.success {
+            background: #27ae60;
+        }
+        
+        .btn.success:hover {
+            background: #229954;
+        }
+        
+        .content-area {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 500px;
+            overflow-y: auto;
+            margin: 20px 0;
+            border: 2px solid #34495e;
+        }
+        
+        .status {
+            margin: 15px 0;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .status.success {
+            background: #d5f4e6;
+            color: #155724;
+            border: 2px solid #27ae60;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-box h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+        
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .module-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .module-card h5 {
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+            font-size: 1em;
+        }
+        
+        .module-card p {
+            margin: 4px 0;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📄 POS Database Documentation</h1>
+        <p class="subtitle">Complete Backend Integration Mapping</p>
+        
+        <div class="download-section">
+            <h3>📥 Get Your Documentation</h3>
+            <p>Choose your preferred method to access the complete database documentation:</p>
+            
+            <button class="btn success" onclick="downloadTextFile()">📝 Download Text File</button>
+            <button class="btn" onclick="downloadJSONFile()">📊 Download JSON</button>
+            <button class="btn" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+            <button class="btn" onclick="showContent()">👁️ View Content</button>
+            
+            <div id="status"></div>
+        </div>
+        
+        <div class="info-box">
+            <h4>📋 What's Included:</h4>
+            <div class="modules-grid">
+                <div class="module-card">
+                    <h5>🏨 Property Management</h5>
+                    <p>Table: IT_CONF_PROPERTY</p>
+                    <p>API: /api/property-codes</p>
+                </div>
+                <div class="module-card">
+                    <h5>🏬 Outlet Setup</h5>
+                    <p>Table: IT_CONF_OUTSET</p>
+                    <p>API: /api/outlets</p>
+                </div>
+                <div class="module-card">
+                    <h5>🍽️ Item Master</h5>
+                    <p>Table: IT_CONF_ITEM_MASTER</p>
+                    <p>API: /api/items</p>
+                </div>
+                <div class="module-card">
+                    <h5>📋 Set Menu</h5>
+                    <p>Table: IT_CONF_SET_MENU</p>
+                    <p>API: /api/set-menus</p>
+                </div>
+                <div class="module-card">
+                    <h5>🔍 Reason Codes</h5>
+                    <p>Table: IT_CONF_REASONS</p>
+                    <p>API: /api/reason-codes</p>
+                </div>
+                <div class="module-card">
+                    <h5>📏 Unit of Measurement</h5>
+                    <p>Table: IT_CONF_UOM</p>
+                    <p>API: /api/uom</p>
+                </div>
+                <div class="module-card">
+                    <h5>👥 User Management</h5>
+                    <p>Table: users</p>
+                    <p>API: /api/users</p>
+                </div>
+                <div class="module-card">
+                    <h5>🔗 Relationships</h5>
+                    <p>Foreign Keys & Dependencies</p>
+                    <p>API Patterns & Implementation</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="contentDisplay" class="content-area" style="display: none;"></div>
+        
+        <div class="info-box">
+            <h4>💡 Alternative Methods:</h4>
+            <p><strong>Manual Copy:</strong> Click "View Content" then select all text with Ctrl+A and copy with Ctrl+C</p>
+            <p><strong>Print to PDF:</strong> After viewing content, use Ctrl+P and select "Save as PDF"</p>
+            <p><strong>Share via Email:</strong> Copy the content and paste into any email or document</p>
+        </div>
+    </div>
+
+    <script>
+        const fullDocumentation = `POS SYSTEM - DATABASE INTEGRATION MAPPING
+========================================
+Generated: ${new Date().toLocaleDateString()}
+
+COMPLETE BACKEND INTEGRATION DOCUMENTATION
+==========================================
+
+This document provides comprehensive backend integration mapping for the POS system,
+covering all management screens, database tables, API endpoints, and relationships.
+
+TABLE OF CONTENTS
+================
+1. Property Code Management (IT_CONF_PROPERTY)
+2. Outlet Setup Management (IT_CONF_OUTSET)  
+3. Item Master Management (IT_CONF_ITEM_MASTER)
+4. User Setup & Management (users)
+5. Set Menu Configuration (IT_CONF_SET_MENU)
+6. Reason Codes Management (IT_CONF_REASONS)
+7. Unit of Measurement (IT_CONF_UOM)
+8. Database Relationships & Dependencies
+9. API Patterns & Implementation Guidelines
+
+========================================
+
+1. PROPERTY CODE MANAGEMENT
+==========================
+Component: PropertyCode.js
+Backend Table: IT_CONF_PROPERTY
+Primary Key: id (AUTO_INCREMENT)
+Unique Fields: property_code
+
+Table Structure:
++------------------+---------------+-------------------+
+| Field Name       | Data Type     | Constraints       |
++------------------+---------------+-------------------+
+| id               | INT           | AUTO_INCREMENT PK |
+| applicable_from  | DATE          | -                 |
+| property_code    | VARCHAR(32)   | NOT NULL UNIQUE   |
+| property_name    | VARCHAR(128)  | NOT NULL          |
+| nick_name        | VARCHAR(64)   | -                 |
+| owner_name       | VARCHAR(128)  | -                 |
+| address_name     | VARCHAR(256)  | -                 |
+| gst_number       | VARCHAR(32)   | -                 |
+| pan_number       | VARCHAR(32)   | -                 |
+| group_name       | VARCHAR(64)   | -                 |
+| local_currency   | VARCHAR(16)   | -                 |
+| currency_format  | VARCHAR(16)   | -                 |
+| symbol           | VARCHAR(8)    | -                 |
+| decimal_places   | INT           | DEFAULT 2         |
+| date_format      | VARCHAR(16)   | -                 |
+| round_off        | VARCHAR(16)   | -                 |
+| property_logo    | VARCHAR(256)  | -                 |
+| created_at       | TIMESTAMP     | DEFAULT CURRENT   |
+| updated_at       | TIMESTAMP     | ON UPDATE CURRENT |
++------------------+---------------+-------------------+
+
+API Endpoints:
+- GET /api/property-codes - Fetch all property codes
+- POST /api/property-codes - Create new property code
+- PUT /api/property-codes/:id - Update existing property code
+- DELETE /api/property-codes/:id - Delete property code
+
+Field Mappings (Form → Database):
+- applicable_from → applicable_from
+- property_code → property_code (UNIQUE constraint)
+- property_name → property_name (REQUIRED)
+- nick_name → nick_name
+- owner_name → owner_name
+- address_name → address_name
+- gst_number → gst_number
+- pan_number → pan_number
+
+Key Features:
+- Unique property code validation
+- Currency configuration
+- Date format settings
+- Logo upload support
+
+========================================
+
+2. OUTLET SETUP MANAGEMENT
+=========================
+Component: OutletSetup.js
+Backend Table: IT_CONF_OUTSET
+Primary Key: Composite (APPDAT, OUTCODE)
+
+Table Structure:
++---------------+---------------+-------------------+
+| Field Name    | Data Type     | Constraints       |
++---------------+---------------+-------------------+
+| APPDAT        | DECIMAL(8,0)  | PRIMARY KEY       |
+| OUTCODE       | VARCHAR(3)    | PRIMARY KEY       |
+| OUTNAME       | VARCHAR(30)   | DEFAULT ' '       |
+| SHTNAM        | VARCHAR(10)   | DEFAULT ' '       |
+| OUTTYPE       | DECIMAL(1,0)  | DEFAULT 1         |
+| BILInitial    | VARCHAR(2)    | DEFAULT '0'       |
+| OUTSET        | DECIMAL(6,0)  | DEFAULT 0         |
+| ActiveStatus  | TINYINT(1)    | DEFAULT 1         |
++---------------+---------------+-------------------+
+
+API Endpoints:
+- GET /api/outlets - Fetch all outlets
+- POST /api/outlets - Create new outlet
+- PUT /api/outlets/:outlet_code - Update outlet
+- DELETE /api/outlets/:outlet_code - Delete outlet
+
+Relationships: References property_code from Property setup
+
+========================================
+
+3. ITEM MASTER MANAGEMENT
+========================
+Component: ItemMaster.js
+Backend Table: IT_CONF_ITEM_MASTER
+Primary Key: id (AUTO_INCREMENT)
+Unique Fields: item_code
+
+Table Structure:
++--------------------+---------------+-------------------+
+| Field Name         | Data Type     | Constraints       |
++--------------------+---------------+-------------------+
+| id                 | INT           | AUTO_INCREMENT PK |
+| select_outlets     | JSON          | Selected outlets  |
+| applicable_from    | DATE          | NOT NULL          |
+| item_code          | VARCHAR(20)   | NOT NULL UNIQUE   |
+| inventory_code     | VARCHAR(20)   | -                 |
+| item_name          | VARCHAR(50)   | NOT NULL          |
+| short_name         | VARCHAR(20)   | -                 |
+| alternate_name     | VARCHAR(100)  | -                 |
+| tax_code           | VARCHAR(10)   | -                 |
+| item_price_1       | DECIMAL(10,2) | -                 |
+| item_price_2       | DECIMAL(10,2) | -                 |
+| item_price_3       | DECIMAL(10,2) | -                 |
+| item_price_4       | DECIMAL(10,2) | -                 |
+| item_printer_1     | VARCHAR(20)   | -                 |
+| item_printer_2     | VARCHAR(20)   | -                 |
+| item_printer_3     | VARCHAR(20)   | -                 |
+| print_group        | VARCHAR(50)   | -                 |
+| item_department    | VARCHAR(4)    | NOT NULL          |
+| item_category      | VARCHAR(10)   | NOT NULL          |
+| cost               | DECIMAL(10,2) | -                 |
+| unit               | VARCHAR(20)   | -                 |
+| set_menu           | VARCHAR(50)   | -                 |
+| item_modifier_group| VARCHAR(50)   | -                 |
+| status             | ENUM          | Active/Inactive   |
+| item_logo          | VARCHAR(255)  | -                 |
++--------------------+---------------+-------------------+
+
+Foreign Key Relationships:
+- item_department → IT_CONF_ITEM_DEPARTMENTS(department_code)
+- item_category → IT_CONF_ITEM_CATEGORIES(category_code)
+
+API Endpoints:
+- GET /api/items - Fetch all items
+- POST /api/items - Create new item
+- PUT /api/items/:item_code - Update item
+- DELETE /api/items/:item_code - Delete item
+
+========================================
+
+4. SET MENU CONFIGURATION
+========================
+Component: SetMenu.js
+Backend Table: IT_CONF_SET_MENU
+
+Key Fields:
+- set_menu_code (Primary Key)
+- set_menu_name
+- description
+- items_included (JSON array with item details)
+- selling_price (calculated from item prices)
+- is_active
+- effective_from
+- effective_to
+
+Features:
+- Item selection from Item Master
+- Real-time price calculation
+- Grid/popup interface for item management
+- Search, sort, and filter capabilities
+- Copy functionality for duplicate menus
+
+API Endpoints:
+- GET /api/set-menus - Fetch all set menus
+- POST /api/set-menus - Create new set menu
+- PUT /api/set-menus/:id - Update set menu
+- DELETE /api/set-menus/:id - Delete set menu
+
+========================================
+
+5. REASON CODES MANAGEMENT
+=========================
+Component: ReasonCodes.js
+Backend Table: IT_CONF_REASONS
+Primary Key: REASON_CODE
+
+Table Structure:
++---------------+---------------+-------------------+
+| Field Name    | Data Type     | Constraints       |
++---------------+---------------+-------------------+
+| REASON_CODE   | VARCHAR(10)   | PRIMARY KEY       |
+| REASON_DESC   | VARCHAR(100)  | DEFAULT ' '       |
+| ActiveStatus  | TINYINT(1)    | DEFAULT 1         |
++---------------+---------------+-------------------+
+
+Purpose: Define operational reason codes for audit and reporting
+Operation Types: POS, KOT, Bill, Payment, Inventory, Reports, User Management, System, General
+
+API Endpoints:
+- GET /api/reason-codes - Fetch all reason codes
+- POST /api/reason-codes - Create new reason code
+- PUT /api/reason-codes/:id - Update reason code
+- DELETE /api/reason-codes/:id - Delete reason code
+
+========================================
+
+6. UNIT OF MEASUREMENT
+=====================
+Component: UnitOfMeasurement.js
+Backend Table: IT_CONF_UOM
+Primary Key: UOM_CODE
+
+Table Structure:
++---------------+---------------+-------------------+
+| Field Name    | Data Type     | Constraints       |
++---------------+---------------+-------------------+
+| UOM_CODE      | VARCHAR(10)   | PRIMARY KEY       |
+| UOM_NAME      | VARCHAR(50)   | DEFAULT ' '       |
+| DESCRIPTION   | VARCHAR(100)  | DEFAULT ' '       |
+| ActiveStatus  | TINYINT(1)    | DEFAULT 1         |
++---------------+---------------+-------------------+
+
+Purpose: Standardize measurement units across the application
+Features: Conversion factor support, display sequence for dropdown ordering
+
+API Endpoints:
+- GET /api/uom - Fetch all UOM records
+- POST /api/uom - Create new UOM
+- PUT /api/uom/:id - Update UOM
+- DELETE /api/uom/:id - Delete UOM
+
+========================================
+
+7. USER SETUP & MANAGEMENT
+==========================
+Component: UserSetup.js
+Backend Table: users
+Primary Key: id (AUTO_INCREMENT)
+Unique Fields: email, tin
+
+Table Structure:
++---------------+---------------+-------------------+
+| Field Name    | Data Type     | Constraints       |
++---------------+---------------+-------------------+
+| id            | INT           | AUTO_INCREMENT PK |
+| email         | VARCHAR(255)  | UNIQUE            |
+| password      | VARCHAR(255)  | -                 |
+| tin           | VARCHAR(255)  | UNIQUE            |
+| name          | VARCHAR(255)  | -                 |
+| profile_img   | VARCHAR(255)  | -                 |
+| role          | VARCHAR(32)   | DEFAULT 'user'    |
++---------------+---------------+-------------------+
+
+Related Tables:
+- user_groups - User group management
+- Property relationships via property_code
+- Outlet assignments (JSON or separate linking table)
+
+API Endpoints:
+- POST /api/users - Create new user (Admin only)
+- GET /api/users - Fetch all users
+- PUT /api/users/:id - Update user
+- DELETE /api/users/:id - Delete user
+
+========================================
+
+8. DATABASE RELATIONSHIPS & DEPENDENCIES
+=======================================
+
+Master-Transaction Relationships:
+
+1. Property Code → Outlet Setup (1:N relationship)
+   • One property can have multiple outlets
+   • property_code links the tables
+
+2. Item Departments → Item Categories → Item Master (1:N:N)
+   • Departments contain multiple categories
+   • Categories contain multiple items
+   • Hierarchical structure for menu organization
+
+3. Property Code → User Setup (1:N relationship)
+   • Users belong to specific properties
+   • property_code in user table
+
+4. Outlet Setup → User Setup (N:N via outlet assignments)
+   • Users can be assigned to multiple outlets
+   • outlet_codes array in user setup
+
+5. Item Master → Set Menu (N:N via items_included JSON)
+   • Set menus contain multiple items
+   • JSON array stores item relationships
+
+Foreign Key Constraints:
+- IT_CONF_ITEM_MASTER.item_department → IT_CONF_ITEM_DEPARTMENTS.department_code
+- IT_CONF_ITEM_MASTER.item_category → IT_CONF_ITEM_CATEGORIES.category_code
+- IT_CONF_ITEM_CATEGORIES.item_department_code → IT_CONF_ITEM_DEPARTMENTS.department_code
+
+========================================
+
+9. API PATTERNS & IMPLEMENTATION
+===============================
+
+RESTful API Pattern:
+All CRUD operations follow consistent conventions:
+- GET /api/{resource} - Fetch all records
+- POST /api/{resource} - Create new record
+- PUT /api/{resource}/:id - Update existing record
+- DELETE /api/{resource}/:id - Delete record
+
+Data Persistence Strategy:
+All forms use localStorage with hash verification:
+- {formName}Records - Main data storage
+- {formName}RecordsBackup - Backup with timestamp
+- {formName}RecordsHash - Data integrity verification
+
+Validation Strategy:
+- Client-side validation with duplicate checking
+- Field-level validation with error messaging
+- Data type and length constraints
+- Required field validation
+
+Export Capabilities:
+- Excel export for all data tables
+- PDF export with formatted layouts
+- Import/Export functionality for data migration
+- Backup and restore capabilities
+
+========================================
+
+IMPLEMENTATION NOTES
+===================
+
+Authentication & Authorization:
+- Session-based authentication
+- Role-based access control (Admin/User)
+- Protected routes and API endpoints
+
+Database Configuration:
+- MySQL database with InnoDB engine
+- UTF8MB4 character set for international support
+- Proper indexing for performance optimization
+- Foreign key constraints for data integrity
+
+Development Environment:
+- Node.js backend with Express framework
+- React frontend with modern ES6+ features
+- MySQL database server
+- Development and production configurations
+
+========================================
+
+FIELD MAPPING SUMMARY
+====================
+
+Property Code Form Fields:
+- applicable_from → applicable_from (DATE)
+- property_code → property_code (VARCHAR(32), UNIQUE)
+- property_name → property_name (VARCHAR(128), REQUIRED)
+- nick_name → nick_name (VARCHAR(64))
+- owner_name → owner_name (VARCHAR(128))
+- gst_number → gst_number (VARCHAR(32))
+- pan_number → pan_number (VARCHAR(32))
+
+Item Master Form Fields:
+- item_code → item_code (VARCHAR(20), UNIQUE)
+- item_name → item_name (VARCHAR(50), REQUIRED)
+- item_price_1 → item_price_1 (DECIMAL(10,2))
+- tax_code → tax_code (VARCHAR(10))
+- item_department → item_department (VARCHAR(4), FK)
+- item_category → item_category (VARCHAR(10), FK)
+
+Outlet Setup Form Fields:
+- OUTCODE → OUTCODE (VARCHAR(3), PK)
+- OUTNAME → OUTNAME (VARCHAR(30))
+- SHTNAM → SHTNAM (VARCHAR(10))
+- OUTTYPE → OUTTYPE (DECIMAL(1,0))
+
+========================================
+
+This documentation provides comprehensive backend integration mapping
+for the complete POS system with all management screens, API endpoints,
+database structures, field mappings, and implementation guidelines.
+
+Document generated: ${new Date().toLocaleString()}
+Total Coverage: 8 Management Screens + Relationships + API Patterns
+========================================`;
+
+        function showStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 5000);
+        }
+
+        function downloadTextFile() {
+            try {
+                const blob = new Blob([fullDocumentation], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'POS_Database_Documentation_' + new Date().toISOString().slice(0, 10) + '.txt';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                showStatus('✅ Text documentation downloaded successfully!');
+            } catch (error) {
+                showStatus('❌ Download failed: ' + error.message, 'error');
+            }
+        }
+
+        function downloadJSONFile() {
+            try {
+                const jsonData = {
+                    title: "POS System - Backend Database Integration Mapping",
+                    generatedOn: new Date().toISOString(),
+                    version: "1.0",
+                    modules: [
+                        {
+                            name: "Property Code Management",
+                            component: "PropertyCode.js",
+                            table: "IT_CONF_PROPERTY",
+                            primaryKey: "id (AUTO_INCREMENT)",
+                            uniqueFields: ["property_code"],
+                            endpoints: [
+                                "GET /api/property-codes",
+                                "POST /api/property-codes",
+                                "PUT /api/property-codes/:id",
+                                "DELETE /api/property-codes/:id"
+                            ],
+                            keyFields: {
+                                "property_code": "VARCHAR(32) NOT NULL UNIQUE",
+                                "property_name": "VARCHAR(128) NOT NULL",
+                                "gst_number": "VARCHAR(32)",
+                                "pan_number": "VARCHAR(32)"
+                            }
+                        },
+                        {
+                            name: "Outlet Setup",
+                            component: "OutletSetup.js",
+                            table: "IT_CONF_OUTSET",
+                            primaryKey: "Composite (APPDAT, OUTCODE)",
+                            endpoints: [
+                                "GET /api/outlets",
+                                "POST /api/outlets",
+                                "PUT /api/outlets/:outlet_code",
+                                "DELETE /api/outlets/:outlet_code"
+                            ]
+                        },
+                        {
+                            name: "Item Master Management",
+                            component: "ItemMaster.js",
+                            table: "IT_CONF_ITEM_MASTER",
+                            primaryKey: "id (AUTO_INCREMENT)",
+                            uniqueFields: ["item_code"],
+                            endpoints: [
+                                "GET /api/items",
+                                "POST /api/items",
+                                "PUT /api/items/:item_code",
+                                "DELETE /api/items/:item_code"
+                            ],
+                            keyFields: {
+                                "item_code": "VARCHAR(20) NOT NULL UNIQUE",
+                                "item_name": "VARCHAR(50) NOT NULL",
+                                "item_price_1": "DECIMAL(10,2)",
+                                "tax_code": "VARCHAR(10)"
+                            }
+                        },
+                        {
+                            name: "Set Menu Configuration",
+                            component: "SetMenu.js",
+                            table: "IT_CONF_SET_MENU",
+                            endpoints: [
+                                "GET /api/set-menus",
+                                "POST /api/set-menus",
+                                "PUT /api/set-menus/:id",
+                                "DELETE /api/set-menus/:id"
+                            ]
+                        }
+                    ],
+                    relationships: [
+                        "Property Code → Outlet Setup (1:N)",
+                        "Item Departments → Item Categories → Item Master (1:N:N)",
+                        "Property Code → User Setup (1:N)",
+                        "Item Master → Set Menu (N:N via JSON)"
+                    ],
+                    apiPatterns: {
+                        restful: "Standard CRUD operations",
+                        persistence: "localStorage with hash verification",
+                        validation: "Client-side with duplicate checking"
+                    },
+                    implementation: {
+                        backend: "Node.js/Express",
+                        frontend: "React",
+                        database: "MySQL with InnoDB",
+                        authentication: "Session-based with role control"
+                    }
+                };
+
+                const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'POS_Database_Documentation_' + new Date().toISOString().slice(0, 10) + '.json';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                showStatus('✅ JSON documentation downloaded successfully!');
+            } catch (error) {
+                showStatus('❌ JSON download failed: ' + error.message, 'error');
+            }
+        }
+
+        function copyToClipboard() {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(fullDocumentation).then(() => {
+                    showStatus('✅ Complete documentation copied to clipboard!');
+                }).catch(() => {
+                    fallbackCopy();
+                });
+            } else {
+                fallbackCopy();
+            }
+        }
+
+        function fallbackCopy() {
+            const textArea = document.createElement('textarea');
+            textArea.value = fullDocumentation;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showStatus('✅ Documentation copied to clipboard!');
+            } catch (err) {
+                showStatus('📋 Please select the text above and copy manually (Ctrl+C)', 'error');
+                showContent();
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function showContent() {
+            const contentDiv = document.getElementById('contentDisplay');
+            if (contentDiv.style.display === 'none') {
+                contentDiv.textContent = fullDocumentation;
+                contentDiv.style.display = 'block';
+                contentDiv.scrollIntoView({ behavior: 'smooth' });
+                showStatus('📖 Documentation displayed. You can select all (Ctrl+A) and copy (Ctrl+C)');
+            } else {
+                contentDiv.style.display = 'none';
+                showStatus('📖 Content hidden');
+            }
+        }
+
+        // Log page ready
+        console.log('✅ POS Database Documentation page loaded successfully');
+        console.log('📋 Total documentation size:', fullDocumentation.length, 'characters');
+    </script>
+</body>
+</html>

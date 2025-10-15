@@ -6,6 +6,8 @@ import infoLogo from './info-logo-new.png';
 import propertyLogo from './hotel-abc-logo.png';
 import DashboardSummaryPanel from './DashboardSummaryPanel';
 import SidebarMenu from './SidebarMenu';
+import { downloadDatabaseDocumentation } from './DatabaseDocumentationGenerator';
+import { VERSION_INFO, VersionUtils } from './version';
 const menuItems = [
   {
     icon: '🏨',
@@ -86,6 +88,459 @@ const menuItems = [
     label: 'POS System'
   }
 ];
+// Database Documentation Content Component
+function DatabaseDocumentationContent() {
+  const documentationData = `POS SYSTEM - DATABASE INTEGRATION MAPPING
+========================================
+Generated: ${new Date().toLocaleDateString()}
+
+OVERVIEW
+========
+This document provides comprehensive backend integration mapping for the POS system,
+covering all management screens, database tables, API endpoints, and relationships.
+
+TABLE OF CONTENTS
+================
+1. Property Code Management (IT_CONF_PROPERTY)
+2. Outlet Setup Management (IT_CONF_OUTSET)  
+3. Item Master Management (IT_CONF_ITEM_MASTER)
+4. User Setup & Management (users)
+5. Set Menu Configuration (IT_CONF_SET_MENU)
+6. Reason Codes Management (IT_CONF_REASONS)
+7. Unit of Measurement (IT_CONF_UOM)
+8. Database Relationships & Dependencies
+9. API Patterns & Implementation Guidelines
+
+========================================
+
+1. PROPERTY CODE MANAGEMENT
+==========================
+Component: PropertyCode.js
+Backend Table: IT_CONF_PROPERTY
+Primary Key: id (AUTO_INCREMENT)
+Unique Fields: property_code
+
+Table Structure:
+- id (INT, AUTO_INCREMENT, PRIMARY KEY)
+- applicable_from (DATE)
+- property_code (VARCHAR(32), NOT NULL, UNIQUE)
+- property_name (VARCHAR(128), NOT NULL)
+- nick_name (VARCHAR(64))
+- owner_name (VARCHAR(128))
+- address_name (VARCHAR(256))
+- gst_number (VARCHAR(32))
+- pan_number (VARCHAR(32))
+- group_name (VARCHAR(64))
+- local_currency (VARCHAR(16))
+- currency_format (VARCHAR(16))
+- symbol (VARCHAR(8))
+- decimal_places (INT, DEFAULT 2)
+- date_format (VARCHAR(16))
+- round_off (VARCHAR(16))
+- property_logo (VARCHAR(256))
+
+API Endpoints:
+- GET /api/property-codes - Fetch all property codes
+- POST /api/property-codes - Create new property code
+- PUT /api/property-codes/:id - Update existing property code
+- DELETE /api/property-codes/:id - Delete property code
+
+========================================
+
+2. OUTLET SETUP MANAGEMENT
+=========================
+Component: OutletSetup.js
+Backend Table: IT_CONF_OUTSET
+Primary Key: Composite (APPDAT, OUTCODE)
+
+Table Structure:
+- APPDAT (DECIMAL(8,0), PRIMARY KEY)
+- OUTCODE (VARCHAR(3), PRIMARY KEY)
+- OUTNAME (VARCHAR(30), DEFAULT '')
+- SHTNAM (VARCHAR(10), DEFAULT '')
+- OUTTYPE (DECIMAL(1,0), DEFAULT 1)
+- BILInitial (VARCHAR(2), DEFAULT '0')
+- OUTSET (DECIMAL(6,0), DEFAULT 0)
+- ActiveStatus (TINYINT(1), DEFAULT 1)
+
+API Endpoints:
+- GET /api/outlets - Fetch all outlets
+- POST /api/outlets - Create new outlet
+- PUT /api/outlets/:outlet_code - Update outlet
+- DELETE /api/outlets/:outlet_code - Delete outlet
+
+========================================
+
+3. ITEM MASTER MANAGEMENT
+========================
+Component: ItemMaster.js
+Backend Table: IT_CONF_ITEM_MASTER
+Primary Key: id (AUTO_INCREMENT)
+Unique Fields: item_code
+
+Table Structure:
+- id (INT, AUTO_INCREMENT, PRIMARY KEY)
+- select_outlets (JSON, Selected outlets array)
+- applicable_from (DATE, NOT NULL)
+- item_code (VARCHAR(20), NOT NULL, UNIQUE)
+- inventory_code (VARCHAR(20))
+- item_name (VARCHAR(50), NOT NULL)
+- short_name (VARCHAR(20))
+- alternate_name (VARCHAR(100))
+- tax_code (VARCHAR(10))
+- item_price_1 to item_price_4 (DECIMAL(10,2))
+- item_printer_1 to item_printer_3 (VARCHAR(20))
+- print_group (VARCHAR(50))
+- item_department (VARCHAR(4), NOT NULL)
+- item_category (VARCHAR(10), NOT NULL)
+- cost (DECIMAL(10,2))
+- unit (VARCHAR(20))
+- set_menu (VARCHAR(50))
+- item_modifier_group (VARCHAR(50))
+- status (ENUM: Active/Inactive)
+- item_logo (VARCHAR(255))
+
+Foreign Key Relationships:
+- item_department → IT_CONF_ITEM_DEPARTMENTS(department_code)
+- item_category → IT_CONF_ITEM_CATEGORIES(category_code)
+
+API Endpoints:
+- GET /api/items - Fetch all items
+- POST /api/items - Create new item
+- PUT /api/items/:item_code - Update item
+- DELETE /api/items/:item_code - Delete item
+
+========================================
+
+4. SET MENU CONFIGURATION
+========================
+Component: SetMenu.js
+Backend Table: IT_CONF_SET_MENU
+
+Key Fields:
+- set_menu_code (Primary Key)
+- set_menu_name
+- description
+- items_included (JSON array with item details)
+- selling_price (calculated from item prices)
+- is_active
+- effective_from
+- effective_to
+
+Features:
+- Item selection from Item Master
+- Real-time price calculation
+- Grid/popup interface for item management
+- Search, sort, and filter capabilities
+- Copy functionality for duplicate menus
+
+API Endpoints:
+- GET /api/set-menus - Fetch all set menus
+- POST /api/set-menus - Create new set menu
+- PUT /api/set-menus/:id - Update set menu
+- DELETE /api/set-menus/:id - Delete set menu
+
+========================================
+
+5. REASON CODES MANAGEMENT
+=========================
+Component: ReasonCodes.js
+Backend Table: IT_CONF_REASONS
+Primary Key: REASON_CODE
+
+Table Structure:
+- REASON_CODE (VARCHAR(10), PRIMARY KEY)
+- REASON_DESC (VARCHAR(100), DEFAULT '')
+- ActiveStatus (TINYINT(1), DEFAULT 1)
+
+Purpose: Define operational reason codes for audit and reporting
+Operation Types: POS, KOT, Bill, Payment, Inventory, Reports, User Management, System, General
+
+API Endpoints:
+- GET /api/reason-codes - Fetch all reason codes
+- POST /api/reason-codes - Create new reason code
+- PUT /api/reason-codes/:id - Update reason code
+- DELETE /api/reason-codes/:id - Delete reason code
+
+========================================
+
+6. UNIT OF MEASUREMENT
+=====================
+Component: UnitOfMeasurement.js
+Backend Table: IT_CONF_UOM
+Primary Key: UOM_CODE
+
+Table Structure:
+- UOM_CODE (VARCHAR(10), PRIMARY KEY)
+- UOM_NAME (VARCHAR(50), DEFAULT '')
+- DESCRIPTION (VARCHAR(100), DEFAULT '')
+- ActiveStatus (TINYINT(1), DEFAULT 1)
+
+Purpose: Standardize measurement units across the application
+Features: Conversion factor support, display sequence for dropdown ordering
+
+API Endpoints:
+- GET /api/uom - Fetch all UOM records
+- POST /api/uom - Create new UOM
+- PUT /api/uom/:id - Update UOM
+- DELETE /api/uom/:id - Delete UOM
+
+========================================
+
+7. USER SETUP & MANAGEMENT
+==========================
+Component: UserSetup.js
+Backend Table: users
+Primary Key: id (AUTO_INCREMENT)
+Unique Fields: email, tin
+
+Table Structure:
+- id (INT, AUTO_INCREMENT, PRIMARY KEY)
+- email (VARCHAR(255), UNIQUE)
+- password (VARCHAR(255))
+- tin (VARCHAR(255), UNIQUE)
+- name (VARCHAR(255))
+- profile_img (VARCHAR(255))
+- role (VARCHAR(32), DEFAULT 'user')
+
+Related Tables:
+- user_groups - User group management
+- Property relationships via property_code
+- Outlet assignments (JSON or separate linking table)
+
+API Endpoints:
+- POST /api/users - Create new user (Admin only)
+- GET /api/users - Fetch all users
+- PUT /api/users/:id - Update user
+- DELETE /api/users/:id - Delete user
+
+========================================
+
+8. DATABASE RELATIONSHIPS
+=========================
+
+Master-Transaction Relationships:
+
+1. Property Code → Outlet Setup (1:N relationship)
+   • One property can have multiple outlets
+   • property_code links the tables
+
+2. Item Departments → Item Categories → Item Master (1:N:N)
+   • Departments contain multiple categories
+   • Categories contain multiple items
+   • Hierarchical structure for menu organization
+
+3. Property Code → User Setup (1:N relationship)
+   • Users belong to specific properties
+   • property_code in user table
+
+4. Outlet Setup → User Setup (N:N via outlet assignments)
+   • Users can be assigned to multiple outlets
+   • outlet_codes array in user setup
+
+5. Item Master → Set Menu (N:N via items_included JSON)
+   • Set menus contain multiple items
+   • JSON array stores item relationships
+
+Foreign Key Constraints:
+- IT_CONF_ITEM_MASTER.item_department → IT_CONF_ITEM_DEPARTMENTS.department_code
+- IT_CONF_ITEM_MASTER.item_category → IT_CONF_ITEM_CATEGORIES.category_code
+- IT_CONF_ITEM_CATEGORIES.item_department_code → IT_CONF_ITEM_DEPARTMENTS.department_code
+
+========================================
+
+9. API PATTERNS & IMPLEMENTATION
+===============================
+
+RESTful API Pattern:
+All CRUD operations follow consistent conventions:
+- GET /api/{resource} - Fetch all records
+- POST /api/{resource} - Create new record
+- PUT /api/{resource}/:id - Update existing record
+- DELETE /api/{resource}/:id - Delete record
+
+Data Persistence Strategy:
+All forms use localStorage with hash verification:
+- {formName}Records - Main data storage
+- {formName}RecordsBackup - Backup with timestamp
+- {formName}RecordsHash - Data integrity verification
+
+Validation Strategy:
+- Client-side validation with duplicate checking
+- Field-level validation with error messaging
+- Data type and length constraints
+- Required field validation
+
+Export Capabilities:
+- Excel export for all data tables
+- PDF export with formatted layouts
+- Import/Export functionality for data migration
+- Backup and restore capabilities
+
+========================================
+
+IMPLEMENTATION NOTES
+===================
+
+Authentication & Authorization:
+- Session-based authentication
+- Role-based access control (Admin/User)
+- Protected routes and API endpoints
+
+Database Configuration:
+- MySQL database with InnoDB engine
+- UTF8MB4 character set for international support
+- Proper indexing for performance optimization
+- Foreign key constraints for data integrity
+
+Development Environment:
+- Node.js backend with Express framework
+- React frontend with modern ES6+ features
+- MySQL database server
+- Development and production configurations
+
+========================================
+
+This documentation provides comprehensive backend integration mapping
+for the complete POS system with all management screens, API endpoints,
+database structures, and implementation guidelines.
+
+Document generated: ${new Date().toLocaleString()}
+========================================`;
+
+  const downloadText = () => {
+    try {
+      const blob = new Blob([documentationData], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'POS_Database_Documentation_' + new Date().toISOString().slice(0, 10) + '.txt';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      alert('✅ Text documentation downloaded successfully!');
+    } catch (error) {
+      alert('❌ Download failed: ' + error.message);
+    }
+  };
+
+  const downloadJSON = () => {
+    try {
+      const jsonData = {
+        title: "POS System - Backend Database Integration Mapping",
+        generatedOn: new Date().toISOString(),
+        modules: [
+          { name: "Property Code Management", table: "IT_CONF_PROPERTY", component: "PropertyCode.js" },
+          { name: "Outlet Setup", table: "IT_CONF_OUTSET", component: "OutletSetup.js" },
+          { name: "Item Master", table: "IT_CONF_ITEM_MASTER", component: "ItemMaster.js" },
+          { name: "Set Menu", table: "IT_CONF_SET_MENU", component: "SetMenu.js" },
+          { name: "Reason Codes", table: "IT_CONF_REASONS", component: "ReasonCodes.js" },
+          { name: "Unit of Measurement", table: "IT_CONF_UOM", component: "UnitOfMeasurement.js" },
+          { name: "User Setup", table: "users", component: "UserSetup.js" }
+        ],
+        relationships: [
+          "Property Code → Outlet Setup (1:N)",
+          "Item Departments → Item Categories → Item Master (1:N:N)",
+          "Property Code → User Setup (1:N)",
+          "Item Master → Set Menu (N:N via JSON)"
+        ]
+      };
+      
+      const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'POS_Database_Documentation_' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      alert('✅ JSON documentation downloaded successfully!');
+    } catch (error) {
+      alert('❌ JSON download failed: ' + error.message);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(documentationData).then(() => {
+        alert('✅ Documentation copied to clipboard!');
+      }).catch(() => {
+        fallbackCopy();
+      });
+    } else {
+      fallbackCopy();
+    }
+  };
+
+  const fallbackCopy = () => {
+    const textArea = document.createElement('textarea');
+    textArea.value = documentationData;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      alert('✅ Documentation copied to clipboard!');
+    } catch (err) {
+      alert('📋 Please select the text manually and copy with Ctrl+C');
+    }
+    document.body.removeChild(textArea);
+  };
+
+  return (
+    <div>
+      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+        <h3 style={{ color: '#2c3e50', marginBottom: '10px' }}>POS System - Backend Integration Mapping</h3>
+        <p style={{ color: '#7f8c8d', margin: 0 }}>Complete database documentation for all management screens</p>
+      </div>
+      
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <button onClick={downloadText} style={{
+          background: '#27ae60', color: 'white', border: 'none', padding: '10px 20px',
+          borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '600'
+        }}>
+          📝 Download Text
+        </button>
+        <button onClick={downloadJSON} style={{
+          background: '#3498db', color: 'white', border: 'none', padding: '10px 20px',
+          borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '600'
+        }}>
+          📊 Download JSON
+        </button>
+        <button onClick={copyToClipboard} style={{
+          background: '#e74c3c', color: 'white', border: 'none', padding: '10px 20px',
+          borderRadius: '6px', cursor: 'pointer', fontSize: '14px', fontWeight: '600'
+        }}>
+          📋 Copy Text
+        </button>
+      </div>
+
+      <div style={{
+        background: '#f8f9fa',
+        border: '1px solid #e9ecef',
+        borderRadius: '8px',
+        padding: '15px',
+        fontFamily: 'Courier New, monospace',
+        fontSize: '12px',
+        whiteSpace: 'pre-wrap',
+        maxHeight: '400px',
+        overflow: 'auto',
+        color: '#2c3e50',
+        lineHeight: '1.4'
+      }}>
+        {documentationData}
+      </div>
+      
+      <div style={{ marginTop: '15px', fontSize: '13px', color: '#7f8c8d', textAlign: 'center' }}>
+        📌 <strong>Alternative:</strong> Use Ctrl+P to print this documentation as PDF
+      </div>
+    </div>
+  );
+}
+
 function Dashboard({ user, setUser }) {
   // Track dirty state from child modules
   const [childDirty, setChildDirty] = useState(false);
@@ -97,6 +552,7 @@ function Dashboard({ user, setUser }) {
   const [activeTab, setActiveTab] = useState('compinfo');
   const [loadingCompany, setLoadingCompany] = useState(false);
   const [companyError, setCompanyError] = useState('');
+
   const [propertyRecords, setPropertyRecords] = useState([]); // Persist PropertyCode records
   const [itemDepartmentRecords, setItemDepartmentRecords] = useState([]); // Persist ItemDepartments records
   const [itemCategoryRecords, setItemCategoryRecords] = useState([]); // Persist ItemCategories records
@@ -118,6 +574,10 @@ function Dashboard({ user, setUser }) {
   const [taxCodesRecords, setTaxCodesRecords] = useState([]); // Persist Tax Codes records
   const [taxStructureRecords, setTaxStructureRecords] = useState([]); // Persist Tax Structure records
   const [creditCardRecords, setCreditCardRecords] = useState([]); // Persist Credit Card records
+  const [setMenuRecords, setSetMenuRecords] = useState([]); // Persist Set Menu records
+  const [itemMasterRecords, setItemMasterRecords] = useState([]); // Persist Item Master records
+  const [reasonCodesRecords, setReasonCodesRecords] = useState([]); // Persist Reason Codes records
+  const [uomRecords, setUomRecords] = useState([]); // Persist Unit of Measurement records
   const navigate = useNavigate();
 
   // Flag to track if initial data loading is complete
@@ -205,6 +665,10 @@ function Dashboard({ user, setUser }) {
         const savedTaxCodesRecords = localStorage.getItem('taxCodesRecords');
         const savedTaxStructureRecords = localStorage.getItem('taxStructureRecords');
         const savedCreditCardRecords = localStorage.getItem('creditCardRecords');
+        const savedSetMenuRecords = localStorage.getItem('setMenuRecords');
+        const savedItemMasterRecords = localStorage.getItem('itemMasterRecords');
+        const savedReasonCodesRecords = localStorage.getItem('reasonCodesRecords');
+        const savedUomRecords = localStorage.getItem('uomRecords');
 
         // Parse and set the data with safe parsing and integrity checking
         const loadedPropertyRecords = safeJsonParse(savedPropertyRecords, [], 'propertyRecords');
@@ -228,6 +692,10 @@ function Dashboard({ user, setUser }) {
         const loadedTaxCodesRecords = safeJsonParse(savedTaxCodesRecords, [], 'taxCodesRecords');
         const loadedTaxStructureRecords = safeJsonParse(savedTaxStructureRecords, [], 'taxStructureRecords');
         const loadedCreditCardRecords = safeJsonParse(savedCreditCardRecords, [], 'creditCardRecords');
+        const loadedSetMenuRecords = safeJsonParse(savedSetMenuRecords, [], 'setMenuRecords');
+        const loadedItemMasterRecords = safeJsonParse(savedItemMasterRecords, [], 'itemMasterRecords');
+        const loadedReasonCodesRecords = safeJsonParse(savedReasonCodesRecords, [], 'reasonCodesRecords');
+        const loadedUomRecords = safeJsonParse(savedUomRecords, [], 'uomRecords');
 
         // Log loaded data for debugging with special attention to critical records
         console.log('========== DATA LOADING REPORT ==========');
@@ -240,6 +708,10 @@ function Dashboard({ user, setUser }) {
         console.log('✅ Tax Codes records:', loadedTaxCodesRecords.length, 'items');
         console.log('✅ Tax Structure records:', loadedTaxStructureRecords.length, 'items');
         console.log('✅ Credit Card records:', loadedCreditCardRecords.length, 'items');
+        console.log('✅ Set Menu records:', loadedSetMenuRecords.length, 'items');
+        console.log('✅ Item Master records:', loadedItemMasterRecords.length, 'items');
+        console.log('✅ Reason Codes records:', loadedReasonCodesRecords.length, 'items');
+        console.log('✅ UOM records:', loadedUomRecords.length, 'items');
         console.log('✅ Property records:', loadedPropertyRecords.length, 'items');
         console.log('✅ Table Settings records:', loadedTableSettingsRecords.length, 'items');
         console.log('==========================================');
@@ -274,6 +746,10 @@ function Dashboard({ user, setUser }) {
         setTaxCodesRecords(loadedTaxCodesRecords);
         setTaxStructureRecords(loadedTaxStructureRecords);
         setCreditCardRecords(loadedCreditCardRecords);
+        setSetMenuRecords(loadedSetMenuRecords);
+        setItemMasterRecords(loadedItemMasterRecords);
+        setReasonCodesRecords(loadedReasonCodesRecords);
+        setUomRecords(loadedUomRecords);
 
         console.log('Data loaded from localStorage successfully');
         setDataLoaded(true); // Mark data as loaded
@@ -525,6 +1001,34 @@ function Dashboard({ user, setUser }) {
   }, [creditCardRecords, dataLoaded]);
 
   useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('setMenuRecords', setMenuRecords);
+      console.log('Saving setMenuRecords to localStorage:', setMenuRecords);
+    }
+  }, [setMenuRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('itemMasterRecords', itemMasterRecords);
+      console.log('Saving itemMasterRecords to localStorage:', itemMasterRecords);
+    }
+  }, [itemMasterRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('reasonCodesRecords', reasonCodesRecords);
+      console.log('Saving reasonCodesRecords to localStorage:', reasonCodesRecords);
+    }
+  }, [reasonCodesRecords, dataLoaded]);
+
+  useEffect(() => {
+    if (dataLoaded) {
+      saveToLocalStorage('uomRecords', uomRecords);
+      console.log('Saving uomRecords to localStorage:', uomRecords);
+    }
+  }, [uomRecords, dataLoaded]);
+
+  useEffect(() => {
     // Load default company info on mount
     const fetchCompanyInfo = () => {
       setLoadingCompany(true);
@@ -677,6 +1181,10 @@ function Dashboard({ user, setUser }) {
             if (importedData.taxCodesRecords) setTaxCodesRecords(importedData.taxCodesRecords);
             if (importedData.taxStructureRecords) setTaxStructureRecords(importedData.taxStructureRecords);
             if (importedData.creditCardRecords) setCreditCardRecords(importedData.creditCardRecords);
+            if (importedData.setMenuRecords) setSetMenuRecords(importedData.setMenuRecords);
+            if (importedData.itemMasterRecords) setItemMasterRecords(importedData.itemMasterRecords);
+            if (importedData.reasonCodesRecords) setReasonCodesRecords(importedData.reasonCodesRecords);
+            if (importedData.uomRecords) setUomRecords(importedData.uomRecords);
 
             alert('Data imported successfully!');
           }
@@ -820,6 +1328,10 @@ function Dashboard({ user, setUser }) {
         taxCodesRecords,
         taxStructureRecords,
         creditCardRecords,
+        setMenuRecords,
+        itemMasterRecords,
+        reasonCodesRecords,
+        uomRecords,
         version: '1.0'
       };
       
@@ -912,9 +1424,103 @@ function Dashboard({ user, setUser }) {
     <div className="dashboard-container">
       <div className="dashboard-topbar">
         <img src={infoLogo} alt="Info Logo" className="dashboard-logo" />
-        <span className="dashboard-title">ithots G5 Restaurant Edition</span>
+        <span className="dashboard-title">{VERSION_INFO.productName}</span>
         <span className="dashboard-hotel">{hotelName}</span>
         <div style={{display:'flex',alignItems:'center',marginLeft:'auto',gap:'16px'}}>
+          <button 
+            onClick={() => {
+              const docContent = `POS SYSTEM - DATABASE INTEGRATION MAPPING
+========================================
+Generated: ${new Date().toLocaleDateString()}
+
+COMPREHENSIVE BACKEND INTEGRATION MAPPING
+==========================================
+
+1. PROPERTY CODE MANAGEMENT (PropertyCode.js)
+   Table: IT_CONF_PROPERTY
+   API: /api/property-codes
+   Fields: property_code (UNIQUE), property_name, gst_number, pan_number, etc.
+
+2. OUTLET SETUP (OutletSetup.js) 
+   Table: IT_CONF_OUTSET
+   API: /api/outlets
+   Primary Key: Composite (APPDAT, OUTCODE)
+
+3. ITEM MASTER (ItemMaster.js)
+   Table: IT_CONF_ITEM_MASTER  
+   API: /api/items
+   Fields: item_code (UNIQUE), item_name, item_price_1-4, tax_code, etc.
+
+4. SET MENU (SetMenu.js)
+   Table: IT_CONF_SET_MENU
+   API: /api/set-menus
+   Features: Item selection, price calculation
+
+5. REASON CODES (ReasonCodes.js)
+   Table: IT_CONF_REASONS
+   API: /api/reason-codes
+   Purpose: Operational audit codes
+
+6. UNIT OF MEASUREMENT (UnitOfMeasurement.js)
+   Table: IT_CONF_UOM
+   API: /api/uom
+   Purpose: Standardize measurement units
+
+7. USER SETUP (UserSetup.js)
+   Table: users
+   API: /api/users
+   Fields: email (UNIQUE), tin (UNIQUE), role, etc.
+
+KEY RELATIONSHIPS:
+- Property Code → Outlets (1:N)
+- Item Departments → Categories → Items (1:N:N)  
+- Users → Properties → Outlets
+- Items → Set Menus (N:N)
+
+API PATTERNS:
+- RESTful CRUD: GET/POST/PUT/DELETE
+- localStorage persistence with hash verification
+- Client-side validation with duplicate checking
+
+IMPLEMENTATION:
+- Node.js/Express backend
+- React frontend  
+- MySQL database with InnoDB
+- Session-based authentication
+
+Generated: ${new Date().toLocaleString()}`;
+              
+              if (navigator.clipboard) {
+                navigator.clipboard.writeText(docContent).then(() => {
+                  alert('✅ DATABASE DOCUMENTATION COPIED!\n\nThe complete database documentation has been copied to your clipboard.\n\nYou can now:\n• Paste it into a Word document (Ctrl+V)\n• Save it as a text file\n• Email it or share it\n\nThis includes all table structures, API endpoints, relationships, and implementation details for the 8 management screens.');
+                }).catch(() => {
+                  prompt('📋 COPY THIS DOCUMENTATION:\n\nPress Ctrl+A to select all, then Ctrl+C to copy:', docContent);
+                });
+              } else {
+                prompt('📋 COPY THIS DOCUMENTATION:\n\nPress Ctrl+A to select all, then Ctrl+C to copy:', docContent);
+              }
+            }}
+            style={{
+              background:'#4CAF50',
+              color:'white',
+              border:'none',
+              borderRadius:'8px',
+              padding:'8px 16px',
+              fontSize:'0.95rem',
+              fontWeight:'500',
+              cursor:'pointer',
+              display:'flex',
+              alignItems:'center',
+              gap:'6px',
+              boxShadow:'0 2px 4px rgba(0,0,0,0.1)',
+              transition:'background 0.2s'
+            }}
+            onMouseOver={(e) => e.target.style.background = '#45a049'}
+            onMouseOut={(e) => e.target.style.background = '#4CAF50'}
+            title="Copy Complete Database Documentation to Clipboard"
+          >
+            📄 DB Docs
+          </button>
           <div className="dashboard-userinfo" style={{display:'flex',alignItems:'center',background:'#fff',borderRadius:'18px',boxShadow:'0 2px 8px rgba(0,0,0,0.10)',padding:'2px 18px 2px 8px',marginRight:'8px',minWidth:'160px'}}>
             <span style={{display:'flex',alignItems:'center',marginRight:'10px'}}>
               <span style={{display:'inline-block',width:'32px',height:'32px',borderRadius:'50%',background:'#e3e3e3',border:'2px solid #1976d2',overflow:'hidden',marginRight:'8px'}}>
@@ -999,6 +1605,22 @@ function Dashboard({ user, setUser }) {
                 setRecords: setPropertyRecords
               })}
             </React.Suspense>
+          ) : activeSubmenu === 'Reason Codes' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./ReasonCodes').default, {
+                setParentDirty: setChildDirty,
+                records: reasonCodesRecords,
+                setRecords: setReasonCodesRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Unit Of Measurement' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./UnitOfMeasurement').default, {
+                setParentDirty: setChildDirty,
+                records: uomRecords,
+                setRecords: setUomRecords
+              })}
+            </React.Suspense>
           ) : activeSubmenu === 'Tax codes' ? (
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./TaxCodes').default, {
@@ -1079,7 +1701,18 @@ function Dashboard({ user, setUser }) {
           ) : activeSubmenu === 'Item Master' ? (
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./ItemMaster').default, {
-                setParentDirty: setChildDirty
+                setParentDirty: setChildDirty,
+                records: itemMasterRecords,
+                setRecords: setItemMasterRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Set Menu' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./SetMenu').default, {
+                setParentDirty: setChildDirty,
+                records: setMenuRecords,
+                setRecords: setSetMenuRecords,
+                itemMasterRecords: itemMasterRecords
               })}
             </React.Suspense>
           ) : activeSubmenu === 'Item Sold' ? (
@@ -1411,40 +2044,71 @@ function Dashboard({ user, setUser }) {
             </div>
           ) : showCompanyInfo ? (
             <div className="compinfo-center-panel">
-              <div className="compinfo-card">
-                <div className="compinfo-logo-row">
-                  <img src={propertyLogo} alt="Property Logo" className="compinfo-logo" />
+              <div className="compinfo-card-with-scroll">
+                {/* Fixed Header Section */}
+                <div className="compinfo-header-section">
+                  <div className="compinfo-logo-row">
+                    <img src={propertyLogo} alt="Property Logo" className="compinfo-logo" />
+                  </div>
+                  <div className="compinfo-title">ithots POS Version : {companyInfo?.pos_version || VersionUtils.getCurrentVersion()}</div>
+                  <div className="compinfo-expiry">Annual Software Subscription will Expire on {companyInfo?.subscription_expiry || companyInfo?.subscription_end || '2026-03-31'}</div>
                 </div>
-                <div className="compinfo-title">ithots POS Version : {companyInfo?.pos_version || '1.1.0'}</div>
-                <div className="compinfo-expiry">Annual Software Subscription will Expire on {companyInfo?.subscription_expiry || companyInfo?.subscription_end || '2026-03-31'}</div>
-                <div className="compinfo-info-row">
-                  <div className="compinfo-table">
-                    <div className="compinfo-table-header">Legal Info <span className="compinfo-eye">&#128065;</span></div>
-                    <table>
-                      <tbody>
-                        <tr><td>Licensed Name</td><td>{companyInfo?.licensed_name || ''}</td></tr>
-                        <tr><td>Legal Owner</td><td>{companyInfo?.legal_owner || ''}</td></tr>
-                        <tr><td>Address</td><td>{companyInfo?.address || ''}</td></tr>
-                        <tr><td>City</td><td>{companyInfo?.city || ''}</td></tr>
-                        <tr><td>Subscription Start Date</td><td>{companyInfo?.subscription_start || ''}</td></tr>
-                      </tbody>
-                    </table>
+
+                {/* Scrollable Content Section */}
+                <div className="compinfo-scrollable-content">
+                  {/* Enhanced Version Information */}
+                  <div className="compinfo-version-details">
+                    <div className="compinfo-version-header">
+                      📋 Version Details
+                    </div>
+                    <div className="compinfo-version-grid">
+                      <div><strong>Current Version:</strong> {VersionUtils.getCurrentVersion()}</div>
+                      <div><strong>Build Date:</strong> {VERSION_INFO.buildDate}</div>
+                      <div><strong>Release Type:</strong> {VERSION_INFO.releaseType}</div>
+                      <div><strong>API Version:</strong> {VERSION_INFO.apiVersion}</div>
+                    </div>
+                    <div className="compinfo-version-release">
+                      <strong>Release:</strong> {VERSION_INFO.releaseName}
+                    </div>
+                    <div className="compinfo-version-copyright">
+                      {VERSION_INFO.copyright}
+                    </div>
                   </div>
-                  <div className="compinfo-table">
-                    <div className="compinfo-table-header">System Info <span className="compinfo-eye">&#128065;</span></div>
-                    <table>
-                      <tbody>
-                        <tr><td>Property Code</td><td>{companyInfo?.property_code || ''}</td></tr>
-                        <tr><td>No Outlets</td><td>{companyInfo?.no_of_outlets || ''}</td></tr>
-                      </tbody>
-                    </table>
+
+                  {/* Information Tables */}
+                  <div className="compinfo-info-row">
+                    <div className="compinfo-table">
+                      <div className="compinfo-table-header">Legal Info <span className="compinfo-eye">&#128065;</span></div>
+                      <table>
+                        <tbody>
+                          <tr><td>Licensed Name</td><td>{companyInfo?.licensed_name || ''}</td></tr>
+                          <tr><td>Legal Owner</td><td>{companyInfo?.legal_owner || ''}</td></tr>
+                          <tr><td>Address</td><td>{companyInfo?.address || ''}</td></tr>
+                          <tr><td>City</td><td>{companyInfo?.city || ''}</td></tr>
+                          <tr><td>Subscription Start Date</td><td>{companyInfo?.subscription_start || ''}</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="compinfo-table">
+                      <div className="compinfo-table-header">System Info <span className="compinfo-eye">&#128065;</span></div>
+                      <table>
+                        <tbody>
+                          <tr><td>Property Code</td><td>{companyInfo?.property_code || ''}</td></tr>
+                          <tr><td>No Outlets</td><td>{companyInfo?.no_of_outlets || ''}</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
+
+                  {/* Additional spacing for smooth scrolling */}
+                  <div style={{ height: '20px' }}></div>
                 </div>
               </div>
             </div>
           ) : null}
         </main>
       </div>
+
     </div>
   );
 }
