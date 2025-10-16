@@ -48,6 +48,7 @@ export default function ItemMaster({ setParentDirty }) {
   const [units, setUnits] = useState([]);
   const [showSavePopup, setShowSavePopup] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedRecordId, setSelectedRecordId] = useState(null);
   const [showRecordSelect, setShowRecordSelect] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [records, setRecords] = useState([]);
@@ -55,74 +56,155 @@ export default function ItemMaster({ setParentDirty }) {
   const formRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Load master data from localStorage
+  // Load master data from backend API with localStorage fallback
   useEffect(() => {
-    const loadMasterData = () => {
+    const loadMasterData = async () => {
       try {
-        console.log('🔄 Loading Item Master dropdown data from localStorage...');
+        console.log('🔄 Loading Item Master dropdown data from backend API...');
         
-        // Load Outlet Setup data
-        const savedOutletRecords = localStorage.getItem('outletRecords');
-        const outletData = savedOutletRecords ? JSON.parse(savedOutletRecords) : [];
-        const formattedOutlets = outletData.map(outlet => ({
-          id: outlet.id || outlet.outlet_code,
-          code: outlet.outlet_code,
-          name: outlet.outlet_name || outlet.name
-        }));
-        setOutlets(formattedOutlets);
-        console.log('✅ Loaded outlets:', formattedOutlets.length, 'items');
-
-        // Load Item Departments data
-        const savedDepartments = localStorage.getItem('itemDepartmentRecords');
-        const departmentData = savedDepartments ? JSON.parse(savedDepartments) : [];
-        const formattedDepartments = departmentData
-          .filter(dept => !dept.inactive) // Only active departments
-          .map(dept => ({
-            id: dept.id || dept.department_code,
-            code: dept.department_code,
-            name: dept.name
+        // Load Outlets from backend API
+        try {
+          const outletResponse = await axios.get('/api/outlet-setup');
+          if (outletResponse.data.success) {
+            const formattedOutlets = outletResponse.data.data
+              .filter(outlet => !outlet.inactive) // Only active outlets
+              .map(outlet => ({
+                id: outlet.id || outlet.outlet_code,
+                code: outlet.outlet_code,
+                name: outlet.outlet_name
+              }));
+            setOutlets(formattedOutlets);
+            console.log('✅ Loaded outlets from API:', formattedOutlets.length, 'items');
+          }
+        } catch (error) {
+          console.warn('⚠️ Using localStorage for outlets:', error.message);
+          // Fallback to localStorage if API fails
+          const savedOutletRecords = localStorage.getItem('outletRecords');
+          const outletData = savedOutletRecords ? JSON.parse(savedOutletRecords) : [];
+          const formattedOutlets = outletData.map(outlet => ({
+            id: outlet.id || outlet.outlet_code,
+            code: outlet.outlet_code,
+            name: outlet.outlet_name || outlet.name
           }));
-        setDepartments(formattedDepartments);
-        console.log('✅ Loaded departments:', formattedDepartments.length, 'items');
+          setOutlets(formattedOutlets);
+        }
 
-        // Load Item Categories data
-        const savedCategories = localStorage.getItem('itemCategoryRecords');
-        const categoryData = savedCategories ? JSON.parse(savedCategories) : [];
-        const formattedCategories = categoryData
-          .filter(cat => !cat.inactive) // Only active categories
-          .map(cat => ({
-            id: cat.id || cat.category_code,
-            code: cat.category_code,
-            name: cat.name
-          }));
-        setCategories(formattedCategories);
-        console.log('✅ Loaded categories:', formattedCategories.length, 'items');
+        // Load Item Departments from backend API
+        try {
+          const departmentResponse = await axios.get('/api/item-departments');
+          if (departmentResponse.data.success) {
+            const formattedDepartments = departmentResponse.data.data
+              .filter(dept => !dept.inactive) // Only active departments
+              .map(dept => ({
+                id: dept.id || dept.department_code,
+                code: dept.department_code,
+                name: dept.name
+              }));
+            setDepartments(formattedDepartments);
+            console.log('✅ Loaded departments from API:', formattedDepartments.length, 'items');
+          }
+        } catch (error) {
+          console.warn('⚠️ Using localStorage for departments:', error.message);
+          // Fallback to localStorage if API fails
+          const savedDepartments = localStorage.getItem('itemDepartmentRecords');
+          const departmentData = savedDepartments ? JSON.parse(savedDepartments) : [];
+          const formattedDepartments = departmentData
+            .filter(dept => !dept.inactive)
+            .map(dept => ({
+              id: dept.id || dept.department_code,
+              code: dept.department_code,
+              name: dept.name
+            }));
+          setDepartments(formattedDepartments);
+        }
 
-        // Load Tax Codes from Tax Structure
-        const savedTaxStructure = localStorage.getItem('taxStructureRecords');
-        const taxData = savedTaxStructure ? JSON.parse(savedTaxStructure) : [];
-        const formattedTaxCodes = taxData
-          .filter(tax => tax.is_active) // Only active tax codes
-          .map(tax => ({
-            id: tax.id || tax.tax_structure_code,
-            code: tax.tax_structure_code,
-            name: tax.tax_structure_name
-          }));
-        setTaxCodes(formattedTaxCodes);
-        console.log('✅ Loaded tax codes:', formattedTaxCodes.length, 'items');
+        // Load Item Categories from backend API
+        try {
+          const categoryResponse = await axios.get('/api/item-categories');
+          if (categoryResponse.data.success) {
+            const formattedCategories = categoryResponse.data.data
+              .filter(cat => !cat.inactive) // Only active categories
+              .map(cat => ({
+                id: cat.id || cat.category_code,
+                code: cat.category_code,
+                name: cat.name
+              }));
+            setCategories(formattedCategories);
+            console.log('✅ Loaded categories from API:', formattedCategories.length, 'items');
+          }
+        } catch (error) {
+          console.warn('⚠️ Using localStorage for categories:', error.message);
+          // Fallback to localStorage if API fails
+          const savedCategories = localStorage.getItem('itemCategoryRecords');
+          const categoryData = savedCategories ? JSON.parse(savedCategories) : [];
+          console.log('🔍 Raw category data:', categoryData);
+          const formattedCategories = categoryData
+            .filter(cat => !cat.inactive)
+            .map(cat => ({
+              id: cat.id || cat.category_code,
+              code: cat.category_code,
+              name: cat.name
+            }));
+          setCategories(formattedCategories);
+        }
 
-        // Load UOM data
-        const savedUOM = localStorage.getItem('uomRecords');
-        const uomData = savedUOM ? JSON.parse(savedUOM) : [];
-        const formattedUnits = uomData
-          .filter(uom => uom.is_active) // Only active units
-          .map(uom => ({
-            id: uom.id || uom.uom_code,
-            code: uom.uom_code,
-            name: uom.uom_name
-          }));
-        setUnits(formattedUnits);
-        console.log('✅ Loaded units:', formattedUnits.length, 'items');
+        // Load Tax Codes from backend API
+        try {
+          const taxResponse = await axios.get('/api/tax-codes');
+          if (taxResponse.data.success) {
+            const formattedTaxCodes = taxResponse.data.data
+              .filter(tax => tax.is_active) // Only active tax codes
+              .map(tax => ({
+                id: tax.id || tax.tax_code,
+                code: tax.tax_code,
+                name: tax.tax_name
+              }));
+            setTaxCodes(formattedTaxCodes);
+            console.log('✅ Loaded tax codes from API:', formattedTaxCodes.length, 'items');
+          }
+        } catch (error) {
+          console.warn('⚠️ Using localStorage for tax codes:', error.message);
+          // Fallback to localStorage if API fails
+          const savedTaxStructure = localStorage.getItem('taxStructureRecords');
+          const taxData = savedTaxStructure ? JSON.parse(savedTaxStructure) : [];
+          const formattedTaxCodes = taxData
+            .filter(tax => tax.is_active)
+            .map(tax => ({
+              id: tax.id || tax.tax_structure_code,
+              code: tax.tax_structure_code,
+              name: tax.tax_structure_name
+            }));
+          setTaxCodes(formattedTaxCodes);
+        }
+
+        // Load UOM data from backend API
+        try {
+          const uomResponse = await axios.get('/api/uom');
+          if (uomResponse.data.success) {
+            const formattedUnits = uomResponse.data.data
+              .filter(uom => uom.is_active) // Only active units
+              .map(uom => ({
+                id: uom.id || uom.uom_code,
+                code: uom.uom_code,
+                name: uom.uom_name
+              }));
+            setUnits(formattedUnits);
+            console.log('✅ Loaded units from API:', formattedUnits.length, 'items');
+          }
+        } catch (error) {
+          console.warn('⚠️ Using localStorage for UOM:', error.message);
+          // Fallback to localStorage if API fails
+          const savedUOM = localStorage.getItem('uomRecords');
+          const uomData = savedUOM ? JSON.parse(savedUOM) : [];
+          const formattedUnits = uomData
+            .filter(uom => uom.is_active)
+            .map(uom => ({
+              id: uom.id || uom.uom_code,
+              code: uom.uom_code,
+              name: uom.uom_name
+            }));
+          setUnits(formattedUnits);
+        }
 
         // For now, set empty arrays for printer-related data (can be implemented later)
         setPrinters([]);
@@ -196,11 +278,121 @@ export default function ItemMaster({ setParentDirty }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your submit logic here
+    
+    console.log('🚀 Form submission started...');
+    
+    // Basic validation
+    if (!form.item_code || form.item_code.trim() === '') {
+      alert('Item Code is required');
+      return;
+    }
+    
+    if (!form.item_name || form.item_name.trim() === '') {
+      alert('Item Name is required');
+      return;
+    }
+    
+    if (!form.select_outlets || form.select_outlets.length === 0) {
+      alert('Outlet selection is required');
+      return;
+    }
+    
+    try {
+      // Load existing item master records
+      const existingRecords = JSON.parse(localStorage.getItem('itemMasterRecords') || '[]');
+      
+      // Create new record
+      const newRecord = {
+        id: Date.now(), // Simple ID generation
+        item_code: form.item_code,
+        item_name: form.item_name,
+        short_name: form.short_name,
+        item_department: form.item_department,
+        applicable_from: form.applicable_from,
+        inventory_code: form.inventory_code,
+        alternate_name: form.alternate_name,
+        tax_code: form.tax_code,
+        item_category: form.item_category,
+        item_price_1: parseFloat(form.item_price_1) || 0,
+        item_price_2: parseFloat(form.item_price_2) || 0,
+        item_price_3: parseFloat(form.item_price_3) || 0,
+        item_price_4: parseFloat(form.item_price_4) || 0,
+        item_printer_1: form.item_printer_1,
+        item_printer_2: form.item_printer_2,
+        item_printer_3: form.item_printer_3,
+        set_menu: form.set_menu,
+        item_modifier_group: form.item_modifier_group,
+        unit: form.unit,
+        print_group: form.print_group,
+        cost: parseFloat(form.cost) || 0,
+        in_active: form.in_active,
+        item_logo: form.item_logo,
+        item_logo_url: form.item_logo_url,
+        select_outlets: form.select_outlets,
+        created_by: 'admin', // TODO: Get from user session
+        created_date: new Date().toISOString(),
+        modified_by: 'admin',
+        modified_date: new Date().toISOString()
+      };
+      
+      // Check for duplicate item codes
+      const existingItem = existingRecords.find(record => 
+        record.item_code === form.item_code && record.id !== (selectedRecordId || null)
+      );
+      
+      if (existingItem && action === 'Add') {
+        alert('Item Code already exists. Please use a different code.');
+        return;
+      }
+      
+      let updatedRecords;
+      
+      if (action === 'Add') {
+        // Add new record
+        updatedRecords = [...existingRecords, newRecord];
+        console.log('✅ Adding new item:', newRecord);
+      } else if (action === 'Edit' && selectedRecordId) {
+        // Update existing record
+        updatedRecords = existingRecords.map(record => 
+          record.id === selectedRecordId ? { ...newRecord, id: selectedRecordId } : record
+        );
+        console.log('✅ Updating existing item:', newRecord);
+      } else {
+        alert('Invalid action or no record selected for editing');
+        return;
+      }
+      
+      // Save to localStorage
+      localStorage.setItem('itemMasterRecords', JSON.stringify(updatedRecords));
+      
+      // Show success message
+      setShowSavePopup(true);
+      setTimeout(() => setShowSavePopup(false), 1800);
+      
+      // Reset form for Add action
+      if (action === 'Add') {
+        handleClear();
+      }
+      
+      console.log('💾 Item saved successfully!');
+      
+    } catch (error) {
+      console.error('❌ Error saving item:', error);
+      alert('Error saving item. Please try again.');
+    }
   };
 
-  const handleSave = async () => {
-    // Add your save logic here
+  const handleSave = () => {
+    console.log('💾 Save button clicked!');
+    console.log('📋 Current form data:', form);
+    console.log('📦 Available categories:', categories);
+    console.log('🏪 Available outlets:', outlets);
+    console.log('📂 Available departments:', departments);
+    console.log('💰 Available tax codes:', taxCodes);
+    
+    if (formRef.current) {
+      formRef.current.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }
   };
 
   const handleExportExcel = () => {

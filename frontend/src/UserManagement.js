@@ -9,10 +9,10 @@ function UserManagement({ onClose }) {
   const [assignMsg, setAssignMsg] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/users', { withCredentials: true })
-      .then(res => { if (res.data.success) setUsers(res.data.users); });
-    axios.get('http://localhost:5000/api/groups', { withCredentials: true })
-      .then(res => { if (res.data.success) setGroups(res.data.groups); });
+    axios.get('/api/user-setup', { withCredentials: true })
+      .then(res => { if (res.data.success) setUsers(res.data.data); });
+    axios.get('/api/user-groups', { withCredentials: true })
+      .then(res => { if (res.data.success) setGroups(res.data.data); });
   }, []);
 
   const handleAssign = async () => {
@@ -22,7 +22,7 @@ function UserManagement({ onClose }) {
       return;
     }
     try {
-      const res = await axios.post('http://localhost:5000/api/groups/assign', { userId: selectedUser, groupId: selectedGroup }, { withCredentials: true });
+      const res = await axios.post('/api/user-groups/assign', { userId: selectedUser, groupId: selectedGroup }, { withCredentials: true });
       if (res.data.success) setAssignMsg('User assigned to group!');
       else setAssignMsg(res.data.message || 'Failed to assign');
     } catch {

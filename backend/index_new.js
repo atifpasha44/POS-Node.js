@@ -29,10 +29,9 @@ app.use(session({
 // ========================================
 const db = mysql.createConnection({
     host: 'localhost',
-    port: 3307,
     user: 'root',
-    password: 'Jaheed@9',
-    database: 'pos_db'
+    password: '',
+    database: 'pos_system'
 });
 
 db.connect((err) => {
@@ -48,9 +47,6 @@ db.connect((err) => {
 // ========================================
 const initializeDatabase = async () => {
     try {
-        console.log('✅ Database schema initialization skipped (using existing pos_db schema)');
-        // Commented out automatic schema initialization to use existing pos_db tables
-        /*
         // Read and execute the SQL schema file
         const schemaPath = path.join(__dirname, 'pos_tables_schema.sql');
         if (fs.existsSync(schemaPath)) {
@@ -73,7 +69,6 @@ const initializeDatabase = async () => {
             }
             console.log('✅ Database schema initialized successfully');
         }
-        */
     } catch (error) {
         console.error('❌ Database initialization error:', error);
     }
@@ -101,81 +96,6 @@ const getCurrentDateOnly = () => {
     const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 };
-
-// ========================================
-// AUTHENTICATION API
-// ========================================
-app.post('/api/login', (req, res) => {
-    const { email, password, tin } = req.body;
-    
-    // Check if we have email/password or TIN
-    if (!email && !tin) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Email or TIN is required' 
-        });
-    }
-    
-    let query;
-    let params;
-    
-    if (tin) {
-        // Login with TIN (assuming TIN is stored in user_code field)
-        query = 'SELECT * FROM IT_CONF_USER_SETUP WHERE user_code = ? AND is_active = 1';
-        params = [tin];
-    } else {
-        // Login with email and password (assuming email is in user_name field for now)
-        query = 'SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1';
-        params = [email, password];
-    }
-    
-    db.query(query, params, (err, results) => {
-        if (err) return handleDatabaseError(res, err, 'login authentication');
-        
-        if (results.length === 0) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Invalid credentials' 
-            });
-        }
-        
-        const user = results[0];
-        
-        // Create user session data
-        const userData = {
-            id: user.id,
-            user_code: user.user_code,
-            user_name: user.user_name,
-            user_group: user.user_group,
-            user_department: user.user_department,
-            user_designation: user.user_designation
-        };
-        
-        // Store in session
-        req.session.user = userData;
-        
-        res.json({ 
-            success: true, 
-            message: 'Login successful',
-            user: userData
-        });
-    });
-});
-
-app.post('/api/logout', (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({ 
-                success: false, 
-                message: 'Logout failed' 
-            });
-        }
-        res.json({ 
-            success: true, 
-            message: 'Logout successful' 
-        });
-    });
-});
 
 // ========================================
 // ITEM DEPARTMENTS API
@@ -500,10 +420,10 @@ app.delete('/api/outlet-setup/:id', (req, res) => {
 });
 
 // ========================================
-// TAX CODES API (Existing Table Schema)
+// TAX CODES API
 // ========================================
 app.get('/api/tax-codes', (req, res) => {
-    const query = 'SELECT TAX_CODE as tax_code, TAX_DESC as tax_name, RATE as tax_percentage, ActiveStatus as is_active FROM it_conf_taxcode ORDER BY TAX_CODE';
+    const query = 'SELECT * FROM IT_CONF_TAXCODE ORDER BY tax_code';
     db.query(query, (err, results) => {
         if (err) return handleDatabaseError(res, err, 'fetch tax codes');
         res.json({ success: true, data: results });
@@ -511,7 +431,14 @@ app.get('/api/tax-codes', (req, res) => {
 });
 
 app.post('/api/tax-codes', (req, res) => {
-    const { tax_code, tax_name, tax_percentage = 0, is_active = 1 } = req.body;
+    const { 
+        tax_code, 
+        tax_name, 
+        tax_name_alternate, 
+        tax_group_name, 
+        tax_percentage = 0, 
+        is_active = 1 
+    } = req.body;
     
     if (!tax_code || !tax_name) {
         return res.status(400).json({ 
@@ -520,9 +447,14 @@ app.post('/api/tax-codes', (req, res) => {
         });
     }
 
-    const query = `INSERT INTO it_conf_taxcode (TAX_CODE, TAX_DESC, RATE, ActiveStatus) VALUES (?, ?, ?, ?)`;
+    const query = `INSERT INTO IT_CONF_TAXCODE 
+                   (tax_code, tax_name, tax_name_alternate, tax_group_name, 
+                    tax_percentage, is_active, created_by) 
+                   VALUES (?, ?, ?, ?, ?, ?, 'admin')`;
     
-    db.query(query, [tax_code, tax_name, tax_percentage, is_active], (err, result) => {
+    db.query(query, [
+        tax_code, tax_name, tax_name_alternate, tax_group_name, tax_percentage, is_active
+    ], (err, result) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ 
@@ -534,18 +466,31 @@ app.post('/api/tax-codes', (req, res) => {
         }
         res.json({ 
             success: true, 
-            message: 'Tax code created successfully'
+            message: 'Tax code created successfully',
+            id: result.insertId 
         });
     });
 });
 
-app.put('/api/tax-codes/:code', (req, res) => {
-    const { code } = req.params;
-    const { tax_code, tax_name, tax_percentage, is_active } = req.body;
+app.put('/api/tax-codes/:id', (req, res) => {
+    const { id } = req.params;
+    const { 
+        tax_code, 
+        tax_name, 
+        tax_name_alternate, 
+        tax_group_name, 
+        tax_percentage, 
+        is_active 
+    } = req.body;
     
-    const query = `UPDATE it_conf_taxcode SET TAX_CODE = ?, TAX_DESC = ?, RATE = ?, ActiveStatus = ? WHERE TAX_CODE = ?`;
+    const query = `UPDATE IT_CONF_TAXCODE 
+                   SET tax_code = ?, tax_name = ?, tax_name_alternate = ?, 
+                       tax_group_name = ?, tax_percentage = ?, is_active = ?, modified_by = 'admin'
+                   WHERE id = ?`;
     
-    db.query(query, [tax_code, tax_name, tax_percentage, is_active, code], (err, result) => {
+    db.query(query, [
+        tax_code, tax_name, tax_name_alternate, tax_group_name, tax_percentage, is_active, id
+    ], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'update tax code');
         
         if (result.affectedRows === 0) {
@@ -562,11 +507,11 @@ app.put('/api/tax-codes/:code', (req, res) => {
     });
 });
 
-app.delete('/api/tax-codes/:code', (req, res) => {
-    const { code } = req.params;
+app.delete('/api/tax-codes/:id', (req, res) => {
+    const { id } = req.params;
     
-    const query = 'DELETE FROM it_conf_taxcode WHERE TAX_CODE = ?';
-    db.query(query, [code], (err, result) => {
+    const query = 'DELETE FROM IT_CONF_TAXCODE WHERE id = ?';
+    db.query(query, [id], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'delete tax code');
         
         if (result.affectedRows === 0) {

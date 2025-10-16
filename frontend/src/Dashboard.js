@@ -701,6 +701,8 @@ function Dashboard({ user, setUser }) {
         // Log loaded data for debugging with special attention to critical records
         console.log('========== DATA LOADING REPORT ==========');
         console.log('✅ Outlet Setup records:', loadedOutletRecords.length, 'items', loadedOutletRecords.length > 0 ? '(DATA FOUND)' : '(NO DATA)');
+        console.log('✅ Item Departments records:', loadedItemDepartmentRecords.length, 'items');
+        console.log('✅ Item Categories records:', loadedItemCategoryRecords.length, 'items');
         console.log('✅ UserDepartments records:', loadedUserDepartmentsRecords.length, 'items');
         console.log('✅ UserDesignations records:', loadedUserDesignationsRecords.length, 'items');
         console.log('✅ UserSetup records:', loadedUserSetupRecords.length, 'items');
@@ -846,12 +848,14 @@ function Dashboard({ user, setUser }) {
   useEffect(() => {
     if (dataLoaded) {
       saveToLocalStorage('itemDepartmentRecords', itemDepartmentRecords);
+      console.log('Saving itemDepartmentRecords to localStorage:', itemDepartmentRecords);
     }
   }, [itemDepartmentRecords, dataLoaded]);
 
   useEffect(() => {
     if (dataLoaded) {
       saveToLocalStorage('itemCategoryRecords', itemCategoryRecords);
+      console.log('Saving itemCategoryRecords to localStorage:', itemCategoryRecords);
     }
   }, [itemCategoryRecords, dataLoaded]);
 

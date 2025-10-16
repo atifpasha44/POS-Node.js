@@ -6,7 +6,7 @@ import 'jspdf-autotable';
 
 const { autoTable } = require('jspdf-autotable');
 
-export default function ItemCategories({ setParentDirty }) {
+export default function ItemCategories({ setParentDirty, records: externalRecords, setRecords: setExternalRecords }) {
   const initialState = {
     category_code: '',
     name: '',
@@ -26,11 +26,20 @@ export default function ItemCategories({ setParentDirty }) {
   const [showNoChangePopup, setShowNoChangePopup] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectModalMessage, setSelectModalMessage] = useState('');
-  const [records, setRecords] = useState([]);
+  
+  // Use external records from Dashboard if provided, otherwise use local state
+  const [localRecords, setLocalRecords] = useState([]);
+  const records = externalRecords || localRecords;
+  const setRecords = setExternalRecords || setLocalRecords;
+  
   const [itemDepartments, setItemDepartments] = useState([]);
   const [fieldErrors, setFieldErrors] = useState({});
   const [showAlternateNameField, setShowAlternateNameField] = useState(true); // TODO: Get from system settings
   const formRef = useRef(null);
+
+  console.log('🏷️ ItemCategories component initialized');
+  console.log('📊 External records provided:', !!externalRecords, 'Records count:', records.length);
+  console.log('🔗 External setRecords provided:', !!setExternalRecords);
 
   // Computed values
   const isCategoryCodeLocked = action === 'Edit' || action === 'Search';

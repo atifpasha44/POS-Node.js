@@ -13,7 +13,6 @@ const initialState = {
   re_user_pin: '',
   full_name: '',
   short_name: '',
-  property_code: '',
   outlet_codes: [],
   user_no: '',
   role: 'General User',
@@ -84,10 +83,6 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
       errors.short_name = 'Short Name must not exceed 20 characters';
     }
     
-    if (!form.property_code.trim()) {
-      errors.property_code = 'Property Code is required';
-    }
-    
     if (!form.user_no.trim()) {
       errors.user_no = 'User No is required';
     } else if (form.user_no.length > 20) {
@@ -155,26 +150,22 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
     }
   };
 
-  // Get available outlets for selected property
+  // Get available outlets
   const getAvailableOutlets = () => {
-    if (!form.property_code || !outletRecords) return [];
-    return outletRecords.filter(outlet => outlet.property_code === form.property_code);
+    if (!outletRecords) return [];
+    return outletRecords;
   };
 
-  // Get available departments for selected property
+  // Get available departments
   const getAvailableDepartments = () => {
-    if (!form.property_code || !userDepartmentsRecords) return [];
-    return userDepartmentsRecords.filter(dept => 
-      dept.property_code === form.property_code && !dept.inactive
-    );
+    if (!userDepartmentsRecords) return [];
+    return userDepartmentsRecords.filter(dept => !dept.inactive);
   };
 
-  // Get available user groups for selected property
+  // Get available user groups
   const getAvailableUserGroups = () => {
-    if (!form.property_code || !userGroupsRecords) return [];
-    return userGroupsRecords.filter(group => 
-      group.property_code === form.property_code && group.is_active
-    );
+    if (!userGroupsRecords) return [];
+    return userGroupsRecords.filter(group => group.is_active);
   };
 
   // Handlers
@@ -277,7 +268,6 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
         re_user_pin: record.user_pin || '',
         full_name: record.full_name || '',
         short_name: record.short_name || '',
-        property_code: record.property_code || '',
         outlet_codes: record.outlet_codes || [],
         user_no: record.user_no || '',
         role: record.role || 'General User',
@@ -353,7 +343,6 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
         'Login Name',
         'Full Name',
         'Short Name',
-        'Property Code',
         'Outlet Codes',
         'User No',
         'Role',
@@ -401,7 +390,6 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           record.login_name || '',
           record.full_name || '',
           record.short_name || '',
-          record.property_code || '',
           Array.isArray(record.outlet_codes) ? record.outlet_codes.join(', ') : (record.outlet_codes || ''),
           record.user_no || '',
           record.role || '',
@@ -549,7 +537,6 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
         { header: 'ID', dataKey: 'id' },
         { header: 'Login Name', dataKey: 'login_name' },
         { header: 'Full Name', dataKey: 'full_name' },
-        { header: 'Property Code', dataKey: 'property_code' },
         { header: 'User No', dataKey: 'user_no' },
         { header: 'Role', dataKey: 'role' },
         { header: 'Department', dataKey: 'department_name' },
@@ -563,7 +550,6 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
         id: rec.id || '',
         login_name: rec.login_name || '',
         full_name: rec.full_name || '',
-        property_code: rec.property_code || '',
         user_no: rec.user_no || '',
         role: rec.role || '',
         department_name: rec.department_name || '',
@@ -686,7 +672,7 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
   };
 
   return (
-    <div className="propertycode-panel" style={{background:'#fff',border:'2.5px solid #222',borderRadius:'16px',boxShadow:'0 2px 12px rgba(0,0,0,0.10)',width:'100%',maxWidth:'1200px',margin:'32px auto',padding:'0',height:'calc(100vh - 120px)',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+    <div className="propertycode-panel" style={{background:'#fff',border:'2.5px solid #222',borderRadius:'16px',boxShadow:'0 2px 12px rgba(0,0,0,0.10)',width:'100%',maxWidth:'1200px',margin:'32px auto',padding:'0',height:'calc(100vh - 120px)',display:'flex',flexDirection:'column',position:'relative'}}>
       {/* Top Control Bar - sticky */}
       <div style={{
         display:'flex',alignItems:'center',justifyContent:'space-between',
@@ -751,14 +737,16 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
         </div>
       </div>
 
-      {/* Form Section - following PropertyCode pattern exactly */}
-      <form ref={formRef} className="propertycode-form" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 32px',padding:'32px 32px 0 32px'}}>
-        {/* Save confirmation popup */}
-        {showSavePopup && (
-          <div style={{position:'fixed',top:'30%',left:'50%',transform:'translate(-50%,-50%)',background:'#fff',border:'2px solid #43a047',borderRadius:'12px',padding:'32px 48px',zIndex:1000,boxShadow:'0 4px 24px rgba(0,0,0,0.18)',fontSize:'1.25rem',color:'#43a047',fontWeight:'bold'}}>
-            {action === 'Delete' ? 'User has been successfully deleted.' : 'User data has been saved successfully.'}
-          </div>
-        )}
+      {/* Scrollable Content Area */}
+      <div style={{flex: 1, overflowY: 'auto', overflowX: 'hidden'}}>
+        {/* Form Section - following PropertyCode pattern exactly */}
+        <form ref={formRef} className="propertycode-form" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 32px',padding:'32px 32px 0 32px'}}>
+          {/* Save confirmation popup */}
+          {showSavePopup && (
+            <div style={{position:'fixed',top:'30%',left:'50%',transform:'translate(-50%,-50%)',background:'#fff',border:'2px solid #43a047',borderRadius:'12px',padding:'32px 48px',zIndex:1000,boxShadow:'0 4px 24px rgba(0,0,0,0.18)',fontSize:'1.25rem',color:'#43a047',fontWeight:'bold'}}>
+              {action === 'Delete' ? 'User has been successfully deleted.' : 'User data has been saved successfully.'}
+            </div>
+          )}
 
         {/* Record selection modal for Edit/Delete/Search */}
         {showSelectModal && (
@@ -775,7 +763,6 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
                     <tr style={{background:'#e3e3e3'}}>
                       <th style={{border:'1px solid #ccc',padding:'8px',textAlign:'left'}}>Login Name</th>
                       <th style={{border:'1px solid #ccc',padding:'8px',textAlign:'left'}}>Full Name</th>
-                      <th style={{border:'1px solid #ccc',padding:'8px',textAlign:'left'}}>Property Code</th>
                       <th style={{border:'1px solid #ccc',padding:'8px',textAlign:'left'}}>User No</th>
                       <th style={{border:'1px solid #ccc',padding:'8px',textAlign:'left'}}>Role</th>
                       <th style={{border:'1px solid #ccc',padding:'8px',textAlign:'left'}}>Action</th>
@@ -786,7 +773,6 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
                       <tr key={idx}>
                         <td style={{border:'1px solid #ccc',padding:'8px'}}>{record.login_name}</td>
                         <td style={{border:'1px solid #ccc',padding:'8px'}}>{record.full_name}</td>
-                        <td style={{border:'1px solid #ccc',padding:'8px'}}>{record.property_code}</td>
                         <td style={{border:'1px solid #ccc',padding:'8px'}}>{record.user_no}</td>
                         <td style={{border:'1px solid #ccc',padding:'8px'}}>{record.role}</td>
                         <td style={{border:'1px solid #ccc',padding:'8px'}}>
@@ -932,24 +918,6 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
               maxLength="20"
             />
             {fieldErrors.short_name && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.short_name}</span>}
-          </div>
-
-          <div style={{display:'flex',alignItems:'center'}}>
-            <label style={{width:'200px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property Code *</label>
-            <select 
-              name="property_code" 
-              value={form.property_code} 
-              onChange={handleChange} 
-              style={{width:'75%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background:'#fff'}}
-            >
-              <option value="">Select Property Code</option>
-              {propertyCodes && propertyCodes.map((property, index) => (
-                <option key={index} value={property.property_code}>
-                  {property.property_code} - {property.property_name}
-                </option>
-              ))}
-            </select>
-            {fieldErrors.property_code && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.property_code}</span>}
           </div>
 
           <div style={{display:'flex',alignItems:'center'}}>
@@ -1153,6 +1121,8 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
           </table>
         </div>
       </div>
+      {/* End of Scrollable Content Area */}
+    </div>
     </div>
   );
 }
