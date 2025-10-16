@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -422,48 +424,308 @@ const TaxStructure = ({ setParentDirty, records, setRecords, taxCodesRecords }) 
   };
 
   // Export handlers
-  const exportToExcel = () => {
-    const exportData = records && records.length > 0 ? records.map(record => ({
-      'Structure Code': record.tax_structure_code,
-      'Structure Name': record.tax_structure_name,
-      'Included Taxes': record.included_taxes.map(tax => 
-        `${tax.tax_code} (Seq: ${tax.sequence}, Method: ${tax.calculation_method})`
-      ).join('; '),
-      'Status': record.is_active ? 'Active' : 'Inactive',
-      'Effective From': record.effective_from || '',
-      'Effective To': record.effective_to || '',
-      'Created Date': record.created_at ? new Date(record.created_at).toLocaleDateString() : ''
-    })) : [form];
+  const exportToExcel = async () => {
+    if (!records || records.length === 0) {
+      alert('No data to export');
+      return;
+    }
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'TaxStructures');
-    XLSX.writeFile(wb, 'TaxStructures.xlsx');
+    try {
+      // Create a new workbook and worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Tax Structures Export', {
+        pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
+      });
+      
+      // Add report title
+      const titleRow = worksheet.addRow(['Tax Structures Export Report']);
+      titleRow.getCell(1).font = { size: 16, bold: true, color: { argb: 'FF366092' } };
+      titleRow.getCell(1).alignment = { horizontal: 'center' };
+      worksheet.mergeCells('A1:H1');
+      
+      // Add date/time
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const dateRow = worksheet.addRow([`Generated on: ${dateTimeString}`]);
+      dateRow.getCell(1).font = { size: 10, italic: true };
+      dateRow.getCell(1).alignment = { horizontal: 'center' };
+      worksheet.mergeCells('A2:H2');
+      
+      // Add empty row
+      worksheet.addRow([]);
+      
+      // Define headers
+      const headers = [
+        'ID', 'Structure Code', 'Structure Name', 'Included Taxes', 
+        'Status', 'Effective From', 'Effective To', 'Created Date'
+      ];
+      
+      // Add header row with styling
+      const headerRow = worksheet.addRow(headers);
+      headerRow.eachCell((cell, colNumber) => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, name: 'Calibri', size: 11 };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FF000000' } },
+          left: { style: 'thin', color: { argb: 'FF000000' } },
+          bottom: { style: 'thin', color: { argb: 'FF000000' } },
+          right: { style: 'thin', color: { argb: 'FF000000' } }
+        };
+      });
+      
+      // Add data rows
+      records.forEach((record, index) => {
+        const rowData = [
+          record.id || '',
+          record.tax_structure_code || '',
+          record.tax_structure_name || '',
+          record.included_taxes ? record.included_taxes.map(tax => 
+            `${tax.tax_code} (Seq: ${tax.sequence}, Method: ${tax.calculation_method})`
+          ).join('; ') : '',
+          record.is_active ? 'Active' : 'Inactive',
+          record.effective_from || '',
+          record.effective_to || '',
+          record.created_at ? new Date(record.created_at).toLocaleDateString() : ''
+        ];
+        
+        const dataRow = worksheet.addRow(rowData);
+        
+        // Apply styling to data rows
+        dataRow.eachCell((cell, colNumber) => {
+          cell.font = { name: 'Calibri', size: 10 };
+          cell.alignment = { horizontal: 'left', vertical: 'top', wrapText: true };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            right: { style: 'thin', color: { argb: 'FFD0D0D0' } }
+          };
+          
+          // Alternating row colors
+          if (index % 2 === 0) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8F9FA' } };
+          }
+        });
+      });
+      
+      // Auto-size columns
+      worksheet.columns.forEach((column, index) => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: false }, (cell) => {
+          const columnLength = cell.value ? cell.value.toString().length : 10;
+          if (columnLength > maxLength) {
+            maxLength = columnLength;
+          }
+        });
+        column.width = Math.min(Math.max(maxLength + 2, 12), 50);
+      });
+      
+      // Get current user for footer
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      // Add user footer
+      const footerRowIndex = worksheet.rowCount + 2;
+      const footerRow = worksheet.addRow([`Generated by: ${currentUser}`]);
+      footerRow.getCell(1).font = { size: 9, italic: true, color: { argb: 'FF666666' } };
+      worksheet.mergeCells(`A${footerRowIndex}:H${footerRowIndex}`);
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Tax_Structures_Export_${year}${month}${day}_${hours}${minutes}${seconds}.xlsx`;
+      
+      // Save the file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      saveAs(blob, filename);
+      
+      console.log('✅ Tax Structures Excel file exported successfully:', filename);
+      alert(`✅ Professional Tax Structures Excel Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Professional report title and timestamp\n• Blue styled headers with white text\n• Alternating row colors for better readability\n• Auto-sized columns with proper formatting\n• Borders and professional styling\n• User footer (Generated by: ${currentUser})\n• Landscape orientation optimized for printing`);
+      
+    } catch (error) {
+      console.error('Tax Structures Excel export error:', error);
+      alert('❌ Error exporting Tax Structures to Excel. Please try again.\n\nError: ' + error.message);
+    }
   };
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    
-    const tableColumn = ['Code', 'Structure Name', 'Taxes Count', 'Status', 'Effective From'];
-    
-    const tableRows = records ? records.map(record => [
-      record.tax_structure_code,
-      record.tax_structure_name,
-      record.included_taxes.length,
-      record.is_active ? 'Active' : 'Inactive',
-      record.effective_from || ''
-    ]) : [];
+  const exportToPDF = async () => {
+    if (!records || records.length === 0) {
+      alert('No data to export');
+      return;
+    }
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [71, 129, 202] }
-    });
-
-    doc.text('Tax Structures Report', 14, 15);
-    doc.save('TaxStructures.pdf');
+    try {
+      // Create PDF in landscape mode
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Add report title
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Tax Structures Export Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+      
+      // Add generation date/time
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on: ${dateTimeString}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+      
+      // Define columns with proper headers
+      const columns = [
+        { header: 'ID', dataKey: 'id' },
+        { header: 'Structure Code', dataKey: 'structure_code' },
+        { header: 'Structure Name', dataKey: 'structure_name' },
+        { header: 'Taxes Count', dataKey: 'taxes_count' },
+        { header: 'Status', dataKey: 'status' },
+        { header: 'Effective From', dataKey: 'effective_from' },
+        { header: 'Effective To', dataKey: 'effective_to' }
+      ];
+      
+      // Prepare data rows
+      const rows = records.map(rec => ({
+        id: rec.id || '',
+        structure_code: rec.tax_structure_code || '',
+        structure_name: rec.tax_structure_name || '',
+        taxes_count: rec.included_taxes ? rec.included_taxes.length : 0,
+        status: rec.is_active ? 'Active' : 'Inactive',
+        effective_from: rec.effective_from || '',
+        effective_to: rec.effective_to || ''
+      }));
+      
+      // Calculate available width for the table
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margins = { left: 10, right: 10 };
+      
+      // Create the table with professional styling and auto-fit columns
+      autoTable(doc, {
+        columns: columns,
+        body: rows,
+        startY: 35,
+        theme: 'grid',
+        styles: {
+          fontSize: 7,
+          cellPadding: 2,
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1,
+          overflow: 'linebreak',
+          halign: 'left'
+        },
+        headStyles: {
+          fillColor: [54, 96, 146], // Blue background matching Excel
+          textColor: [255, 255, 255], // White text
+          fontSize: 8,
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle',
+          cellPadding: 3
+        },
+        bodyStyles: {
+          textColor: [0, 0, 0],
+          fontSize: 7,
+          cellPadding: 2,
+          valign: 'top'
+        },
+        alternateRowStyles: {
+          fillColor: [248, 249, 250] // Light gray for alternating rows
+        },
+        columnStyles: {
+          0: { halign: 'center' }, // ID
+          1: { halign: 'center' }, // Structure Code
+          2: { halign: 'left' },   // Structure Name
+          3: { halign: 'center' }, // Taxes Count
+          4: { halign: 'center' }, // Status
+          5: { halign: 'center' }, // Effective From
+          6: { halign: 'center' }  // Effective To
+        },
+        margin: margins,
+        pageBreak: 'auto',
+        showHead: 'everyPage',
+        tableWidth: 'auto',
+        horizontalPageBreak: true,
+        horizontalPageBreakRepeat: [0, 1, 2] // Always repeat ID, Code, Name columns
+      });
+      
+      // Get current user for footer
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      // Add page numbers and user footer
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // Add page numbers
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+          `Page ${i} of ${totalPages}`,
+          doc.internal.pageSize.getWidth() - 20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'right' }
+        );
+        
+        // Add user footer on left side
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(102, 102, 102); // Gray color
+        doc.text(
+          `Generated by: ${currentUser}`,
+          20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'left' }
+        );
+        
+        // Reset text color for next page
+        doc.setTextColor(0, 0, 0);
+      }
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Tax_Structures_Export_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      console.log('✅ Tax Structures PDF file exported successfully:', filename);
+      alert(`✅ Professional Tax Structures PDF Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Landscape orientation with auto-fit columns\n• Report heading and timestamp\n• Professional blue headers\n• Alternating row colors\n• Page numbers and user footer\n• Smart table layout that prevents content cutoff\n• Text wrapping for long content\n• User footer (Generated by: ${currentUser})`);
+      
+    } catch (error) {
+      console.error('Tax Structures PDF export error:', error);
+      alert('❌ Error exporting Tax Structures to PDF. Please try again.\n\nError: ' + error.message);
+    }
   };
 
   return (

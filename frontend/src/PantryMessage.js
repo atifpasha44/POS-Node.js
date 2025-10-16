@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -244,45 +246,302 @@ const PantryMessage = ({ setParentDirty, records, setRecords }) => {
   };
 
   // Export handlers
-  const exportToExcel = () => {
-    const exportData = records && records.length > 0 ? records.map(record => ({
-      'Message Code': record.message_code,
-      'Message Name': record.message_name,
-      'Display Sequence': record.display_sequence,
-      'Status': record.is_active ? 'Active' : 'Inactive',
-      'Created Date': record.created_at ? new Date(record.created_at).toLocaleDateString() : '',
-      'Updated Date': record.updated_at ? new Date(record.updated_at).toLocaleDateString() : ''
-    })) : [form];
+  const exportToExcel = async () => {
+    if (!records || records.length === 0) {
+      alert('No data to export');
+      return;
+    }
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'PantryMessages');
-    XLSX.writeFile(wb, 'PantryMessages.xlsx');
+    try {
+      // Create a new workbook and worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Pantry Messages Export', {
+        pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
+      });
+      
+      // Add report title
+      const titleRow = worksheet.addRow(['Pantry Messages Export Report']);
+      titleRow.getCell(1).font = { size: 16, bold: true, color: { argb: 'FF366092' } };
+      titleRow.getCell(1).alignment = { horizontal: 'center' };
+      worksheet.mergeCells('A1:G1');
+      
+      // Add date/time
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const dateRow = worksheet.addRow([`Generated on: ${dateTimeString}`]);
+      dateRow.getCell(1).font = { size: 10, italic: true };
+      dateRow.getCell(1).alignment = { horizontal: 'center' };
+      worksheet.mergeCells('A2:G2');
+      
+      // Add empty row
+      worksheet.addRow([]);
+      
+      // Define headers
+      const headers = [
+        'ID', 'Message Code', 'Message Name', 'Display Sequence', 
+        'Status', 'Created Date', 'Updated Date'
+      ];
+      
+      // Add header row with styling
+      const headerRow = worksheet.addRow(headers);
+      headerRow.eachCell((cell, colNumber) => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, name: 'Calibri', size: 11 };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FF000000' } },
+          left: { style: 'thin', color: { argb: 'FF000000' } },
+          bottom: { style: 'thin', color: { argb: 'FF000000' } },
+          right: { style: 'thin', color: { argb: 'FF000000' } }
+        };
+      });
+      
+      // Add data rows
+      records.forEach((record, index) => {
+        const rowData = [
+          record.id || '',
+          record.message_code || '',
+          record.message_name || '',
+          record.display_sequence || '',
+          record.is_active ? 'Active' : 'Inactive',
+          record.created_at ? new Date(record.created_at).toLocaleDateString() : '',
+          record.updated_at ? new Date(record.updated_at).toLocaleDateString() : ''
+        ];
+        
+        const dataRow = worksheet.addRow(rowData);
+        
+        // Apply styling to data rows
+        dataRow.eachCell((cell, colNumber) => {
+          cell.font = { name: 'Calibri', size: 10 };
+          cell.alignment = { horizontal: 'left', vertical: 'top', wrapText: true };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            right: { style: 'thin', color: { argb: 'FFD0D0D0' } }
+          };
+          
+          // Alternating row colors
+          if (index % 2 === 0) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8F9FA' } };
+          }
+        });
+      });
+      
+      // Auto-size columns
+      worksheet.columns.forEach((column, index) => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: false }, (cell) => {
+          const columnLength = cell.value ? cell.value.toString().length : 10;
+          if (columnLength > maxLength) {
+            maxLength = columnLength;
+          }
+        });
+        column.width = Math.min(Math.max(maxLength + 2, 12), 50);
+      });
+      
+      // Get current user for footer
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      // Add user footer
+      const footerRowIndex = worksheet.rowCount + 2;
+      const footerRow = worksheet.addRow([`Generated by: ${currentUser}`]);
+      footerRow.getCell(1).font = { size: 9, italic: true, color: { argb: 'FF666666' } };
+      worksheet.mergeCells(`A${footerRowIndex}:G${footerRowIndex}`);
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Pantry_Messages_Export_${year}${month}${day}_${hours}${minutes}${seconds}.xlsx`;
+      
+      // Save the file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      saveAs(blob, filename);
+      
+      console.log('✅ Pantry Messages Excel file exported successfully:', filename);
+      alert(`✅ Professional Pantry Messages Excel Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Professional report title and timestamp\n• Blue styled headers with white text\n• Alternating row colors for better readability\n• Auto-sized columns with proper formatting\n• Borders and professional styling\n• User footer (Generated by: ${currentUser})\n• Landscape orientation optimized for printing`);
+      
+    } catch (error) {
+      console.error('Pantry Messages Excel export error:', error);
+      alert('❌ Error exporting Pantry Messages to Excel. Please try again.\n\nError: ' + error.message);
+    }
   };
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    
-    const tableColumn = ['Code', 'Message Name', 'Sequence', 'Status', 'Created'];
-    
-    const tableRows = records ? records.map(record => [
-      record.message_code,
-      record.message_name,
-      record.display_sequence,
-      record.is_active ? 'Active' : 'Inactive',
-      record.created_at ? new Date(record.created_at).toLocaleDateString() : ''
-    ]) : [];
+  const exportToPDF = async () => {
+    if (!records || records.length === 0) {
+      alert('No data to export');
+      return;
+    }
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [71, 129, 202] }
-    });
-
-    doc.text('Pantry Messages Report', 14, 15);
-    doc.save('PantryMessages.pdf');
+    try {
+      // Create PDF in landscape mode
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Add report title
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Pantry Messages Export Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+      
+      // Add generation date/time
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on: ${dateTimeString}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+      
+      // Define columns with proper headers
+      const columns = [
+        { header: 'ID', dataKey: 'id' },
+        { header: 'Message Code', dataKey: 'message_code' },
+        { header: 'Message Name', dataKey: 'message_name' },
+        { header: 'Display Sequence', dataKey: 'display_sequence' },
+        { header: 'Status', dataKey: 'status' },
+        { header: 'Created Date', dataKey: 'created_date' }
+      ];
+      
+      // Prepare data rows
+      const rows = records.map(rec => ({
+        id: rec.id || '',
+        message_code: rec.message_code || '',
+        message_name: rec.message_name || '',
+        display_sequence: rec.display_sequence || '',
+        status: rec.is_active ? 'Active' : 'Inactive',
+        created_date: rec.created_at ? new Date(rec.created_at).toLocaleDateString() : ''
+      }));
+      
+      // Calculate available width for the table
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margins = { left: 10, right: 10 };
+      
+      // Create the table with professional styling and auto-fit columns
+      autoTable(doc, {
+        columns: columns,
+        body: rows,
+        startY: 35,
+        theme: 'grid',
+        styles: {
+          fontSize: 8,
+          cellPadding: 2,
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1,
+          overflow: 'linebreak',
+          halign: 'left'
+        },
+        headStyles: {
+          fillColor: [54, 96, 146], // Blue background matching Excel
+          textColor: [255, 255, 255], // White text
+          fontSize: 9,
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle',
+          cellPadding: 3
+        },
+        bodyStyles: {
+          textColor: [0, 0, 0],
+          fontSize: 8,
+          cellPadding: 2,
+          valign: 'top'
+        },
+        alternateRowStyles: {
+          fillColor: [248, 249, 250] // Light gray for alternating rows
+        },
+        columnStyles: {
+          0: { halign: 'center' }, // ID
+          1: { halign: 'center' }, // Message Code
+          2: { halign: 'left' },   // Message Name
+          3: { halign: 'center' }, // Display Sequence
+          4: { halign: 'center' }, // Status
+          5: { halign: 'center' }  // Created Date
+        },
+        margin: margins,
+        pageBreak: 'auto',
+        showHead: 'everyPage',
+        tableWidth: 'auto',
+        horizontalPageBreak: true,
+        horizontalPageBreakRepeat: [0, 1, 2] // Always repeat ID, Code, Name columns
+      });
+      
+      // Get current user for footer
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      // Add page numbers and user footer
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // Add page numbers
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+          `Page ${i} of ${totalPages}`,
+          doc.internal.pageSize.getWidth() - 20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'right' }
+        );
+        
+        // Add user footer on left side
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(102, 102, 102); // Gray color
+        doc.text(
+          `Generated by: ${currentUser}`,
+          20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'left' }
+        );
+        
+        // Reset text color for next page
+        doc.setTextColor(0, 0, 0);
+      }
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Pantry_Messages_Export_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      console.log('✅ Pantry Messages PDF file exported successfully:', filename);
+      alert(`✅ Professional Pantry Messages PDF Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Landscape orientation with auto-fit columns\n• Report heading and timestamp\n• Professional blue headers\n• Alternating row colors\n• Page numbers and user footer\n• Smart table layout that prevents content cutoff\n• Text wrapping for long content\n• User footer (Generated by: ${currentUser})`);
+      
+    } catch (error) {
+      console.error('Pantry Messages PDF export error:', error);
+      alert('❌ Error exporting Pantry Messages to PDF. Please try again.\n\nError: ' + error.message);
+    }
   };
 
   return (

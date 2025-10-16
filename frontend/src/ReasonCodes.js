@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -279,43 +281,368 @@ const ReasonCodes = ({ setParentDirty, records, setRecords }) => {
   };
 
   // Export handlers
-  const exportToExcel = () => {
-    const exportData = records && records.length > 0 ? records.map(record => ({
-      'Reason Code': record.reason_code,
-      'Description': record.reason_description,
-      'Operation Type': record.operation_type,
-      'Status': record.is_active ? 'Active' : 'Inactive',
-      'Display Sequence': record.display_sequence,
-      'Created Date': record.created_at ? new Date(record.created_at).toLocaleDateString() : ''
-    })) : [form];
+  const exportToExcel = async () => {
+    const exportData = records && records.length > 0 ? records : [form];
     
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'ReasonCodes');
-    XLSX.writeFile(wb, 'ReasonCodes.xlsx');
+    if (exportData.length === 0) {
+      alert('No data to export');
+      return;
+    }
+
+    try {
+      // Create a new workbook using ExcelJS
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Reason Codes Export');
+      
+      // Add report title
+      worksheet.addRow(['Reason Codes Export Report']);
+      worksheet.getCell('A1').font = {
+        bold: true,
+        color: { argb: 'FF366092' },
+        size: 16,
+        name: 'Calibri'
+      };
+      worksheet.getCell('A1').alignment = {
+        horizontal: 'center',
+        vertical: 'middle'
+      };
+      
+      // Add generation date
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      worksheet.addRow([`Generated on: ${dateTimeString}`]);
+      worksheet.getCell('A2').font = {
+        color: { argb: 'FF666666' },
+        size: 11,
+        name: 'Calibri'
+      };
+      worksheet.getCell('A2').alignment = {
+        horizontal: 'center',
+        vertical: 'middle'
+      };
+      
+      // Add empty row for spacing
+      worksheet.addRow([]);
+      
+      // Define headers
+      const headers = [
+        'ID',
+        'Reason Code',
+        'Description',
+        'Operation Type',
+        'Status',
+        'Display Sequence',
+        'Created Date'
+      ];
+      
+      // Add header row
+      const headerRow = worksheet.addRow(headers);
+      
+      // Style header row
+      headerRow.eachCell((cell, colNumber) => {
+        cell.font = {
+          bold: true,
+          color: { argb: 'FFFFFFFF' },
+          size: 12,
+          name: 'Calibri'
+        };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF366092' }
+        };
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle'
+        };
+        cell.border = {
+          top: { style: 'medium', color: { argb: 'FF000000' } },
+          left: { style: 'medium', color: { argb: 'FF000000' } },
+          bottom: { style: 'medium', color: { argb: 'FF000000' } },
+          right: { style: 'medium', color: { argb: 'FF000000' } }
+        };
+      });
+      
+      // Add data rows
+      exportData.forEach((record, index) => {
+        const row = [
+          record.id || '',
+          record.reason_code || '',
+          record.reason_description || '',
+          record.operation_type || '',
+          record.is_active ? 'Active' : 'Inactive',
+          record.display_sequence || '',
+          record.created_at ? new Date(record.created_at).toLocaleDateString('en-GB') : ''
+        ];
+        
+        const dataRow = worksheet.addRow(row);
+        
+        // Style data rows with alternating colors
+        const isEvenRow = (index + 4) % 2 === 0; // +4 because title(1) + date(1) + empty(1) + header(1)
+        const fillColor = isEvenRow ? 'FFF8F9FA' : 'FFFFFFFF';
+        
+        dataRow.eachCell((cell, colNumber) => {
+          cell.font = {
+            color: { argb: 'FF000000' },
+            size: 10,
+            name: 'Calibri'
+          };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: fillColor }
+          };
+          cell.alignment = {
+            horizontal: colNumber <= 2 ? 'center' : 'left',
+            vertical: 'middle'
+          };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+            left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+            bottom: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+            right: { style: 'thin', color: { argb: 'FFCCCCCC' } }
+          };
+        });
+      });
+      
+      // Add footer with user information
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      worksheet.addRow([]);
+      const footerRow = worksheet.addRow(['Report generated by:', currentUser]);
+      
+      // Style footer
+      footerRow.getCell(1).font = {
+        bold: true,
+        color: { argb: 'FF333333' },
+        size: 10,
+        name: 'Calibri'
+      };
+      footerRow.getCell(1).alignment = {
+        horizontal: 'right',
+        vertical: 'middle'
+      };
+      
+      footerRow.getCell(2).font = {
+        bold: true,
+        color: { argb: 'FF0066CC' },
+        size: 10,
+        name: 'Calibri'
+      };
+      footerRow.getCell(2).alignment = {
+        horizontal: 'left',
+        vertical: 'middle'
+      };
+
+      // Auto-fit columns
+      worksheet.columns.forEach((column, index) => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: true }, (cell) => {
+          const cellValue = cell.value ? cell.value.toString() : '';
+          maxLength = Math.max(maxLength, cellValue.length);
+        });
+        column.width = Math.min(Math.max(maxLength + 2, 12), 30);
+      });
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Reason_Codes_Export_${year}${month}${day}_${hours}${minutes}${seconds}.xlsx`;
+      
+      // Generate buffer and save file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      saveAs(blob, filename);
+      
+      console.log('✅ Reason Codes Excel file exported successfully:', filename);
+      alert(`✅ Formatted Reason Codes Excel Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Report heading at top\n• Professional blue headers\n• Alternating row colors\n• Complete table formatting\n• Auto-sized columns\n• User footer (Generated by: ${currentUser})`);
+      
+    } catch (error) {
+      console.error('Reason Codes Excel export error:', error);
+      alert('❌ Error exporting Reason Codes to Excel. Please try again.\n\nError: ' + error.message);
+    }
   };
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    const tableColumn = ['Code', 'Description', 'Operation Type', 'Status', 'Sequence'];
-    const tableRows = records ? records.map(record => [
-      record.reason_code,
-      record.reason_description,
-      record.operation_type,
-      record.is_active ? 'Active' : 'Inactive',
-      record.display_sequence
-    ]) : [];
+  const exportToPDF = async () => {
+    const exportData = records && records.length > 0 ? records : [form];
     
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [71, 129, 202] }
-    });
-    
-    doc.text('Reason Codes Report', 14, 15);
-    doc.save('ReasonCodes.pdf');
+    if (exportData.length === 0) {
+      alert('No data to export');
+      return;
+    }
+
+    try {
+      // Create PDF in landscape mode
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Add report title
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Reason Codes Export Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+      
+      // Add generation date/time
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on: ${dateTimeString}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+      
+      // Define columns with proper headers
+      const columns = [
+        { header: 'ID', dataKey: 'id' },
+        { header: 'Reason Code', dataKey: 'reason_code' },
+        { header: 'Description', dataKey: 'reason_description' },
+        { header: 'Operation Type', dataKey: 'operation_type' },
+        { header: 'Status', dataKey: 'status' },
+        { header: 'Display Sequence', dataKey: 'display_sequence' },
+        { header: 'Created Date', dataKey: 'created_date' }
+      ];
+      
+      // Prepare data rows
+      const rows = exportData.map(rec => ({
+        id: rec.id || '',
+        reason_code: rec.reason_code || '',
+        reason_description: rec.reason_description || '',
+        operation_type: rec.operation_type || '',
+        status: rec.is_active ? 'Active' : 'Inactive',
+        display_sequence: rec.display_sequence || '',
+        created_date: rec.created_at ? new Date(rec.created_at).toLocaleDateString('en-GB') : ''
+      }));
+      
+      // Calculate available width for the table
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margins = { left: 10, right: 10 };
+      
+      // Create the table with professional styling and auto-fit columns
+      autoTable(doc, {
+        columns: columns,
+        body: rows,
+        startY: 35,
+        theme: 'grid',
+        styles: {
+          fontSize: 7,
+          cellPadding: 2,
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1,
+          overflow: 'linebreak',
+          halign: 'left'
+        },
+        headStyles: {
+          fillColor: [54, 96, 146], // Blue background matching Excel
+          textColor: [255, 255, 255], // White text
+          fontSize: 8,
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle',
+          cellPadding: 3
+        },
+        bodyStyles: {
+          textColor: [0, 0, 0],
+          fontSize: 7,
+          cellPadding: 2,
+          valign: 'top'
+        },
+        alternateRowStyles: {
+          fillColor: [248, 249, 250] // Light gray for alternating rows
+        },
+        columnStyles: {
+          0: { halign: 'center' }, // ID
+          1: { halign: 'center' }, // Reason Code
+          2: { halign: 'left' },   // Description
+          3: { halign: 'center' }, // Operation Type
+          4: { halign: 'center' }, // Status
+          5: { halign: 'center' }, // Display Sequence
+          6: { halign: 'center' }  // Created Date
+        },
+        margin: margins,
+        pageBreak: 'auto',
+        showHead: 'everyPage',
+        tableWidth: 'auto',
+        horizontalPageBreak: true,
+        horizontalPageBreakRepeat: [0, 1, 2] // Always repeat ID, Code, Description columns
+      });
+      
+      // Get current user for footer
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      // Add page numbers and user footer
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // Add page numbers
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+          `Page ${i} of ${totalPages}`,
+          doc.internal.pageSize.getWidth() - 20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'right' }
+        );
+        
+        // Add user footer on left side
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(102, 102, 102); // Gray color
+        doc.text(
+          `Generated by: ${currentUser}`,
+          20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'left' }
+        );
+        
+        // Reset text color for next page
+        doc.setTextColor(0, 0, 0);
+      }
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Reason_Codes_Export_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      console.log('✅ Reason Codes PDF file exported successfully:', filename);
+      alert(`✅ Professional Reason Codes PDF Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Landscape orientation with auto-fit columns\n• Report heading and timestamp\n• Professional blue headers\n• Alternating row colors\n• Page numbers and user footer\n• Smart table layout that prevents content cutoff\n• Text wrapping for long content\n• User footer (Generated by: ${currentUser})`);
+      
+    } catch (error) {
+      console.error('Reason Codes PDF export error:', error);
+      alert('❌ Error exporting Reason Codes to PDF. Please try again.\n\nError: ' + error.message);
+    }
   };
 
   // Filtered and sorted records

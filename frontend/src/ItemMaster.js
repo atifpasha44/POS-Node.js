@@ -55,31 +55,84 @@ export default function ItemMaster({ setParentDirty }) {
   const formRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Load master data
+  // Load master data from localStorage
   useEffect(() => {
-    const loadMasterData = async () => {
+    const loadMasterData = () => {
       try {
-        const [outletsRes, deptsRes, catsRes, taxRes, printersRes, printGroupsRes, modifierGroupsRes, unitsRes] = await Promise.all([
-          axios.get('/api/outlets'),
-          axios.get('/api/departments'),
-          axios.get('/api/categories'),
-          axios.get('/api/tax-codes'),
-          axios.get('/api/printers'),
-          axios.get('/api/print-groups'),
-          axios.get('/api/modifier-groups'),
-          axios.get('/api/units')
-        ]);
+        console.log('🔄 Loading Item Master dropdown data from localStorage...');
+        
+        // Load Outlet Setup data
+        const savedOutletRecords = localStorage.getItem('outletRecords');
+        const outletData = savedOutletRecords ? JSON.parse(savedOutletRecords) : [];
+        const formattedOutlets = outletData.map(outlet => ({
+          id: outlet.id || outlet.outlet_code,
+          code: outlet.outlet_code,
+          name: outlet.outlet_name || outlet.name
+        }));
+        setOutlets(formattedOutlets);
+        console.log('✅ Loaded outlets:', formattedOutlets.length, 'items');
 
-        setOutlets(outletsRes.data || []);
-        setDepartments(deptsRes.data || []);
-        setCategories(catsRes.data || []);
-        setTaxCodes(taxRes.data || []);
-        setPrinters(printersRes.data || []);
-        setPrintGroups(printGroupsRes.data || []);
-        setModifierGroups(modifierGroupsRes.data || []);
-        setUnits(unitsRes.data || []);
+        // Load Item Departments data
+        const savedDepartments = localStorage.getItem('itemDepartmentRecords');
+        const departmentData = savedDepartments ? JSON.parse(savedDepartments) : [];
+        const formattedDepartments = departmentData
+          .filter(dept => !dept.inactive) // Only active departments
+          .map(dept => ({
+            id: dept.id || dept.department_code,
+            code: dept.department_code,
+            name: dept.name
+          }));
+        setDepartments(formattedDepartments);
+        console.log('✅ Loaded departments:', formattedDepartments.length, 'items');
+
+        // Load Item Categories data
+        const savedCategories = localStorage.getItem('itemCategoryRecords');
+        const categoryData = savedCategories ? JSON.parse(savedCategories) : [];
+        const formattedCategories = categoryData
+          .filter(cat => !cat.inactive) // Only active categories
+          .map(cat => ({
+            id: cat.id || cat.category_code,
+            code: cat.category_code,
+            name: cat.name
+          }));
+        setCategories(formattedCategories);
+        console.log('✅ Loaded categories:', formattedCategories.length, 'items');
+
+        // Load Tax Codes from Tax Structure
+        const savedTaxStructure = localStorage.getItem('taxStructureRecords');
+        const taxData = savedTaxStructure ? JSON.parse(savedTaxStructure) : [];
+        const formattedTaxCodes = taxData
+          .filter(tax => tax.is_active) // Only active tax codes
+          .map(tax => ({
+            id: tax.id || tax.tax_structure_code,
+            code: tax.tax_structure_code,
+            name: tax.tax_structure_name
+          }));
+        setTaxCodes(formattedTaxCodes);
+        console.log('✅ Loaded tax codes:', formattedTaxCodes.length, 'items');
+
+        // Load UOM data
+        const savedUOM = localStorage.getItem('uomRecords');
+        const uomData = savedUOM ? JSON.parse(savedUOM) : [];
+        const formattedUnits = uomData
+          .filter(uom => uom.is_active) // Only active units
+          .map(uom => ({
+            id: uom.id || uom.uom_code,
+            code: uom.uom_code,
+            name: uom.uom_name
+          }));
+        setUnits(formattedUnits);
+        console.log('✅ Loaded units:', formattedUnits.length, 'items');
+
+        // For now, set empty arrays for printer-related data (can be implemented later)
+        setPrinters([]);
+        setPrintGroups([]);
+        setModifierGroups([]);
+
+        console.log('🎉 Item Master dropdown data loading complete!');
+        
       } catch (error) {
-        console.error('Error loading master data:', error);
+        console.error('❌ Error loading Item Master dropdown data:', error);
       }
     };
 

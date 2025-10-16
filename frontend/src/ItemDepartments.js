@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import axios from 'axios';
 
 const initialState = {
@@ -237,58 +239,394 @@ export default function ItemDepartments({ setParentDirty, records, setRecords })
     }
   };
 
-  const handleExportExcel = () => {
-    if (!records.length) {
+  const handleExportExcel = async () => {
+    if (!records || records.length === 0) {
       alert('No data to export');
       return;
     }
 
-    const exportData = records.map(record => ({
-      'Department Code': record.department_code,
-      'Name': record.name,
-      'Alternate Name': record.alternate_name || '',
-      'Status': record.inactive ? 'Inactive' : 'Active',
-      'Created By': record.created_by || '',
-      'Created Date': record.created_at ? new Date(record.created_at).toLocaleDateString() : '',
-      'Modified By': record.modified_by || '',
-      'Modified Date': record.updated_at ? new Date(record.updated_at).toLocaleDateString() : ''
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Item Departments');
-    XLSX.writeFile(wb, 'Item_Departments.xlsx');
+    try {
+      // Create a new workbook
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Item Departments Report', {
+        pageSetup: {
+          orientation: 'landscape',
+          fitToPage: true,
+          paperSize: 9 // A4
+        }
+      });
+      
+      // Add report title - merge cells across all columns
+      const titleRange = 'A1:H1';
+      worksheet.mergeCells(titleRange);
+      const titleCell = worksheet.getCell('A1');
+      titleCell.value = 'Item Departments Export Report';
+      titleCell.font = {
+        name: 'Calibri',
+        size: 16,
+        bold: true,
+        color: { argb: '366092' }
+      };
+      titleCell.alignment = {
+        horizontal: 'center',
+        vertical: 'middle'
+      };
+      
+      // Add generation date/time
+      const dateRange = 'A2:H2';
+      worksheet.mergeCells(dateRange);
+      const dateCell = worksheet.getCell('A2');
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      dateCell.value = `Generated on: ${dateTimeString}`;
+      dateCell.font = {
+        name: 'Calibri',
+        size: 10,
+        italic: true
+      };
+      dateCell.alignment = {
+        horizontal: 'center',
+        vertical: 'middle'
+      };
+      
+      // Add empty row
+      worksheet.getRow(3).height = 10;
+      
+      // Define headers
+      const headers = [
+        'ID',
+        'Department Code', 
+        'Name',
+        'Alternate Name',
+        'Status',
+        'Created By',
+        'Created Date',
+        'Modified Date'
+      ];
+      
+      // Add headers to row 4
+      const headerRow = worksheet.getRow(4);
+      headers.forEach((header, index) => {
+        const cell = headerRow.getCell(index + 1);
+        cell.value = header;
+        cell.font = {
+          name: 'Calibri',
+          size: 11,
+          bold: true,
+          color: { argb: 'FFFFFF' }
+        };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: '366092' }
+        };
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle'
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+      });
+      
+      headerRow.height = 25;
+      
+      // Add data rows
+      records.forEach((record, index) => {
+        const rowNumber = index + 5; // Starting from row 5
+        const row = worksheet.getRow(rowNumber);
+        
+        const rowData = [
+          record.id || index + 1,
+          record.department_code || '',
+          record.name || '',
+          record.alternate_name || '',
+          record.inactive ? 'Inactive' : 'Active',
+          record.created_by || '',
+          record.created_at ? new Date(record.created_at).toLocaleDateString() : '',
+          record.updated_at ? new Date(record.updated_at).toLocaleDateString() : ''
+        ];
+        
+        rowData.forEach((cellValue, colIndex) => {
+          const cell = row.getCell(colIndex + 1);
+          cell.value = cellValue;
+          cell.font = {
+            name: 'Calibri',
+            size: 10
+          };
+          cell.alignment = {
+            horizontal: colIndex === 0 || colIndex === 4 ? 'center' : 'left',
+            vertical: 'middle'
+          };
+          
+          // Add borders
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+          
+          // Alternating row colors
+          if (index % 2 === 1) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'F8F9FA' }
+            };
+          }
+        });
+        
+        row.height = 20;
+      });
+      
+      // Auto-fit columns
+      worksheet.columns.forEach((column, index) => {
+        let maxWidth = headers[index].length;
+        
+        records.forEach((record) => {
+          const rowData = [
+            record.id || '',
+            record.department_code || '',
+            record.name || '',
+            record.alternate_name || '',
+            record.inactive ? 'Inactive' : 'Active',
+            record.created_by || '',
+            record.created_at ? new Date(record.created_at).toLocaleDateString() : '',
+            record.updated_at ? new Date(record.updated_at).toLocaleDateString() : ''
+          ];
+          
+          const cellValue = String(rowData[index]);
+          if (cellValue.length > maxWidth) {
+            maxWidth = cellValue.length;
+          }
+        });
+        
+        // Set column width (minimum 10, maximum 50)
+        column.width = Math.min(Math.max(maxWidth + 2, 10), 50);
+      });
+      
+      // Add user footer information
+      const footerRowNum = records.length + 6;
+      const footerRange = `A${footerRowNum}:H${footerRowNum}`;
+      worksheet.mergeCells(footerRange);
+      const footerCell = worksheet.getCell(`A${footerRowNum}`);
+      
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      footerCell.value = `Generated by: ${currentUser} | Total Records: ${records.length}`;
+      footerCell.font = {
+        name: 'Calibri',
+        size: 9,
+        italic: true,
+        color: { argb: '666666' }
+      };
+      footerCell.alignment = {
+        horizontal: 'center',
+        vertical: 'middle'
+      };
+      
+      // Generate the file
+      const buffer = await workbook.xlsx.writeBuffer();
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Item_Departments_Export_${year}${month}${day}_${hours}${minutes}${seconds}.xlsx`;
+      
+      // Save the file
+      saveAs(new Blob([buffer]), filename);
+      
+      console.log('✅ Item Departments Excel file exported successfully:', filename);
+      alert(`✅ Professional Item Departments Excel Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Professional report title and timestamp\n• Blue headers with white text\n• Alternating row colors for readability\n• Auto-fitted columns\n• Landscape orientation\n• User footer (Generated by: ${currentUser})\n• ${records.length} records exported`);
+      
+    } catch (error) {
+      console.error('Item Departments Excel export error:', error);
+      alert('❌ Error exporting Item Departments to Excel. Please try again.\n\nError: ' + error.message);
+    }
   };
 
-  const handleExportPDF = () => {
-    if (!records.length) {
+  const handleExportPDF = async () => {
+    if (!records || records.length === 0) {
       alert('No data to export');
       return;
     }
 
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text('Item Departments', 14, 20);
-
-    const headers = [['Department Code', 'Name', 'Alternate Name', 'Status', 'Created By', 'Created Date']];
-    const data = records.map(record => [
-      record.department_code,
-      record.name,
-      record.alternate_name || '',
-      record.inactive ? 'Inactive' : 'Active',
-      record.created_by || '',
-      record.created_at ? new Date(record.created_at).toLocaleDateString() : ''
-    ]);
-
-    autoTable(doc, {
-      head: headers,
-      body: data,
-      startY: 30,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [255, 183, 0] }
-    });
-
-    doc.save('Item_Departments.pdf');
+    try {
+      // Create PDF in landscape mode
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Add report title
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Item Departments Export Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+      
+      // Add generation date/time
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on: ${dateTimeString}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+      
+      // Define columns with proper headers
+      const columns = [
+        { header: 'ID', dataKey: 'id' },
+        { header: 'Department Code', dataKey: 'department_code' },
+        { header: 'Name', dataKey: 'name' },
+        { header: 'Alternate Name', dataKey: 'alternate_name' },
+        { header: 'Status', dataKey: 'status' },
+        { header: 'Created By', dataKey: 'created_by' },
+        { header: 'Created Date', dataKey: 'created_date' },
+        { header: 'Modified Date', dataKey: 'modified_date' }
+      ];
+      
+      // Prepare data rows
+      const rows = records.map(rec => ({
+        id: rec.id || '',
+        department_code: rec.department_code || '',
+        name: rec.name || '',
+        alternate_name: rec.alternate_name || '',
+        status: rec.inactive ? 'Inactive' : 'Active',
+        created_by: rec.created_by || '',
+        created_date: rec.created_at ? new Date(rec.created_at).toLocaleDateString() : '',
+        modified_date: rec.updated_at ? new Date(rec.updated_at).toLocaleDateString() : ''
+      }));
+      
+      // Calculate available width for the table
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margins = { left: 10, right: 10 };
+      
+      // Create the table with professional styling and auto-fit columns
+      autoTable(doc, {
+        columns: columns,
+        body: rows,
+        startY: 35,
+        theme: 'grid',
+        styles: {
+          fontSize: 7,
+          cellPadding: 2,
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1,
+          overflow: 'linebreak',
+          halign: 'left'
+        },
+        headStyles: {
+          fillColor: [54, 96, 146], // Blue background matching Excel
+          textColor: [255, 255, 255], // White text
+          fontSize: 8,
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle',
+          cellPadding: 3
+        },
+        bodyStyles: {
+          textColor: [0, 0, 0],
+          fontSize: 7,
+          cellPadding: 2,
+          valign: 'top'
+        },
+        alternateRowStyles: {
+          fillColor: [248, 249, 250] // Light gray for alternating rows
+        },
+        columnStyles: {
+          0: { halign: 'center' }, // ID
+          1: { halign: 'center' }, // Department Code
+          2: { halign: 'left' },   // Name
+          3: { halign: 'left' },   // Alternate Name
+          4: { halign: 'center' }, // Status
+          5: { halign: 'center' }, // Created By
+          6: { halign: 'center' }, // Created Date
+          7: { halign: 'center' }  // Modified Date
+        },
+        margin: margins,
+        pageBreak: 'auto',
+        showHead: 'everyPage',
+        tableWidth: 'auto',
+        horizontalPageBreak: true,
+        horizontalPageBreakRepeat: [0, 1, 2] // Always repeat ID, Code, Name columns
+      });
+      
+      // Get current user for footer
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      // Add page numbers and user footer
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // Add page numbers
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+          `Page ${i} of ${totalPages}`,
+          doc.internal.pageSize.getWidth() - 20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'right' }
+        );
+        
+        // Add user footer on left side
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(102, 102, 102); // Gray color
+        doc.text(
+          `Generated by: ${currentUser}`,
+          20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'left' }
+        );
+        
+        // Reset text color for next page
+        doc.setTextColor(0, 0, 0);
+      }
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Item_Departments_Export_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      console.log('✅ Item Departments PDF file exported successfully:', filename);
+      alert(`✅ Professional Item Departments PDF Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Landscape orientation with auto-fit columns\n• Report heading and timestamp\n• Professional blue headers\n• Alternating row colors\n• Page numbers and user footer\n• Smart table layout that prevents content cutoff\n• Text wrapping for long content\n• User footer (Generated by: ${currentUser})`);
+      
+    } catch (error) {
+      console.error('Item Departments PDF export error:', error);
+      alert('❌ Error exporting Item Departments to PDF. Please try again.\n\nError: ' + error.message);
+    }
   };
 
   const handleAdd = () => {

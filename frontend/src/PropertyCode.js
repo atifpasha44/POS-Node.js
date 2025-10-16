@@ -342,73 +342,125 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     
     // Fetch fresh data and apply sorting
     try {
-      console.log('Fetching fresh records for edit modal...');
+      console.log('🔄 Fetching fresh records for edit modal...');
       const response = await axios.get('/api/property-codes');
       const freshData = response.data;
       
-      console.log('Fresh data received:', freshData);
+      console.log('📊 Fresh data received (count):', freshData.length);
+      console.log('📊 Fresh data details:', freshData);
       
-      // Apply sorting logic
+      // Debug: Show all dates in the dataset for verification
+      console.log('🔍 All dates in dataset:');
+      freshData.forEach((record, index) => {
+        const localDate = getCurrentDateOnly(record.applicable_from);
+        console.log(`  ${index}: ${record.applicable_from} -> Local: ${localDate.toLocaleDateString('en-GB')} (${record.property_name || record.property_code})`);
+      });
+      
+      // Apply sorting logic: Latest Record → Future → Past
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      console.log('Today (for comparison):', today.toISOString());
+      console.log('📅 Today (for comparison):', today.toISOString(), '| Local:', today.toLocaleDateString('en-GB'));
       
-      // First find the latest date across all records
+      // CRITICAL FIX: Ensure we're working with local dates to avoid timezone issues
+      const getCurrentDateOnly = (dateStr) => {
+        const date = new Date(dateStr);
+        // Create new date in local timezone to avoid timezone conversion issues
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      };
+      
+      // Find the maximum/latest date across all records using local date comparison
       const latestDate = freshData.reduce((latest, record) => {
-        const recordDate = new Date(record.applicable_from);
-        recordDate.setHours(0, 0, 0, 0);
+        const recordDate = getCurrentDateOnly(record.applicable_from);
+        console.log(`📊 Comparing: ${recordDate.toLocaleDateString('en-GB')} vs current max: ${latest.toLocaleDateString('en-GB')}`);
         return recordDate > latest ? recordDate : latest;
       }, new Date('1900-01-01'));
       
-      console.log('Latest date in dataset:', latestDate.toISOString());
+      console.log('📈 FINAL Latest/Maximum date in dataset:', latestDate.toISOString(), '| Local:', latestDate.toLocaleDateString('en-GB'));
       
+      // Verify which record has this latest date
+      const latestRecord = freshData.find(record => {
+        const recordDate = getCurrentDateOnly(record.applicable_from);
+        return recordDate.getTime() === latestDate.getTime();
+      });
+      console.log('🎯 Latest record details:', latestRecord ? `${latestRecord.applicable_from} (${latestRecord.property_name || latestRecord.property_code})` : 'Not found');
+      
+      // Enhanced sorting logic with detailed logging and proper date handling
       const sortedRecords = freshData.sort((a, b) => {
-        let dateA = new Date(a.applicable_from);
-        let dateB = new Date(b.applicable_from);
+        // Use local date parsing to avoid timezone issues
+        let dateA = getCurrentDateOnly(a.applicable_from);
+        let dateB = getCurrentDateOnly(b.applicable_from);
         
-        dateA.setHours(0, 0, 0, 0);
-        dateB.setHours(0, 0, 0, 0);
-        
-        // Check if records are the latest record
+        // Categorize dates using local date comparison
         const isLatestA = dateA.getTime() === latestDate.getTime();
         const isLatestB = dateB.getTime() === latestDate.getTime();
+        const isCurrentA = dateA.getTime() === today.getTime();
+        const isCurrentB = dateB.getTime() === today.getTime();
         const isFutureA = dateA > today;
         const isFutureB = dateB > today;
         const isPastA = dateA < today;
         const isPastB = dateB < today;
         
-        console.log(`${a.applicable_from}: Latest=${isLatestA}, Future=${isFutureA}, Past=${isPastA}`);
+        console.log(`🔍 Record A: ${a.applicable_from} -> ${dateA.toLocaleDateString('en-GB')} (${a.property_name || a.property_code}) - Latest=${isLatestA}, Current=${isCurrentA}, Future=${isFutureA}, Past=${isPastA}`);
+        console.log(`🔍 Record B: ${b.applicable_from} -> ${dateB.toLocaleDateString('en-GB')} (${b.property_name || b.property_code}) - Latest=${isLatestB}, Current=${isCurrentB}, Future=${isFutureB}, Past=${isPastB}`);
         
-        // Priority order: Latest (0) → Future (1) → Past (2)
-        const getPriority = (isLatest, isFuture, isPast) => {
-          if (isLatest) return 0;  // Latest record always first
-          if (isFuture) return 1;  // Future dates second
-          if (isPast) return 2;    // Past dates last
-          return 3;
+        // REQUIREMENT: Priority order based on user specification:
+        // 1. Latest/Maximum date record (Select button enabled) - TOP
+        // 2. Future-dated records (Select button enabled) 
+        // 3. Current date records (Select button enabled)
+        // 4. Past records (Read Only)
+        const getPriority = (isLatest, isCurrent, isFuture, isPast) => {
+          if (isLatest) return 0;   // Latest/Maximum date record always first
+          if (isFuture && !isLatest) return 1;   // Future dates second (but not latest)
+          if (isCurrent && !isLatest) return 2;  // Current date third (if not latest)
+          if (isPast) return 3;     // Past dates last (Read Only)
+          return 4;
         };
         
-        const priorityA = getPriority(isLatestA, isFutureA, isPastA);
-        const priorityB = getPriority(isLatestB, isFutureB, isPastB);
+        const priorityA = getPriority(isLatestA, isCurrentA, isFutureA, isPastA);
+        const priorityB = getPriority(isLatestB, isCurrentB, isFutureB, isPastB);
+        
+        console.log(`⚡ Priority A: ${priorityA}, Priority B: ${priorityB}`);
         
         // If different priorities, sort by priority
         if (priorityA !== priorityB) {
-          return priorityA - priorityB;
+          const result = priorityA - priorityB;
+          console.log(`📊 Different priorities, result: ${result} (${result < 0 ? 'A first' : 'B first'})`);
+          return result;
         }
         
         // If same priority, sort within category
+        let result = 0;
         if (priorityA === 0) {
-          return 0; // Latest dates (should be unique)
+          result = 0; // Latest records (should be unique, but just in case)
+          console.log(`📊 Both latest records, result: ${result}`);
         } else if (priorityA === 1) {
-          return dateA - dateB; // Future dates: nearest future first
+          result = 0; // Current dates (should be unique, but just in case)
+          console.log(`📊 Both current records, result: ${result}`);
+        } else if (priorityA === 2) {
+          result = dateA - dateB; // Future dates: nearest future first
+          console.log(`📊 Both future records, result: ${result} (${result < 0 ? 'A first (nearer future)' : 'B first (nearer future)'})`);
         } else {
-          return dateB - dateA; // Past dates: most recent past first
+          result = dateB - dateA; // Past dates: most recent past first
+          console.log(`📊 Both past records, result: ${result} (${result < 0 ? 'A first (more recent past)' : 'B first (more recent past)'})`);
         }
+        
+        return result;
       });
       
-      console.log('Sorted records:', sortedRecords);
+      console.log('✅ Final sorted records:');
+      sortedRecords.forEach((record, index) => {
+        const recordDate = getCurrentDateOnly(record.applicable_from);
+        const isLatest = recordDate.getTime() === latestDate.getTime();
+        const isCurrent = recordDate.getTime() === today.getTime();
+        const isFuture = recordDate > today;
+        const isPast = recordDate < today;
+        
+        console.log(`${index + 1}. ${record.applicable_from} (${record.property_name || record.property_code}) - ${isLatest ? 'LATEST' : isCurrent ? 'CURRENT' : isFuture ? 'FUTURE' : 'PAST'} | Local Date: ${recordDate.toLocaleDateString('en-GB')}`);
+      });
+      
       setRecords(sortedRecords);
     } catch (error) {
-      console.error('Error fetching records for edit:', error);
+      console.error('❌ Error fetching records for edit:', error);
     }
     
     setShowSelectModal(true);
@@ -607,6 +659,43 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
           });
         });
         
+        // Add footer with user information
+        const currentRowNumber = worksheet.rowCount + 2; // Add some spacing
+        
+        // Get current user (this could be enhanced to get from authentication context)
+        const currentUser = localStorage.getItem('currentUser') || 
+                           sessionStorage.getItem('currentUser') || 
+                           'System Administrator'; // Default fallback
+        
+        // Add footer separator
+        worksheet.addRow([]);
+        
+        // Add user footer
+        const footerRow = worksheet.addRow(['Report generated by:', currentUser]);
+        
+        // Style footer
+        footerRow.getCell(1).font = {
+          bold: true,
+          color: { argb: 'FF333333' },
+          size: 10,
+          name: 'Calibri'
+        };
+        footerRow.getCell(1).alignment = {
+          horizontal: 'right',
+          vertical: 'middle'
+        };
+        
+        footerRow.getCell(2).font = {
+          bold: true,
+          color: { argb: 'FF0066CC' },
+          size: 10,
+          name: 'Calibri'
+        };
+        footerRow.getCell(2).alignment = {
+          horizontal: 'left',
+          vertical: 'middle'
+        };
+
         // Auto-fit columns
         worksheet.columns.forEach((column, index) => {
           let maxLength = 0;
@@ -637,7 +726,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
         saveAs(blob, filename);
         
         console.log('✅ Property Setup Excel file exported successfully:', filename);
-        alert(`✅ Formatted Property Setup Excel Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Report heading at top\n• Professional blue headers\n• Alternating row colors\n• Complete table formatting\n• Auto-sized columns`);
+        alert(`✅ Formatted Property Setup Excel Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Report heading at top\n• Professional blue headers\n• Alternating row colors\n• Complete table formatting\n• Auto-sized columns\n• User footer (Generated by: ${currentUser})`);
         
       } catch (error) {
         console.error('Property Setup Excel export error:', error);
@@ -645,17 +734,193 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
       }
       
     } else if (type === 'PDF') {
-      const doc = new jsPDF();
-      const columns = [
-        'Applicable From', 'Property Code', 'Property Name', 'Nick Name', 'Owner Name', 'Address Name', 'GST Number', 'PAN Number',
-        'Group Name', 'Local Currency', 'Currency Format', 'Symbol', 'Decimal', 'Date Format', 'Round Off'
-      ];
-      const rows = exportData.map(rec => [
-        rec.applicable_from, rec.property_code, rec.property_name, rec.nick_name, rec.owner_name, rec.address_name, rec.gst_number, rec.pan_number,
-        rec.group_name, rec.local_currency, rec.currency_format, rec.symbol, rec.decimal, rec.date_format, rec.round_off
-      ]);
-      autoTable(doc, { head: [columns], body: rows });
-      doc.save('PropertyCodes.pdf');
+      try {
+        // Create PDF in landscape mode
+        const doc = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        // Add report title
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Property Setup Export Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+        
+        // Add generation date/time
+        const now = new Date();
+        const dateTimeString = now.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit', 
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Generated on: ${dateTimeString}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+        
+        // Define columns with proper headers
+        const columns = [
+          { header: 'ID', dataKey: 'id' },
+          { header: 'Applicable From', dataKey: 'applicable_from' },
+          { header: 'Property Code', dataKey: 'property_code' },
+          { header: 'Property Name', dataKey: 'property_name' },
+          { header: 'Nick Name', dataKey: 'nick_name' },
+          { header: 'Owner Name', dataKey: 'owner_name' },
+          { header: 'Address Name', dataKey: 'address_name' },
+          { header: 'GST Number', dataKey: 'gst_number' },
+          { header: 'PAN Number', dataKey: 'pan_number' },
+          { header: 'Group Name', dataKey: 'group_name' },
+          { header: 'Local Currency', dataKey: 'local_currency' },
+          { header: 'Currency Format', dataKey: 'currency_format' },
+          { header: 'Symbol', dataKey: 'symbol' },
+          { header: 'Decimal', dataKey: 'decimal' },
+          { header: 'Date Format', dataKey: 'date_format' },
+          { header: 'Round Off', dataKey: 'round_off' }
+        ];
+        
+        // Prepare data rows
+        const rows = exportData.map(rec => ({
+          id: rec.id || '',
+          applicable_from: rec.applicable_from ? new Date(rec.applicable_from).toLocaleDateString('en-GB', { 
+            day: '2-digit', month: '2-digit', year: 'numeric' 
+          }) : '',
+          property_code: rec.property_code || '',
+          property_name: rec.property_name || '',
+          nick_name: rec.nick_name || '',
+          owner_name: rec.owner_name || '',
+          address_name: rec.address_name || '',
+          gst_number: rec.gst_number || '',
+          pan_number: rec.pan_number || '',
+          group_name: rec.group_name || '',
+          local_currency: rec.local_currency || '',
+          currency_format: rec.currency_format || '',
+          symbol: rec.symbol || '',
+          decimal: rec.decimal || '',
+          date_format: rec.date_format || '',
+          round_off: rec.round_off || ''
+        }));
+        
+        // Calculate available width for the table
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margins = { left: 10, right: 10 };
+        const availableWidth = pageWidth - margins.left - margins.right;
+        
+        // Create the table with professional styling and auto-fit columns
+        autoTable(doc, {
+          columns: columns,
+          body: rows,
+          startY: 35,
+          theme: 'grid',
+          styles: {
+            fontSize: 7, // Reduced font size to fit more content
+            cellPadding: 2,
+            lineColor: [200, 200, 200],
+            lineWidth: 0.1,
+            overflow: 'linebreak', // Allow text wrapping
+            halign: 'left'
+          },
+          headStyles: {
+            fillColor: [54, 96, 146], // Blue background matching Excel
+            textColor: [255, 255, 255], // White text
+            fontSize: 8,
+            fontStyle: 'bold',
+            halign: 'center',
+            valign: 'middle',
+            cellPadding: 3
+          },
+          bodyStyles: {
+            textColor: [0, 0, 0],
+            fontSize: 7,
+            cellPadding: 2,
+            valign: 'top'
+          },
+          alternateRowStyles: {
+            fillColor: [248, 249, 250] // Light gray for alternating rows
+          },
+          columnStyles: {
+            0: { halign: 'center' }, // ID
+            1: { halign: 'center' }, // Applicable From
+            2: { halign: 'center' }, // Property Code
+            3: { halign: 'left' },   // Property Name
+            4: { halign: 'left' },   // Nick Name
+            5: { halign: 'left' },   // Owner Name
+            6: { halign: 'left' },   // Address Name
+            7: { halign: 'center' }, // GST Number
+            8: { halign: 'center' }, // PAN Number
+            9: { halign: 'left' },   // Group Name
+            10: { halign: 'center' }, // Local Currency
+            11: { halign: 'center' }, // Currency Format
+            12: { halign: 'center' }, // Symbol
+            13: { halign: 'center' }, // Decimal
+            14: { halign: 'center' }, // Date Format
+            15: { halign: 'center' }  // Round Off
+          },
+          margin: margins,
+          pageBreak: 'auto',
+          showHead: 'everyPage',
+          tableWidth: 'auto', // Auto-fit table to available width
+          // Split table across pages if too wide
+          horizontalPageBreak: true,
+          horizontalPageBreakRepeat: [0, 1, 2] // Always repeat ID, Date, and Property Code columns
+        });
+        
+        // Get current user for footer
+        const currentUser = localStorage.getItem('currentUser') || 
+                           sessionStorage.getItem('currentUser') || 
+                           'System Administrator'; // Default fallback
+        
+        // Add page numbers and user footer
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          
+          // Add page numbers
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'normal');
+          doc.text(
+            `Page ${i} of ${totalPages}`,
+            doc.internal.pageSize.getWidth() - 20,
+            doc.internal.pageSize.getHeight() - 10,
+            { align: 'right' }
+          );
+          
+          // Add user footer on left side
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(102, 102, 102); // Gray color
+          doc.text(
+            `Generated by: ${currentUser}`,
+            20,
+            doc.internal.pageSize.getHeight() - 10,
+            { align: 'left' }
+          );
+          
+          // Reset text color for next page
+          doc.setTextColor(0, 0, 0);
+        }
+        
+        // Generate filename with timestamp
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const filename = `Property_Setup_Export_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+        
+        // Save the PDF
+        doc.save(filename);
+        
+        console.log('✅ Property Setup PDF file exported successfully:', filename);
+        alert(`✅ Professional Property Setup PDF Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Landscape orientation with auto-fit columns\n• Report heading and timestamp\n• Professional blue headers\n• Alternating row colors\n• Page numbers and user footer\n• Smart table layout that prevents content cutoff\n• Text wrapping for long content\n• User footer (Generated by: ${currentUser})`);
+        
+      } catch (error) {
+        console.error('Property Setup PDF export error:', error);
+        alert('❌ Error exporting Property Setup to PDF. Please try again.\n\nError: ' + error.message);
+      }
     }
   };
 
@@ -772,13 +1037,18 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
           <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>
             {action === 'Search' ? 'All Property Code Records - Select to View Details' : (selectModalMessage || 'Select a record to edit/delete')}
             <div style={{fontSize:'0.8rem',color:'#666',marginTop:'4px'}}>
-              Current Date: {new Date().toLocaleDateString('en-GB')} | Records sorted: Current → Future → Past
+              Current Date: {new Date().toLocaleDateString('en-GB')} | Records sorted: Latest Record → Future → Past
             </div>
           </div>
-          {action === 'Search' && (
+          {action === 'Search' ? (
             <div style={{padding:'12px',background:'#e8f5e9',borderRadius:'8px',marginBottom:'16px',fontSize:'0.95rem',color:'#2e7d32'}}>
               📖 <strong>Search Mode:</strong> View all historical and future configurations for this Property Code. 
               Selected records will be displayed in read-only mode to prevent accidental changes.
+            </div>
+          ) : (
+            <div style={{padding:'12px',background:'#e3f2fd',borderRadius:'8px',marginBottom:'16px',fontSize:'0.95rem',color:'#1976d2'}}>
+              ✏️ <strong>Edit Mode:</strong> The latest/maximum date record shows "Select" button (top of list). 
+              Future-dated records also show "Select" button. Other past records are "Read Only" (grayed out).
             </div>
           )}
           {records.length === 0 ? (
@@ -798,10 +1068,19 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
               </thead>
               <tbody>
                 {(() => {
-                  // First pass: Find the latest date in all records
+                  // Get today's date for comparison
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  
+                  // Helper function for local date parsing (matching the sort logic)
+                  const getCurrentDateOnly = (dateStr) => {
+                    const date = new Date(dateStr);
+                    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                  };
+                  
+                  // Find the maximum/latest date across all records using same logic as sort
                   const latestDate = records.reduce((latest, record) => {
-                    const recordDate = new Date(record.applicable_from);
-                    recordDate.setHours(0, 0, 0, 0);
+                    const recordDate = getCurrentDateOnly(record.applicable_from);
                     return recordDate > latest ? recordDate : latest;
                   }, new Date('1900-01-01'));
                   
@@ -811,34 +1090,34 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
                         day: '2-digit', month: '2-digit', year: 'numeric' 
                       }) : rec.applicable_from;
                     
-                    // Enhanced date categorization
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    // Parse the date
+                    // Parse the record date using same logic as sort function
                     let recDate;
                     if (rec.applicable_from) {
-                      recDate = new Date(rec.applicable_from);
-                      recDate.setHours(0, 0, 0, 0);
+                      recDate = getCurrentDateOnly(rec.applicable_from);
                     } else {
-                      recDate = new Date();
+                      recDate = today; // Default to today if no date
                     }
                     
+                    // Date categorization based on requirements using local date comparison
                     const isCurrent = recDate.getTime() === today.getTime();
                     const isFuture = recDate > today;
                     const isPast = recDate < today;
                     const isLatestRecord = recDate.getTime() === latestDate.getTime();
                     
-                    // Determine if this record should have a Select button
-                    const showSelectButton = isLatestRecord || isFuture;
+                    // REQUIREMENT: Select button should be enabled for:
+                    // 1. The latest/maximum date record (top of list) - SELECT ENABLED
+                    // 2. Future dated records (after latest) - SELECT ENABLED  
+                    // 3. Current date records (if not latest) - SELECT ENABLED
+                    // 4. Past records - READ ONLY
+                    const showSelectButton = isLatestRecord || isFuture || (isCurrent && !isLatestRecord);
                     
-                    console.log(`Record ${idx}: ${rec.applicable_from} -> Latest: ${isLatestRecord}, Future: ${isFuture}, ShowSelect: ${showSelectButton}`);
+                    console.log(`Record ${idx}: ${rec.applicable_from} -> Latest: ${isLatestRecord}, Current: ${isCurrent}, Future: ${isFuture}, Past: ${isPast}, ShowSelect: ${showSelectButton}`);
                   
-                    // Determine row styling based on date category and selectability
+                    // Determine row styling based on date category
                     const getRowStyle = () => {
                       let baseStyle = { padding: '6px 8px' };
                       if (isPast && !isLatestRecord) {
-                        // Non-latest past records are grayed out
+                        // Non-latest past records are grayed out (read-only)
                         return { 
                           ...baseStyle, 
                           background: idx % 2 ? '#f0f0f0' : '#f8f8f8', 
@@ -846,6 +1125,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
                           opacity: 0.7 
                         };
                       }
+                      // Latest record, current and future records have normal styling
                       return { ...baseStyle, background: idx % 2 ? '#f7f7f7' : '#fff' };
                     };
                     
@@ -868,7 +1148,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
                                 TODAY
                               </span>
                             )}
-                            {isFuture && (
+                            {isFuture && !isLatestRecord && (
                               <span style={{
                                 background: '#2196f3',
                                 color: '#fff',
@@ -880,7 +1160,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
                                 FUTURE
                               </span>
                             )}
-                            {isLatestRecord && isPast && (
+                            {isLatestRecord && (
                               <span style={{
                                 background: '#ff9800',
                                 color: '#fff',
@@ -920,17 +1200,17 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
                                 color: isLatestRecord ? '#ff9800' : isCurrent ? '#2e7d32' : isFuture ? '#1976d2' : '#757575',
                                 background: isLatestRecord ? '#fff3e0' : isCurrent ? '#e8f5e9' : isFuture ? '#e3f2fd' : '#f5f5f5'
                               }}>
-                                {isLatestRecord && isPast ? 'Latest' : isCurrent ? 'Current' : isFuture ? 'Future' : 'Past'}
+                                {isLatestRecord ? 'Latest' : isCurrent ? 'Current' : isFuture ? 'Future' : 'Past'}
                               </span>
                               <button type="button" style={{background:'#7b1fa2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}} onClick={()=>handleSelectRecord(idx)}>View</button>
                             </>
                           ) : (
-                            // Show Select button for latest record OR future records
+                            // Show Select button for latest record OR future records (as per updated requirement)
                             showSelectButton ? (
                               <button 
                                 type="button" 
                                 style={{
-                                  background: isLatestRecord && isPast ? '#ff9800' : isCurrent ? '#4caf50' : '#2196f3',
+                                  background: isLatestRecord ? '#ff9800' : isCurrent ? '#4caf50' : '#2196f3',
                                   color:'#fff',
                                   border:'none',
                                   borderRadius:'6px',

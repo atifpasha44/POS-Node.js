@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 const initialState = {
   card_code: '',
@@ -298,50 +300,406 @@ const CreditCardManager = ({ setParentDirty, records, setRecords }) => {
   };
 
   // Export handlers
-  const exportToExcel = () => {
-    const exportData = records && records.length > 0 ? records.map(record => ({
-      'Card Code': record.card_code,
-      'Card Name': record.card_name,
-      'Card Type': record.card_type,
-      'Bank/Issuer': record.bank_issuer,
-      'Status': record.is_active ? 'Active' : 'Inactive',
-      'Transaction Fee': record.transaction_fee || '',
-      'Transaction Charges': record.transaction_charges || '',
-      'Effective From': record.effective_from || '',
-      'Effective To': record.effective_to || '',
-      'Created Date': record.created_at ? new Date(record.created_at).toLocaleDateString() : ''
-    })) : [form];
+  const exportToExcel = async () => {
+    if (!records || records.length === 0) {
+      alert('No data to export');
+      return;
+    }
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'CreditCards');
-    XLSX.writeFile(wb, 'CreditCardManager.xlsx');
+    try {
+      // Create a new workbook
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Credit Card Management Report', {
+        pageSetup: {
+          orientation: 'landscape',
+          fitToPage: true,
+          paperSize: 9 // A4
+        }
+      });
+      
+      // Add report title - merge cells across all columns
+      const titleRange = 'A1:J1';
+      worksheet.mergeCells(titleRange);
+      const titleCell = worksheet.getCell('A1');
+      titleCell.value = 'Credit Card Management Export Report';
+      titleCell.font = {
+        name: 'Calibri',
+        size: 16,
+        bold: true,
+        color: { argb: '366092' }
+      };
+      titleCell.alignment = {
+        horizontal: 'center',
+        vertical: 'middle'
+      };
+      
+      // Add generation date/time
+      const dateRange = 'A2:J2';
+      worksheet.mergeCells(dateRange);
+      const dateCell = worksheet.getCell('A2');
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      dateCell.value = `Generated on: ${dateTimeString}`;
+      dateCell.font = {
+        name: 'Calibri',
+        size: 10,
+        italic: true
+      };
+      dateCell.alignment = {
+        horizontal: 'center',
+        vertical: 'middle'
+      };
+      
+      // Add empty row
+      worksheet.getRow(3).height = 10;
+      
+      // Define headers
+      const headers = [
+        'ID',
+        'Card Code', 
+        'Card Name',
+        'Card Type',
+        'Bank/Issuer',
+        'Status',
+        'Transaction Fee',
+        'Transaction Charges',
+        'Effective From',
+        'Effective To'
+      ];
+      
+      // Add headers to row 4
+      const headerRow = worksheet.getRow(4);
+      headers.forEach((header, index) => {
+        const cell = headerRow.getCell(index + 1);
+        cell.value = header;
+        cell.font = {
+          name: 'Calibri',
+          size: 11,
+          bold: true,
+          color: { argb: 'FFFFFF' }
+        };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: '366092' }
+        };
+        cell.alignment = {
+          horizontal: 'center',
+          vertical: 'middle'
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+      });
+      
+      headerRow.height = 25;
+      
+      // Add data rows
+      records.forEach((record, index) => {
+        const rowNumber = index + 5; // Starting from row 5
+        const row = worksheet.getRow(rowNumber);
+        
+        const rowData = [
+          record.id || index + 1,
+          record.card_code || '',
+          record.card_name || '',
+          record.card_type || '',
+          record.bank_issuer || '',
+          record.is_active ? 'Active' : 'Inactive',
+          record.transaction_fee || '',
+          record.transaction_charges || '',
+          record.effective_from || '',
+          record.effective_to || ''
+        ];
+        
+        rowData.forEach((cellValue, colIndex) => {
+          const cell = row.getCell(colIndex + 1);
+          cell.value = cellValue;
+          cell.font = {
+            name: 'Calibri',
+            size: 10
+          };
+          cell.alignment = {
+            horizontal: colIndex === 0 || colIndex === 4 || colIndex === 5 ? 'center' : 'left',
+            vertical: 'middle'
+          };
+          
+          // Add borders
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+          
+          // Alternating row colors
+          if (index % 2 === 1) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'F8F9FA' }
+            };
+          }
+        });
+        
+        row.height = 20;
+      });
+      
+      // Auto-fit columns
+      worksheet.columns.forEach((column, index) => {
+        let maxWidth = headers[index].length;
+        
+        records.forEach((record) => {
+          const rowData = [
+            record.id || '',
+            record.card_code || '',
+            record.card_name || '',
+            record.card_type || '',
+            record.bank_issuer || '',
+            record.is_active ? 'Active' : 'Inactive',
+            record.transaction_fee || '',
+            record.transaction_charges || '',
+            record.effective_from || '',
+            record.effective_to || ''
+          ];
+          
+          const cellValue = String(rowData[index]);
+          if (cellValue.length > maxWidth) {
+            maxWidth = cellValue.length;
+          }
+        });
+        
+        // Set column width (minimum 10, maximum 50)
+        column.width = Math.min(Math.max(maxWidth + 2, 10), 50);
+      });
+      
+      // Add user footer information
+      const footerRowNum = records.length + 6;
+      const footerRange = `A${footerRowNum}:J${footerRowNum}`;
+      worksheet.mergeCells(footerRange);
+      const footerCell = worksheet.getCell(`A${footerRowNum}`);
+      
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      footerCell.value = `Generated by: ${currentUser} | Total Records: ${records.length}`;
+      footerCell.font = {
+        name: 'Calibri',
+        size: 9,
+        italic: true,
+        color: { argb: '666666' }
+      };
+      footerCell.alignment = {
+        horizontal: 'center',
+        vertical: 'middle'
+      };
+      
+      // Generate the file
+      const buffer = await workbook.xlsx.writeBuffer();
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Credit_Card_Management_Export_${year}${month}${day}_${hours}${minutes}${seconds}.xlsx`;
+      
+      // Save the file
+      saveAs(new Blob([buffer]), filename);
+      
+      console.log('✅ Credit Card Management Excel file exported successfully:', filename);
+      alert(`✅ Professional Credit Card Management Excel Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Professional report title and timestamp\n• Blue headers with white text\n• Alternating row colors for readability\n• Auto-fitted columns\n• Landscape orientation\n• User footer (Generated by: ${currentUser})\n• ${records.length} records exported`);
+      
+    } catch (error) {
+      console.error('Credit Card Management Excel export error:', error);
+      alert('❌ Error exporting Credit Card Management to Excel. Please try again.\n\nError: ' + error.message);
+    }
   };
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    
-    const tableColumn = ['Code', 'Card Name', 'Type', 'Bank/Issuer', 'Status', 'Fee'];
-    
-    const tableRows = records ? records.map(record => [
-      record.card_code,
-      record.card_name,
-      record.card_type,
-      record.bank_issuer,
-      record.is_active ? 'Active' : 'Inactive',
-      record.transaction_fee ? `$${record.transaction_fee}` : ''
-    ]) : [];
+  const exportToPDF = async () => {
+    if (!records || records.length === 0) {
+      alert('No data to export');
+      return;
+    }
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [71, 129, 202] }
-    });
-
-    doc.text('Credit Card Manager Report', 14, 15);
-    doc.save('CreditCardManager.pdf');
+    try {
+      // Create PDF in landscape mode
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Add report title
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Credit Card Management Export Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+      
+      // Add generation date/time
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on: ${dateTimeString}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+      
+      // Define columns with proper headers
+      const columns = [
+        { header: 'ID', dataKey: 'id' },
+        { header: 'Card Code', dataKey: 'card_code' },
+        { header: 'Card Name', dataKey: 'card_name' },
+        { header: 'Card Type', dataKey: 'card_type' },
+        { header: 'Bank/Issuer', dataKey: 'bank_issuer' },
+        { header: 'Status', dataKey: 'status' },
+        { header: 'Transaction Fee', dataKey: 'transaction_fee' },
+        { header: 'Transaction Charges', dataKey: 'transaction_charges' },
+        { header: 'Effective From', dataKey: 'effective_from' },
+        { header: 'Effective To', dataKey: 'effective_to' }
+      ];
+      
+      // Prepare data rows
+      const rows = records.map(rec => ({
+        id: rec.id || '',
+        card_code: rec.card_code || '',
+        card_name: rec.card_name || '',
+        card_type: rec.card_type || '',
+        bank_issuer: rec.bank_issuer || '',
+        status: rec.is_active ? 'Active' : 'Inactive',
+        transaction_fee: rec.transaction_fee || '',
+        transaction_charges: rec.transaction_charges || '',
+        effective_from: rec.effective_from || '',
+        effective_to: rec.effective_to || ''
+      }));
+      
+      // Calculate available width for the table
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margins = { left: 10, right: 10 };
+      
+      // Create the table with professional styling and auto-fit columns
+      autoTable(doc, {
+        columns: columns,
+        body: rows,
+        startY: 35,
+        theme: 'grid',
+        styles: {
+          fontSize: 7,
+          cellPadding: 2,
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1,
+          overflow: 'linebreak',
+          halign: 'left'
+        },
+        headStyles: {
+          fillColor: [54, 96, 146], // Blue background matching Excel
+          textColor: [255, 255, 255], // White text
+          fontSize: 8,
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle',
+          cellPadding: 3
+        },
+        bodyStyles: {
+          textColor: [0, 0, 0],
+          fontSize: 7,
+          cellPadding: 2,
+          valign: 'top'
+        },
+        alternateRowStyles: {
+          fillColor: [248, 249, 250] // Light gray for alternating rows
+        },
+        columnStyles: {
+          0: { halign: 'center' }, // ID
+          1: { halign: 'center' }, // Card Code
+          2: { halign: 'left' },   // Card Name
+          3: { halign: 'center' }, // Card Type
+          4: { halign: 'left' },   // Bank/Issuer
+          5: { halign: 'center' }, // Status
+          6: { halign: 'right' },  // Transaction Fee
+          7: { halign: 'right' },  // Transaction Charges
+          8: { halign: 'center' }, // Effective From
+          9: { halign: 'center' }  // Effective To
+        },
+        margin: margins,
+        pageBreak: 'auto',
+        showHead: 'everyPage',
+        tableWidth: 'auto',
+        horizontalPageBreak: true,
+        horizontalPageBreakRepeat: [0, 1, 2] // Always repeat ID, Code, Name columns
+      });
+      
+      // Get current user for footer
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      // Add page numbers and user footer
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // Add page numbers
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+          `Page ${i} of ${totalPages}`,
+          doc.internal.pageSize.getWidth() - 20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'right' }
+        );
+        
+        // Add user footer on left side
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(102, 102, 102); // Gray color
+        doc.text(
+          `Generated by: ${currentUser}`,
+          20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'left' }
+        );
+        
+        // Reset text color for next page
+        doc.setTextColor(0, 0, 0);
+      }
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Credit_Card_Management_Export_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      console.log('✅ Credit Card Management PDF file exported successfully:', filename);
+      alert(`✅ Professional Credit Card Management PDF Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Landscape orientation with auto-fit columns\n• Report heading and timestamp\n• Professional blue headers\n• Alternating row colors\n• Page numbers and user footer\n• Smart table layout that prevents content cutoff\n• Text wrapping for long content\n• User footer (Generated by: ${currentUser})`);
+      
+    } catch (error) {
+      console.error('Credit Card Management PDF export error:', error);
+      alert('❌ Error exporting Credit Card Management to PDF. Please try again.\n\nError: ' + error.message);
+    }
   };
 
   return (

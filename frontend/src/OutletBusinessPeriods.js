@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -383,55 +385,318 @@ const OutletBusinessPeriods = ({ setParentDirty, records, setRecords, outletReco
   };
 
   // Export handlers
-  const exportToExcel = () => {
-    const exportData = records && records.length > 0 ? records.map(record => ({
-      'Applicable From': record.applicable_from,
-      'Outlet Code': record.outlet_code,
-      'Outlet Name': getOutletName(record.outlet_code),
-      'Period Code': record.period_code,
-      'Period Name': record.period_name,
-      'Short Name': record.short_name,
-      'Start Time': record.start_time,
-      'End Time': record.end_time,
-      'Active Days': formatActiveDays(record.active_days),
-      'Status': record.is_active ? 'Active' : 'Inactive'
-    })) : [form];
+  const exportToExcel = async () => {
+    if (!records || records.length === 0) {
+      alert('No data to export');
+      return;
+    }
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'OutletBusinessPeriods');
-    XLSX.writeFile(wb, 'OutletBusinessPeriods.xlsx');
+    try {
+      // Create a new workbook and worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Outlet Business Periods Export', {
+        pageSetup: { paperSize: 9, orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 }
+      });
+      
+      // Add report title
+      const titleRow = worksheet.addRow(['Outlet Business Periods Export Report']);
+      titleRow.getCell(1).font = { size: 16, bold: true, color: { argb: 'FF366092' } };
+      titleRow.getCell(1).alignment = { horizontal: 'center' };
+      worksheet.mergeCells('A1:J1');
+      
+      // Add date/time
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const dateRow = worksheet.addRow([`Generated on: ${dateTimeString}`]);
+      dateRow.getCell(1).font = { size: 10, italic: true };
+      dateRow.getCell(1).alignment = { horizontal: 'center' };
+      worksheet.mergeCells('A2:J2');
+      
+      // Add empty row
+      worksheet.addRow([]);
+      
+      // Define headers
+      const headers = [
+        'ID', 'Applicable From', 'Outlet Code', 'Outlet Name', 'Period Code', 
+        'Period Name', 'Short Name', 'Start Time', 'End Time', 'Active Days', 'Status'
+      ];
+      
+      // Add header row with styling
+      const headerRow = worksheet.addRow(headers);
+      headerRow.eachCell((cell, colNumber) => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, name: 'Calibri', size: 11 };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF366092' } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FF000000' } },
+          left: { style: 'thin', color: { argb: 'FF000000' } },
+          bottom: { style: 'thin', color: { argb: 'FF000000' } },
+          right: { style: 'thin', color: { argb: 'FF000000' } }
+        };
+      });
+      
+      // Add data rows
+      records.forEach((record, index) => {
+        const rowData = [
+          record.id || '',
+          record.applicable_from || '',
+          record.outlet_code || '',
+          getOutletName(record.outlet_code) || '',
+          record.period_code || '',
+          record.period_name || '',
+          record.short_name || '',
+          record.start_time || '',
+          record.end_time || '',
+          formatActiveDays(record.active_days) || '',
+          record.is_active ? 'Active' : 'Inactive'
+        ];
+        
+        const dataRow = worksheet.addRow(rowData);
+        
+        // Apply styling to data rows
+        dataRow.eachCell((cell, colNumber) => {
+          cell.font = { name: 'Calibri', size: 10 };
+          cell.alignment = { horizontal: 'left', vertical: 'top', wrapText: true };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            left: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            bottom: { style: 'thin', color: { argb: 'FFD0D0D0' } },
+            right: { style: 'thin', color: { argb: 'FFD0D0D0' } }
+          };
+          
+          // Alternating row colors
+          if (index % 2 === 0) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8F9FA' } };
+          }
+        });
+      });
+      
+      // Auto-size columns
+      worksheet.columns.forEach((column, index) => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: false }, (cell) => {
+          const columnLength = cell.value ? cell.value.toString().length : 10;
+          if (columnLength > maxLength) {
+            maxLength = columnLength;
+          }
+        });
+        column.width = Math.min(Math.max(maxLength + 2, 12), 50);
+      });
+      
+      // Get current user for footer
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      // Add user footer
+      const footerRowIndex = worksheet.rowCount + 2;
+      const footerRow = worksheet.addRow([`Generated by: ${currentUser}`]);
+      footerRow.getCell(1).font = { size: 9, italic: true, color: { argb: 'FF666666' } };
+      worksheet.mergeCells(`A${footerRowIndex}:K${footerRowIndex}`);
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Outlet_Business_Periods_Export_${year}${month}${day}_${hours}${minutes}${seconds}.xlsx`;
+      
+      // Save the file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      saveAs(blob, filename);
+      
+      console.log('✅ Outlet Business Periods Excel file exported successfully:', filename);
+      alert(`✅ Professional Outlet Business Periods Excel Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Professional report title and timestamp\n• Blue styled headers with white text\n• Alternating row colors for better readability\n• Auto-sized columns with proper formatting\n• Borders and professional styling\n• User footer (Generated by: ${currentUser})\n• Landscape orientation optimized for printing`);
+      
+    } catch (error) {
+      console.error('Outlet Business Periods Excel export error:', error);
+      alert('❌ Error exporting Outlet Business Periods to Excel. Please try again.\n\nError: ' + error.message);
+    }
   };
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    
-    const tableColumn = [
-      'Applicable From', 'Outlet', 'Period Code', 'Period Name', 
-      'Start Time', 'End Time', 'Active Days', 'Status'
-    ];
-    
-    const tableRows = records ? records.map(record => [
-      record.applicable_from,
-      getOutletName(record.outlet_code),
-      record.period_code,
-      record.period_name,
-      record.start_time,
-      record.end_time,
-      formatActiveDays(record.active_days),
-      record.is_active ? 'Active' : 'Inactive'
-    ]) : [];
+  const exportToPDF = async () => {
+    if (!records || records.length === 0) {
+      alert('No data to export');
+      return;
+    }
 
-    autoTable(doc, {
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [71, 129, 202] }
-    });
-
-    doc.text('Outlet Business Periods Report', 14, 15);
-    doc.save('OutletBusinessPeriods.pdf');
+    try {
+      // Create PDF in landscape mode
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Add report title
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Outlet Business Periods Export Report', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+      
+      // Add generation date/time
+      const now = new Date();
+      const dateTimeString = now.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated on: ${dateTimeString}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+      
+      // Define columns with proper headers
+      const columns = [
+        { header: 'ID', dataKey: 'id' },
+        { header: 'Applicable From', dataKey: 'applicable_from' },
+        { header: 'Outlet Code', dataKey: 'outlet_code' },
+        { header: 'Outlet Name', dataKey: 'outlet_name' },
+        { header: 'Period Code', dataKey: 'period_code' },
+        { header: 'Period Name', dataKey: 'period_name' },
+        { header: 'Start Time', dataKey: 'start_time' },
+        { header: 'End Time', dataKey: 'end_time' },
+        { header: 'Active Days', dataKey: 'active_days' },
+        { header: 'Status', dataKey: 'status' }
+      ];
+      
+      // Prepare data rows
+      const rows = records.map(rec => ({
+        id: rec.id || '',
+        applicable_from: rec.applicable_from || '',
+        outlet_code: rec.outlet_code || '',
+        outlet_name: getOutletName(rec.outlet_code) || '',
+        period_code: rec.period_code || '',
+        period_name: rec.period_name || '',
+        start_time: rec.start_time || '',
+        end_time: rec.end_time || '',
+        active_days: formatActiveDays(rec.active_days) || '',
+        status: rec.is_active ? 'Active' : 'Inactive'
+      }));
+      
+      // Calculate available width for the table
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margins = { left: 10, right: 10 };
+      
+      // Create the table with professional styling and auto-fit columns
+      autoTable(doc, {
+        columns: columns,
+        body: rows,
+        startY: 35,
+        theme: 'grid',
+        styles: {
+          fontSize: 6,
+          cellPadding: 2,
+          lineColor: [200, 200, 200],
+          lineWidth: 0.1,
+          overflow: 'linebreak',
+          halign: 'left'
+        },
+        headStyles: {
+          fillColor: [54, 96, 146], // Blue background matching Excel
+          textColor: [255, 255, 255], // White text
+          fontSize: 7,
+          fontStyle: 'bold',
+          halign: 'center',
+          valign: 'middle',
+          cellPadding: 3
+        },
+        bodyStyles: {
+          textColor: [0, 0, 0],
+          fontSize: 6,
+          cellPadding: 2,
+          valign: 'top'
+        },
+        alternateRowStyles: {
+          fillColor: [248, 249, 250] // Light gray for alternating rows
+        },
+        columnStyles: {
+          0: { halign: 'center', cellWidth: 15 }, // ID
+          1: { halign: 'center', cellWidth: 25 }, // Applicable From
+          2: { halign: 'center', cellWidth: 20 }, // Outlet Code
+          3: { halign: 'left', cellWidth: 30 },   // Outlet Name
+          4: { halign: 'center', cellWidth: 20 }, // Period Code
+          5: { halign: 'left', cellWidth: 25 },   // Period Name
+          6: { halign: 'center', cellWidth: 20 }, // Start Time
+          7: { halign: 'center', cellWidth: 20 }, // End Time
+          8: { halign: 'left', cellWidth: 35 },   // Active Days
+          9: { halign: 'center', cellWidth: 20 }  // Status
+        },
+        margin: margins,
+        pageBreak: 'auto',
+        showHead: 'everyPage',
+        tableWidth: 'auto',
+        horizontalPageBreak: true,
+        horizontalPageBreakRepeat: [0, 1, 2, 3] // Always repeat ID, Date, Code, Name columns
+      });
+      
+      // Get current user for footer
+      const currentUser = localStorage.getItem('currentUser') || 
+                         sessionStorage.getItem('currentUser') || 
+                         'System Administrator';
+      
+      // Add page numbers and user footer
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // Add page numbers
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+          `Page ${i} of ${totalPages}`,
+          doc.internal.pageSize.getWidth() - 20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'right' }
+        );
+        
+        // Add user footer on left side
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(102, 102, 102); // Gray color
+        doc.text(
+          `Generated by: ${currentUser}`,
+          20,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'left' }
+        );
+        
+        // Reset text color for next page
+        doc.setTextColor(0, 0, 0);
+      }
+      
+      // Generate filename with timestamp
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      
+      const filename = `Outlet_Business_Periods_Export_${year}${month}${day}_${hours}${minutes}${seconds}.pdf`;
+      
+      // Save the PDF
+      doc.save(filename);
+      
+      console.log('✅ Outlet Business Periods PDF file exported successfully:', filename);
+      alert(`✅ Professional Outlet Business Periods PDF Report exported successfully!\n\nFilename: ${filename}\n\nFeatures included:\n• Landscape orientation with auto-fit columns\n• Report heading and timestamp\n• Professional blue headers\n• Alternating row colors\n• Page numbers and user footer\n• Smart table layout that prevents content cutoff\n• Text wrapping for long content\n• User footer (Generated by: ${currentUser})`);
+      
+    } catch (error) {
+      console.error('Outlet Business Periods PDF export error:', error);
+      alert('❌ Error exporting Outlet Business Periods to PDF. Please try again.\n\nError: ' + error.message);
+    }
   };
 
   return (

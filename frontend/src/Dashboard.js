@@ -548,6 +548,7 @@ function Dashboard({ user, setUser }) {
   const [activeMainMenu, setActiveMainMenu] = useState(null); // Track active main menu for highlight
   const hotelName = 'ABC Hotel';
   const [showCompanyInfo, setShowCompanyInfo] = useState(true); // Show Comp Info by default
+  const [showVersionModal, setShowVersionModal] = useState(false);
   const [companyInfo, setCompanyInfo] = useState(null);
   const [activeTab, setActiveTab] = useState('compinfo');
   const [loadingCompany, setLoadingCompany] = useState(false);
@@ -1536,6 +1537,31 @@ Generated: ${new Date().toLocaleString()}`;
               </span>
             </span>
           </div>
+          <button 
+            onClick={() => setShowVersionModal(true)} 
+            className="dashboard-info-btn"
+            title="Version Information"
+            style={{
+              background: '#2196F3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              fontSize: '16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: '8px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              transition: 'background 0.2s'
+            }}
+            onMouseOver={(e) => e.target.style.background = '#1976D2'}
+            onMouseOut={(e) => e.target.style.background = '#2196F3'}
+          >
+            ℹ
+          </button>
           <button onClick={handleLogout} className="dashboard-logout-btn">Logout</button>
         </div>
       </div>
@@ -2050,30 +2076,12 @@ Generated: ${new Date().toLocaleString()}`;
                   <div className="compinfo-logo-row">
                     <img src={propertyLogo} alt="Property Logo" className="compinfo-logo" />
                   </div>
-                  <div className="compinfo-title">ithots POS Version : {companyInfo?.pos_version || VersionUtils.getCurrentVersion()}</div>
+                  <div className="compinfo-title">{VERSION_INFO.productName}</div>
                   <div className="compinfo-expiry">Annual Software Subscription will Expire on {companyInfo?.subscription_expiry || companyInfo?.subscription_end || '2026-03-31'}</div>
                 </div>
 
                 {/* Scrollable Content Section */}
                 <div className="compinfo-scrollable-content">
-                  {/* Enhanced Version Information */}
-                  <div className="compinfo-version-details">
-                    <div className="compinfo-version-header">
-                      📋 Version Details
-                    </div>
-                    <div className="compinfo-version-grid">
-                      <div><strong>Current Version:</strong> {VersionUtils.getCurrentVersion()}</div>
-                      <div><strong>Build Date:</strong> {VERSION_INFO.buildDate}</div>
-                      <div><strong>Release Type:</strong> {VERSION_INFO.releaseType}</div>
-                      <div><strong>API Version:</strong> {VERSION_INFO.apiVersion}</div>
-                    </div>
-                    <div className="compinfo-version-release">
-                      <strong>Release:</strong> {VERSION_INFO.releaseName}
-                    </div>
-                    <div className="compinfo-version-copyright">
-                      {VERSION_INFO.copyright}
-                    </div>
-                  </div>
 
                   {/* Information Tables */}
                   <div className="compinfo-info-row">
@@ -2108,6 +2116,249 @@ Generated: ${new Date().toLocaleString()}`;
           ) : null}
         </main>
       </div>
+
+      {/* Version Information Modal */}
+      {showVersionModal && (
+        <div 
+          className="version-modal-overlay"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+          onClick={() => setShowVersionModal(false)}
+        >
+          <div 
+            className="version-modal-content"
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '600px',
+              width: '90%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+              position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              paddingBottom: '16px',
+              borderBottom: '2px solid #e0e0e0'
+            }}>
+              <h2 style={{
+                margin: 0,
+                color: '#1976d2',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <span style={{
+                  background: '#1976d2',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px'
+                }}>
+                  ℹ
+                </span>
+                Version Information
+              </h2>
+              <button 
+                onClick={() => setShowVersionModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#666',
+                  padding: '4px',
+                  borderRadius: '4px'
+                }}
+                title="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Version Details */}
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                color: 'white',
+                padding: '16px',
+                borderRadius: '8px',
+                marginBottom: '20px',
+                textAlign: 'center'
+              }}>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>
+                  {VERSION_INFO.productName}
+                </h3>
+                <p style={{ margin: '8px 0 0 0', fontSize: '16px', opacity: 0.9 }}>
+                  Version {VERSION_INFO.version} - {VERSION_INFO.releaseName}
+                </p>
+              </div>
+
+              {/* Version Grid */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '16px',
+                marginBottom: '24px'
+              }}>
+                <div style={{
+                  background: '#f8f9fa',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <strong style={{ color: '#1976d2' }}>Current Version:</strong>
+                  <div style={{ marginTop: '4px' }}>{VERSION_INFO.version}</div>
+                </div>
+                <div style={{
+                  background: '#f8f9fa',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <strong style={{ color: '#1976d2' }}>Build Date:</strong>
+                  <div style={{ marginTop: '4px' }}>{VERSION_INFO.buildDate}</div>
+                </div>
+                <div style={{
+                  background: '#f8f9fa',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <strong style={{ color: '#1976d2' }}>Release Type:</strong>
+                  <div style={{ marginTop: '4px' }}>{VERSION_INFO.releaseType}</div>
+                </div>
+                <div style={{
+                  background: '#f8f9fa',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0'
+                }}>
+                  <strong style={{ color: '#1976d2' }}>API Version:</strong>
+                  <div style={{ marginTop: '4px' }}>{VERSION_INFO.apiVersion}</div>
+                </div>
+              </div>
+
+              {/* Latest Changelog */}
+              {VERSION_INFO.changeLog[VERSION_INFO.version] && (
+                <div style={{ marginBottom: '20px' }}>
+                  <h4 style={{ color: '#1976d2', marginBottom: '12px', fontSize: '18px' }}>
+                    📋 What's New in This Version
+                  </h4>
+                  <div style={{
+                    background: '#f0f7ff',
+                    padding: '16px',
+                    borderRadius: '8px',
+                    border: '1px solid #bbdefb'
+                  }}>
+                    {VERSION_INFO.changeLog[VERSION_INFO.version].features && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <strong style={{ color: '#2e7d32' }}>✨ New Features:</strong>
+                        <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                          {VERSION_INFO.changeLog[VERSION_INFO.version].features.slice(0, 4).map((feature, index) => (
+                            <li key={index} style={{ marginBottom: '2px' }}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {VERSION_INFO.changeLog[VERSION_INFO.version].improvements && (
+                      <div style={{ marginBottom: '12px' }}>
+                        <strong style={{ color: '#f57c00' }}>🚀 Improvements:</strong>
+                        <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                          {VERSION_INFO.changeLog[VERSION_INFO.version].improvements.slice(0, 3).map((improvement, index) => (
+                            <li key={index} style={{ marginBottom: '2px' }}>{improvement}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {VERSION_INFO.changeLog[VERSION_INFO.version].bugFixes && (
+                      <div>
+                        <strong style={{ color: '#d32f2f' }}>🐛 Bug Fixes:</strong>
+                        <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+                          {VERSION_INFO.changeLog[VERSION_INFO.version].bugFixes.slice(0, 3).map((fix, index) => (
+                            <li key={index} style={{ marginBottom: '2px' }}>{fix}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Copyright and License */}
+              <div style={{
+                background: '#fafafa',
+                padding: '16px',
+                borderRadius: '8px',
+                border: '1px solid #e0e0e0',
+                textAlign: 'center'
+              }}>
+                <div style={{ marginBottom: '8px', fontWeight: 'bold', color: '#1976d2' }}>
+                  {VERSION_INFO.copyright}
+                </div>
+                <div style={{ fontSize: '14px', color: '#666' }}>
+                  Developed by {VERSION_INFO.developedBy}
+                </div>
+                <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
+                  License: {VERSION_INFO.license} | Database Version: {VERSION_INFO.databaseVersion}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px',
+              paddingTop: '16px',
+              borderTop: '1px solid #e0e0e0'
+            }}>
+              <button 
+                onClick={() => setShowVersionModal(false)}
+                style={{
+                  background: '#1976d2',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '10px 24px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.background = '#1565c0'}
+                onMouseOut={(e) => e.target.style.background = '#1976d2'}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
