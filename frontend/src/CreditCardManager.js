@@ -4,6 +4,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import InfoTooltip from './InfoTooltip';
 
 const initialState = {
   card_code: '',
@@ -736,6 +737,16 @@ const CreditCardManager = ({ setParentDirty, records, setRecords }) => {
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>
             Credit Card Manager
           </span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="Credit Card Manager"
+                mainTable="it_conf_ccm"
+                linkedTables={[]}
+              />
+            );
+          })()}
           <select
             value={action}
             onChange={e => {

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Control Save Functionality Test</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Software Control Save Functionality Test</h1>
+        <p>Testing the enhanced Software Control save functionality with success confirmation.</p>
+        
+        <div class="test-section">
+            <h3>Software Control Component</h3>
+            <p>Enable/disable the toggle and click Save to test the functionality:</p>
+            <div id="software-control-test"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>InfoTooltip Integration Test</h3>
+            <p>The ℹ️ icon should appear/disappear based on the Software Control setting:</p>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem; font-weight: bold; color: #007bff;">📦 Item Master</span>
+                <div id="infotooltip-test"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Current localStorage State</h3>
+            <div id="localstorage-state"></div>
+            <button onclick="refreshState()" style="
+                background: #007bff;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                cursor: pointer;
+                margin-top: 10px;
+            ">Refresh State</button>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        // Software Control Component (Fixed Version)
+        const SoftwareControl = ({ softwareControlEnabled, setSoftwareControlEnabled }) => {
+            const [isDirty, setIsDirty] = React.useState(false);
+            const [showSuccessMessage, setShowSuccessMessage] = React.useState(false);
+            const [showResetConfirm, setShowResetConfirm] = React.useState(false);
+
+            const handleToggle = () => {
+                setSoftwareControlEnabled(!softwareControlEnabled);
+                setIsDirty(true);
+            };
+
+            const handleSave = () => {
+                try {
+                    // Save to localStorage using JSON format (consistent with Dashboard)
+                    localStorage.setItem('softwareControlEnabled', JSON.stringify(softwareControlEnabled));
+                    
+                    // Mark as clean
+                    setIsDirty(false);
+                    
+                    // Show success message
+                    setShowSuccessMessage(true);
+                    
+                    // Hide success message after 3 seconds
+                    setTimeout(() => {
+                        setShowSuccessMessage(false);
+                    }, 3000);
+                    
+                    console.log('✅ Software Control settings saved successfully:', {
+                        enabled: softwareControlEnabled,
+                        timestamp: new Date().toISOString()
+                    });
+
+                    // Trigger a custom event to update other components
+                    window.dispatchEvent(new CustomEvent('softwareControlUpdated'));
+                } catch (error) {
+                    console.error('❌ Error saving Software Control settings:', error);
+                    alert('Error saving settings. Please try again.');
+                }
+            };
+
+            const handleReset = () => {
+                if (isDirty) {
+                    setShowResetConfirm(true);
+                }
+            };
+
+            const confirmReset = () => {
+                try {
+                    // Reset to default (disabled)
+                    setSoftwareControlEnabled(false);
+                    localStorage.setItem('softwareControlEnabled', JSON.stringify(false));
+                    
+                    // Mark as clean
+                    setIsDirty(false);
+                    
+                    // Hide confirmation dialog
+                    setShowResetConfirm(false);
+                    
+                    // Show success message
+                    setShowSuccessMessage(true);
+                    setTimeout(() => {
+                        setShowSuccessMessage(false);
+                    }, 3000);
+                    
+                    console.log('🔄 Software Control settings reset to default');
+
+                    // Trigger a custom event to update other components
+                    window.dispatchEvent(new CustomEvent('softwareControlUpdated'));
+                } catch (error) {
+                    console.error('❌ Error resetting Software Control settings:', error);
+                    alert('Error resetting settings. Please try again.');
+                }
+            };
+
+            return (
+                <div style={{ padding: '20px', backgroundColor: '#f8f9fa' }}>
+                    {/* Header */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '20px',
+                        borderBottom: '2px solid #007bff',
+                        paddingBottom: '10px'
+                    }}>
+                        <h2 style={{ margin: 0, color: '#007bff' }}>Software Control</h2>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                style={{
+                                    backgroundColor: isDirty ? '#28a745' : '#6c757d',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '8px 16px',
+                                    borderRadius: '4px',
+                                    cursor: isDirty ? 'pointer' : 'not-allowed',
+                                    fontSize: '14px',
+                                    opacity: isDirty ? 1 : 0.6
+                                }}
+                                onClick={handleSave}
+                                disabled={!isDirty}
+                                title={isDirty ? 'Save changes' : 'No changes to save'}
+                            >
+                                💾 Save
+                            </button>
+                            <button
+                                style={{
+                                    backgroundColor: isDirty ? '#dc3545' : '#6c757d',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '8px 16px',
+                                    borderRadius: '4px',
+                                    cursor: isDirty ? 'pointer' : 'not-allowed',
+                                    fontSize: '14px',
+                                    opacity: isDirty ? 1 : 0.6
+                                }}
+                                onClick={handleReset}
+                                disabled={!isDirty}
+                                title={isDirty ? 'Reset changes' : 'No changes to reset'}
+                            >
+                                🔄 Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Settings Container */}
+                    <div style={{
+                        backgroundColor: 'white',
+                        borderRadius: '8px',
+                        padding: '25px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        border: '1px solid #dee2e6'
+                    }}>
+                        
+                        {/* Info Section */}
+                        <div style={{
+                            backgroundColor: '#e3f2fd',
+                            border: '1px solid #bbdefb',
+                            borderRadius: '4px',
+                            padding: '15px',
+                            marginBottom: '25px'
+                        }}>
+                            <h4 style={{ margin: '0 0 10px 0', color: '#1565c0' }}>
+                                ℹ️ About Software Control
+                            </h4>
+                            <p style={{ margin: 0, color: '#1565c0', lineHeight: '1.5' }}>
+                                Enable this option to display database table information icons (ℹ️) throughout the application. 
+                                These icons provide transparency about which database tables are being used in each form.
+                            </p>
+                        </div>
+
+                        {/* Toggle Control */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '20px',
+                            backgroundColor: '#f8f9fa',
+                            borderRadius: '6px',
+                            border: '1px solid #e9ecef'
+                        }}>
+                            <div>
+                                <h4 style={{ margin: '0 0 5px 0', color: '#495057' }}>
+                                    Show Database Table Information
+                                </h4>
+                                <p style={{ margin: 0, fontSize: '14px', color: '#6c757d' }}>
+                                    Display ℹ️ icons next to form titles to show related database tables
+                                </p>
+                            </div>
+                            
+                            <label style={{
+                                position: 'relative',
+                                display: 'inline-block',
+                                width: '60px',
+                                height: '34px'
+                            }}>
+                                <input
+                                    type="checkbox"
+                                    checked={softwareControlEnabled}
+                                    onChange={handleToggle}
+                                    style={{ opacity: 0, width: 0, height: 0 }}
+                                />
+                                <span style={{
+                                    position: 'absolute',
+                                    cursor: 'pointer',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: softwareControlEnabled ? '#2196F3' : '#ccc',
+                                    transition: '.4s',
+                                    borderRadius: '34px'
+                                }}>
+                                    <span style={{
+                                        position: 'absolute',
+                                        content: '',
+                                        height: '26px',
+                                        width: '26px',
+                                        left: softwareControlEnabled ? '30px' : '4px',
+                                        bottom: '4px',
+                                        backgroundColor: 'white',
+                                        transition: '.4s',
+                                        borderRadius: '50%'
+                                    }} />
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Success Message Modal */}
+                    {showSuccessMessage && (
+                        <div style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            zIndex: 10000
+                        }}>
+                            <div style={{
+                                backgroundColor: 'white',
+                                borderRadius: '8px',
+                                padding: '30px',
+                                minWidth: '400px',
+                                textAlign: 'center',
+                                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                                border: '2px solid #28a745'
+                            }}>
+                                <div style={{ fontSize: '48px', marginBottom: '15px' }}>✅</div>
+                                <h3 style={{ margin: '0 0 10px 0', color: '#28a745', fontSize: '1.3rem' }}>
+                                    Control Updated Successfully!
+                                </h3>
+                                <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
+                                    Software Control settings have been saved and will apply immediately.
+                                </p>
+                                <button
+                                    style={{
+                                        marginTop: '20px',
+                                        backgroundColor: '#28a745',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '8px 20px',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px'
+                                    }}
+                                    onClick={() => setShowSuccessMessage(false)}
+                                >
+                                    OK
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Reset Confirmation Modal */}
+                    {showResetConfirm && (
+                        <div style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            zIndex: 10000
+                        }}>
+                            <div style={{
+                                backgroundColor: 'white',
+                                borderRadius: '8px',
+                                padding: '30px',
+                                minWidth: '400px',
+                                textAlign: 'center',
+                                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                                border: '2px solid #dc3545'
+                            }}>
+                                <div style={{ fontSize: '48px', marginBottom: '15px' }}>⚠️</div>
+                                <h3 style={{ margin: '0 0 10px 0', color: '#dc3545', fontSize: '1.3rem' }}>
+                                    Reset Settings?
+                                </h3>
+                                <p style={{ margin: '0 0 20px 0', color: '#666', fontSize: '14px' }}>
+                                    This will discard your changes and reset Software Control to default settings.
+                                </p>
+                                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                                    <button
+                                        style={{
+                                            backgroundColor: '#dc3545',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '8px 20px',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px'
+                                        }}
+                                        onClick={confirmReset}
+                                    >
+                                        Yes, Reset
+                                    </button>
+                                    <button
+                                        style={{
+                                            backgroundColor: '#6c757d',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '8px 20px',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px'
+                                        }}
+                                        onClick={() => setShowResetConfirm(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // InfoTooltip Component (Simplified for testing)
+        const InfoTooltip = () => {
+            const [showModal, setShowModal] = React.useState(false);
+            
+            return (
+                <>
+                    <span 
+                        style={{
+                            fontSize: '16px',
+                            color: '#007bff',
+                            cursor: 'pointer',
+                            marginLeft: '8px'
+                        }}
+                        title="Click to view database table information"
+                        onClick={() => setShowModal(true)}
+                    >
+                        ℹ️
+                    </span>
+                    {showModal && (
+                        <div style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            zIndex: 10000
+                        }} onClick={() => setShowModal(false)}>
+                            <div style={{
+                                backgroundColor: 'white',
+                                borderRadius: '8px',
+                                padding: '25px',
+                                minWidth: '400px',
+                                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                                border: '2px solid #007bff'
+                            }} onClick={(e) => e.stopPropagation()}>
+                                <h3 style={{ color: '#007bff' }}>📊 Database Table Information</h3>
+                                <p>InfoTooltip is working correctly!</p>
+                                <button 
+                                    onClick={() => setShowModal(false)}
+                                    style={{
+                                        background: '#dc3545',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        padding: '8px 12px',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [softwareControlEnabled, setSoftwareControlEnabled] = React.useState(() => {
+                const saved = localStorage.getItem('softwareControlEnabled');
+                return saved ? JSON.parse(saved) : false;
+            });
+            const [refreshKey, setRefreshKey] = React.useState(0);
+
+            // Listen for software control updates
+            React.useEffect(() => {
+                const handleUpdate = () => {
+                    const saved = localStorage.getItem('softwareControlEnabled');
+                    setSoftwareControlEnabled(saved ? JSON.parse(saved) : false);
+                    setRefreshKey(prev => prev + 1);
+                };
+
+                window.addEventListener('softwareControlUpdated', handleUpdate);
+                return () => window.removeEventListener('softwareControlUpdated', handleUpdate);
+            }, []);
+
+            return (
+                <>
+                    <SoftwareControl 
+                        softwareControlEnabled={softwareControlEnabled}
+                        setSoftwareControlEnabled={setSoftwareControlEnabled}
+                    />
+                    {softwareControlEnabled && <InfoTooltip key={refreshKey} />}
+                </>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('software-control-test'));
+        root.render(<App />);
+
+        // Function to refresh localStorage state display
+        function refreshState() {
+            const state = localStorage.getItem('softwareControlEnabled');
+            const stateDiv = document.getElementById('localstorage-state');
+            stateDiv.innerHTML = `
+                <strong>localStorage['softwareControlEnabled']:</strong> ${state}<br>
+                <strong>Parsed value:</strong> ${JSON.parse(state || 'false')}<br>
+                <strong>Type:</strong> ${typeof JSON.parse(state || 'false')}<br>
+                <strong>Last updated:</strong> ${new Date().toLocaleString()}
+            `;
+        }
+
+        // Initial state display
+        refreshState();
+
+        // Auto-refresh state every 2 seconds
+        setInterval(refreshState, 2000);
+    </script>
+</body>
+</html>

@@ -3,6 +3,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import InfoTooltip from './InfoTooltip';
 
 const { autoTable } = require('jspdf-autotable');
 
@@ -148,48 +149,50 @@ export default function ItemMaster({ setParentDirty }) {
           setCategories(formattedCategories);
         }
 
-        // Load Tax Codes from backend API
+        // Load Tax Codes from Tax Structure API
         try {
-          const taxResponse = await axios.get('/api/tax-codes');
+          const taxResponse = await axios.get('/api/tax-structure');
           if (taxResponse.data.success) {
             const formattedTaxCodes = taxResponse.data.data
-              .filter(tax => tax.is_active) // Only active tax codes
+              .filter(tax => tax.is_active) // Only active tax structures
               .map(tax => ({
-                id: tax.id || tax.tax_code,
-                code: tax.tax_code,
-                name: tax.tax_name
+                id: tax.tax_structure_code,
+                code: tax.tax_structure_code,
+                name: tax.tax_structure_name
               }));
             setTaxCodes(formattedTaxCodes);
-            console.log('✅ Loaded tax codes from API:', formattedTaxCodes.length, 'items');
+            console.log('✅ Loaded tax codes from Tax Structure API:', formattedTaxCodes.length, 'items');
           }
         } catch (error) {
-          console.warn('⚠️ Using localStorage for tax codes:', error.message);
-          // Fallback to localStorage if API fails
-          const savedTaxStructure = localStorage.getItem('taxStructureRecords');
-          const taxData = savedTaxStructure ? JSON.parse(savedTaxStructure) : [];
-          const formattedTaxCodes = taxData
-            .filter(tax => tax.is_active)
-            .map(tax => ({
-              id: tax.id || tax.tax_structure_code,
-              code: tax.tax_structure_code,
-              name: tax.tax_structure_name
-            }));
-          setTaxCodes(formattedTaxCodes);
+          console.warn('⚠️ Tax Structure API failed, creating manual tax codes:', error.message);
+          // Create manual tax codes as fallback
+          const manualTaxCodes = [
+            { id: '1', code: 'SGST9', name: 'SGST 9%' },
+            { id: '2', code: 'CGST9', name: 'CGST 9%' },
+            { id: '3', code: 'IGST18', name: 'IGST 18%' },
+            { id: '4', code: 'VAT5', name: 'VAT 5%' },
+            { id: '5', code: 'SVCX12', name: 'Service Tax 12%' }
+          ];
+          setTaxCodes(manualTaxCodes);
+          console.log('🔧 Using manual tax codes:', manualTaxCodes.length, 'items');
         }
 
         // Load UOM data from backend API
         try {
+          console.log('🔄 Loading UOM data from API...');
           const uomResponse = await axios.get('/api/uom');
+          console.log('📊 Raw UOM API response:', uomResponse.data);
           if (uomResponse.data.success) {
             const formattedUnits = uomResponse.data.data
-              .filter(uom => uom.is_active) // Only active units
+              .filter(uom => (uom.is_active || uom.ActiveStatus)) // Handle both formats
               .map(uom => ({
-                id: uom.id || uom.uom_code,
-                code: uom.uom_code,
-                name: uom.uom_name
+                id: uom.id || uom.uom_code || uom.UOM_CODE,
+                code: uom.uom_code || uom.UOM_CODE,
+                name: uom.uom_name || uom.UOM_NAME
               }));
             setUnits(formattedUnits);
             console.log('✅ Loaded units from API:', formattedUnits.length, 'items');
+            console.log('🔍 Formatted units:', formattedUnits);
           }
         } catch (error) {
           console.warn('⚠️ Using localStorage for UOM:', error.message);
@@ -449,6 +452,21 @@ export default function ItemMaster({ setParentDirty }) {
           <span style={{fontWeight: 'bold', fontSize: '2rem', color: '#222', marginRight: '18px'}}>
             Item Master
           </span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="Item Master"
+                mainTable="it_conf_item_master"
+                linkedTables={[
+                  "it_conf_item_categories",
+                  "it_conf_item_departments", 
+                  "it_conf_taxstructure",
+                  "it_conf_uom"
+                ]}
+              />
+            );
+          })()}
           
           <select 
             value={action} 

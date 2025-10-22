@@ -3,6 +3,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import InfoTooltip from './InfoTooltip';
 
 const { autoTable } = require('jspdf-autotable');
 
@@ -360,6 +361,16 @@ export default function ItemCategories({ setParentDirty, records: externalRecord
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>
             Item Categories
           </span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="Item Categories"
+                mainTable="it_conf_item_categories"
+                linkedTables={[]}
+              />
+            );
+          })()}
           <select
             value={action}
             onChange={e => {

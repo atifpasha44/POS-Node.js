@@ -4,6 +4,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import InfoTooltip from './InfoTooltip';
 
 const initialState = {
   property_code: '',
@@ -650,6 +651,16 @@ const UserGroups = ({ setParentDirty, propertyCodes, userDesignationsRecords, us
       }}>
         <div style={{display:'flex',alignItems:'center',gap:'8px',minWidth:0,flexWrap:'wrap'}}>
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>User Groups</span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="User Groups"
+                mainTable="it_conf_user_groups"
+                linkedTables={["it_conf_roles"]}
+              />
+            );
+          })()}
           <select
             value={action}
             onChange={e => {

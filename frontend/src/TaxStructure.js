@@ -4,6 +4,7 @@ import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import InfoTooltip from './InfoTooltip';
 
 const initialState = {
   tax_structure_code: '',
@@ -762,6 +763,16 @@ const TaxStructure = ({ setParentDirty, records, setRecords, taxCodesRecords }) 
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>
             Tax Structure
           </span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="Tax Structure"
+                mainTable="it_conf_taxstructure"
+                linkedTables={[]}
+              />
+            );
+          })()}
           <select
             value={action}
             onChange={e => {

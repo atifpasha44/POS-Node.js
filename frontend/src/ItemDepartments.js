@@ -5,6 +5,7 @@ import autoTable from 'jspdf-autotable';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import axios from 'axios';
+import InfoTooltip from './InfoTooltip';
 
 const initialState = {
   department_code: '',
@@ -664,6 +665,16 @@ export default function ItemDepartments({ setParentDirty, records, setRecords })
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>
             Item Departments
           </span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="Item Departments"
+                mainTable="it_conf_item_departments"
+                linkedTables={[]}
+              />
+            );
+          })()}
           <select
             value={action}
             onChange={e => {

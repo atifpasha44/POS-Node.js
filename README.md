@@ -1,5 +1,25 @@
 # POS-Node.js
 
+## Version Information
+**Current Version: 1.3.0** - Enhanced Database Transparency & InfoTooltip Modal System  
+**Release Date:** October 21, 2025  
+**Build:** 20251021001
+
+### Latest Features (v1.3.0)
+- ✨ **Enhanced InfoTooltip Modal System** - Professional modal popups showing database table relationships
+- 🎯 **Software Control Feature** - Toggle for development/production database transparency
+- 📊 **Main/Linked Table Categorization** - Clear separation of primary vs dependent tables
+- 🎨 **Professional Modal Design** - Click-to-open interface matching application aesthetics
+- 🔧 **Developer Tools** - Advanced database structure documentation for administrators
+
+### Technical Enhancements
+- Updated forms with enhanced InfoTooltip integration (ItemMaster, TaxStructure, UnitOfMeasurement, UserSetup)
+- Professional modal styling with color-coded sections (green for main tables, blue for linked tables)
+- Responsive design with improved user experience
+- Backwards compatibility with existing implementations
+
+---
+
 ## Setup Instructions
 
 ### 1. MySQL Database Setup

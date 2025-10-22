@@ -4,6 +4,7 @@ import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import InfoTooltip from './InfoTooltip';
 
 const initialState = {
   tax_code: '',
@@ -636,6 +637,16 @@ const TaxCodes = ({ setParentDirty, records, setRecords }) => {
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>
             Tax Codes
           </span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="Tax Codes"
+                mainTable="it_conf_taxcode"
+                linkedTables={[]}
+              />
+            );
+          })()}
           <select
             value={action}
             onChange={e => {

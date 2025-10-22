@@ -84,6 +84,13 @@ const menuItems = [
     label: 'End Of Day'
   },
   {
+    icon: '⚙️',
+    label: 'Controls',
+    submenu: [
+      'Software Control'
+    ]
+  },
+  {
     icon: '🖥️',
     label: 'POS System'
   }
@@ -554,7 +561,7 @@ function Dashboard({ user, setUser }) {
   const [loadingCompany, setLoadingCompany] = useState(false);
   const [companyError, setCompanyError] = useState('');
 
-  const [propertyRecords, setPropertyRecords] = useState([]); // Persist PropertyCode records
+  // PropertyCode now manages its own data via database - removed state
   const [itemDepartmentRecords, setItemDepartmentRecords] = useState([]); // Persist ItemDepartments records
   const [itemCategoryRecords, setItemCategoryRecords] = useState([]); // Persist ItemCategories records
   const [itemSoldRecords, setItemSoldRecords] = useState([]); // Persist ItemSold records
@@ -579,6 +586,13 @@ function Dashboard({ user, setUser }) {
   const [itemMasterRecords, setItemMasterRecords] = useState([]); // Persist Item Master records
   const [reasonCodesRecords, setReasonCodesRecords] = useState([]); // Persist Reason Codes records
   const [uomRecords, setUomRecords] = useState([]); // Persist Unit of Measurement records
+  
+  // Software Control state
+  const [softwareControlEnabled, setSoftwareControlEnabled] = useState(() => {
+    const saved = localStorage.getItem('softwareControlEnabled');
+    return saved ? JSON.parse(saved) : false;
+  });
+  
   const navigate = useNavigate();
 
   // Flag to track if initial data loading is complete
@@ -645,7 +659,7 @@ function Dashboard({ user, setUser }) {
     const loadPersistedData = () => {
       try {
         // Load all form records from localStorage with safe parsing
-        const savedPropertyRecords = localStorage.getItem('propertyRecords');
+        // PropertyCode now loads from database directly - removed localStorage dependency
         const savedItemDepartmentRecords = localStorage.getItem('itemDepartmentRecords');
         const savedItemCategoryRecords = localStorage.getItem('itemCategoryRecords');
         const savedItemSoldRecords = localStorage.getItem('itemSoldRecords');
@@ -672,7 +686,7 @@ function Dashboard({ user, setUser }) {
         const savedUomRecords = localStorage.getItem('uomRecords');
 
         // Parse and set the data with safe parsing and integrity checking
-        const loadedPropertyRecords = safeJsonParse(savedPropertyRecords, [], 'propertyRecords');
+        // PropertyCode loads from database directly - removed loadedPropertyRecords
         const loadedItemDepartmentRecords = safeJsonParse(savedItemDepartmentRecords, [], 'itemDepartmentRecords');
         const loadedItemCategoryRecords = safeJsonParse(savedItemCategoryRecords, [], 'itemCategoryRecords');
         const loadedItemSoldRecords = safeJsonParse(savedItemSoldRecords, [], 'itemSoldRecords');
@@ -728,7 +742,7 @@ function Dashboard({ user, setUser }) {
         }
 
         // Set the state
-        setPropertyRecords(loadedPropertyRecords);
+        // PropertyCode manages its own state - removed setPropertyRecords
         setItemDepartmentRecords(loadedItemDepartmentRecords);
         setItemCategoryRecords(loadedItemCategoryRecords);
         setItemSoldRecords(loadedItemSoldRecords);
@@ -839,11 +853,7 @@ function Dashboard({ user, setUser }) {
   };
 
   // Save data to localStorage whenever records change (only after initial load)
-  useEffect(() => {
-    if (dataLoaded) {
-      saveToLocalStorage('propertyRecords', propertyRecords);
-    }
-  }, [propertyRecords, dataLoaded]);
+  // PropertyCode manages its own database persistence - removed propertyRecords localStorage save
 
   useEffect(() => {
     if (dataLoaded) {
@@ -1033,6 +1043,12 @@ function Dashboard({ user, setUser }) {
     }
   }, [uomRecords, dataLoaded]);
 
+  // Save Software Control setting to localStorage
+  useEffect(() => {
+    localStorage.setItem('softwareControlEnabled', JSON.stringify(softwareControlEnabled));
+    console.log('Saving softwareControlEnabled to localStorage:', softwareControlEnabled);
+  }, [softwareControlEnabled]);
+
   useEffect(() => {
     // Load default company info on mount
     const fetchCompanyInfo = () => {
@@ -1111,7 +1127,7 @@ function Dashboard({ user, setUser }) {
   const exportAllData = () => {
     try {
       const allData = {
-        propertyRecords,
+        // PropertyCode manages its own database persistence - removed from export
         itemDepartmentRecords,
         itemCategoryRecords,
         itemSoldRecords,
@@ -1165,7 +1181,7 @@ function Dashboard({ user, setUser }) {
         if (importedData.version && importedData.exportDate) {
           if (window.confirm('This will replace all existing data. Are you sure you want to continue?')) {
             // Import all data
-            if (importedData.propertyRecords) setPropertyRecords(importedData.propertyRecords);
+            // PropertyCode manages its own database persistence - removed import
             if (importedData.itemDepartmentRecords) setItemDepartmentRecords(importedData.itemDepartmentRecords);
             if (importedData.itemCategoryRecords) setItemCategoryRecords(importedData.itemCategoryRecords);
             if (importedData.itemSoldRecords) setItemSoldRecords(importedData.itemSoldRecords);
@@ -1234,7 +1250,7 @@ function Dashboard({ user, setUser }) {
     console.log('🏷️ UserDesignations:', userDesignationsRecords.length, userDesignationsRecords);
     console.log('👤 UserSetup:', userSetupRecords.length, userSetupRecords);
     console.log('🔐 UserGroups:', userGroupsRecords.length, userGroupsRecords);
-    console.log('🏢 Property Records:', propertyRecords.length, propertyRecords);
+    // PropertyCode manages its own database state - removed logging
     console.log('🍽️ Table Settings:', tableSettingsRecords.length, tableSettingsRecords);
     console.log('========================================');
     checkStorageUsage();
@@ -1269,7 +1285,8 @@ function Dashboard({ user, setUser }) {
       
       // Recovery for other records
       const recordTypes = [
-        'propertyRecords', 'userDepartmentsRecords', 'userDesignationsRecords',
+        // PropertyCode manages its own database persistence - removed from recovery
+        'userDepartmentsRecords', 'userDesignationsRecords',
         'userSetupRecords', 'userGroupsRecords', 'tableSettingsRecords', 'businessPeriodsRecords', 'pantryMessageRecords', 'taxCodesRecords'
       ];
       
@@ -1284,7 +1301,7 @@ function Dashboard({ user, setUser }) {
               
               // Apply recovery based on record type
               switch (recordType) {
-                case 'propertyRecords': setPropertyRecords(recoveredData); break;
+                // PropertyCode manages its own database persistence - removed case
                 case 'userDepartmentsRecords': setUserDepartmentsRecords(recoveredData); break;
                 case 'userDesignationsRecords': setUserDesignationsRecords(recoveredData); break;
                 case 'userSetupRecords': setUserSetupRecords(recoveredData); break;
@@ -1322,7 +1339,7 @@ function Dashboard({ user, setUser }) {
       const backupData = {
         timestamp,
         outletRecords,
-        propertyRecords,
+        // PropertyCode manages its own database persistence - removed from backup
         userDepartmentsRecords,
         userDesignationsRecords,
         userSetupRecords,
@@ -1629,11 +1646,7 @@ Generated: ${new Date().toLocaleString()}`;
         <main className="dashboard-content" style={{flex:1}}>
           {activeSubmenu === 'Property Setup' ? (
             <React.Suspense fallback={<div>Loading...</div>}>
-              {React.createElement(require('./PropertyCode').default, {
-                setParentDirty: setChildDirty,
-                records: propertyRecords,
-                setRecords: setPropertyRecords
-              })}
+              {React.createElement(require('./PropertyCode').default)}
             </React.Suspense>
           ) : activeSubmenu === 'Reason Codes' ? (
             <React.Suspense fallback={<div>Loading...</div>}>
@@ -1680,7 +1693,7 @@ Generated: ${new Date().toLocaleString()}`;
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./OutletSetup').default, {
                 setParentDirty: setChildDirty,
-                propertyCodes: propertyRecords,
+                // PropertyCode loads from database directly - components should load property codes independently
                 records: outletRecords,
                 setRecords: setOutletRecords
               })}
@@ -1689,7 +1702,7 @@ Generated: ${new Date().toLocaleString()}`;
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./TableSettings').default, {
                 setParentDirty: setChildDirty,
-                propertyCodes: propertyRecords,
+                // PropertyCode loads from database directly - components should load property codes independently
                 outletRecords: outletRecords,
                 records: tableSettingsRecords,
                 setRecords: setTableSettingsRecords
@@ -1805,7 +1818,7 @@ Generated: ${new Date().toLocaleString()}`;
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./UserDepartments').default, {
                 setParentDirty: setChildDirty,
-                propertyCodes: propertyRecords,
+                // PropertyCode loads from database directly - components should load property codes independently
                 outletRecords: outletRecords,
                 records: userDepartmentsRecords,
                 setRecords: setUserDepartmentsRecords
@@ -1815,7 +1828,7 @@ Generated: ${new Date().toLocaleString()}`;
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./UserDesignations').default, {
                 setParentDirty: setChildDirty,
-                propertyCodes: propertyRecords,
+                // PropertyCode loads from database directly - components should load property codes independently
                 userDepartmentsRecords: userDepartmentsRecords,
                 records: userDesignationsRecords,
                 setRecords: setUserDesignationsRecords
@@ -1825,7 +1838,7 @@ Generated: ${new Date().toLocaleString()}`;
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./UserSetup').default, {
                 setParentDirty: setChildDirty,
-                propertyCodes: propertyRecords,
+                // PropertyCode loads from database directly - components should load property codes independently
                 outletRecords: outletRecords,
                 userDepartmentsRecords: userDepartmentsRecords,
                 userGroupsRecords: userGroupsRecords,
@@ -1837,11 +1850,18 @@ Generated: ${new Date().toLocaleString()}`;
             <React.Suspense fallback={<div>Loading...</div>}>
               {React.createElement(require('./UserGroups').default, {
                 setParentDirty: setChildDirty,
-                propertyCodes: propertyRecords,
+                // PropertyCode loads from database directly - components should load property codes independently
                 userDesignationsRecords: userDesignationsRecords,
                 userSetupRecords: userSetupRecords,
                 records: userGroupsRecords,
                 setRecords: setUserGroupsRecords
+              })}
+            </React.Suspense>
+          ) : activeSubmenu === 'Software Control' ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./SoftwareControl').default, {
+                softwareControlEnabled: softwareControlEnabled,
+                setSoftwareControlEnabled: setSoftwareControlEnabled
               })}
             </React.Suspense>
           ) : activeTab === 'dashboard' ? (

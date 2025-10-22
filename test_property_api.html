@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Property Codes API Test</title>
+</head>
+<body>
+    <h2>Property Codes API Test</h2>
+    <button onclick="testPropertyCodesAPI()">Test Property Codes API</button>
+    <div id="results" style="margin-top: 20px; font-family: monospace; white-space: pre-wrap;"></div>
+    
+    <script>
+        async function testPropertyCodesAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '🔄 Testing Property Codes API...\n\n';
+            
+            try {
+                console.log('Making request to: http://localhost:3001/api/property-codes');
+                
+                const response = await fetch('http://localhost:3001/api/property-codes', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                resultsDiv.innerHTML += `Response Status: ${response.status} ${response.statusText}\n`;
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                resultsDiv.innerHTML += `✅ Response received successfully!\n\n`;
+                resultsDiv.innerHTML += `Success: ${data.success}\n`;
+                resultsDiv.innerHTML += `Data Array Length: ${data.data ? data.data.length : 'undefined'}\n\n`;
+                
+                if (data.data && data.data.length > 0) {
+                    resultsDiv.innerHTML += `Property Codes Found:\n`;
+                    data.data.forEach((property, index) => {
+                        resultsDiv.innerHTML += `${index + 1}. Code: ${property.property_code} - Name: ${property.property_name}\n`;
+                    });
+                    
+                    resultsDiv.innerHTML += `\n📋 Full Response Data:\n`;
+                    resultsDiv.innerHTML += JSON.stringify(data, null, 2);
+                } else {
+                    resultsDiv.innerHTML += `❌ No property codes found in response\n`;
+                    resultsDiv.innerHTML += JSON.stringify(data, null, 2);
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML += `❌ Error: ${error.message}\n\n`;
+                resultsDiv.innerHTML += `Full Error Details:\n${error.stack || error}`;
+                console.error('Property Codes API Test Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

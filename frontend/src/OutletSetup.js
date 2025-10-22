@@ -6,6 +6,8 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import './Dashboard.css';
+import InfoTooltip from './InfoTooltip';
+import { usePropertyCodes, getApplicablePropertyCodes } from './propertyCodesUtils';
 
 const mockPriceLevels = [
   'Price 1',
@@ -20,7 +22,10 @@ const mockOutletTypes = [
   'Bakery',
 ];
 
-export default function OutletSetup({ setParentDirty, propertyCodes, records, setRecords }) {
+export default function OutletSetup({ setParentDirty, records, setRecords }) {
+  // Database-first: Load property codes directly from database
+  const { propertyCodes, loading: loadingPropertyCodes } = usePropertyCodes();
+
 const initialState = {
   property: '',
   applicable_from: '',
@@ -46,45 +51,8 @@ const initialState = {
   }
 };
 
-  // Function to filter Property Codes based on current date logic
-  const getApplicablePropertyCodes = () => {
-    if (!propertyCodes || propertyCodes.length === 0) return [];
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
-    
-    // Group property codes by property_code to handle multiple dates
-    const groupedByCodes = propertyCodes.reduce((acc, pc) => {
-      const code = pc.property_code || pc.code;
-      if (!acc[code]) acc[code] = [];
-      acc[code].push(pc);
-      return acc;
-    }, {});
-    
-    const applicableCodes = [];
-    
-    // For each unique property code, find the most recent applicable record
-    Object.keys(groupedByCodes).forEach(code => {
-      const records = groupedByCodes[code];
-      
-      // Filter records that are applicable (applicable_from <= today)
-      const applicableRecords = records.filter(record => {
-        const applicableDate = new Date(record.applicable_from);
-        applicableDate.setHours(0, 0, 0, 0);
-        return applicableDate <= today;
-      });
-      
-      if (applicableRecords.length > 0) {
-        // Sort by applicable_from date (descending) to get the most recent applicable record
-        applicableRecords.sort((a, b) => new Date(b.applicable_from) - new Date(a.applicable_from));
-        
-        // Add the most recent applicable record
-        applicableCodes.push(applicableRecords[0]);
-      }
-    });
-    
-    return applicableCodes;
-  };
+  // Function to filter Property Codes based on current date logic - now using utility
+  const getApplicablePropertyCodesLocal = () => getApplicablePropertyCodes(propertyCodes);
 
 
   // Track if a delete is pending confirmation
@@ -136,6 +104,55 @@ const initialState = {
       setForm(f => ({ ...f, applicable_from: todayStr }));
     }
   }, [action]);
+
+  // Load existing outlets from database when component mounts
+  useEffect(() => {
+    const loadOutletsFromDatabase = async () => {
+      try {
+        console.log('🔄 Loading outlets from database...');
+        const response = await axios.get('http://localhost:3001/api/outlet-setup');
+        
+        if (response.data.success && response.data.data.length > 0) {
+          // Transform API response to match component format
+          const formattedOutlets = response.data.data.map((outlet, index) => ({
+            id: outlet.id || index + 1,
+            property: outlet.property_code || 'DEFAULT',
+            applicable_from: outlet.applicable_from || new Date().toISOString().split('T')[0],
+            outlet_code: outlet.outlet_code,
+            outlet_name: outlet.outlet_name,
+            short_name: outlet.short_name,
+            outlet_type: outlet.outlet_type || 'Restaurant',
+            item_price_level: outlet.outlet_set || 'Price 1',
+            check_prefix: outlet.bill_initial || '',
+            check_format: 'Standard',
+            receipt_format: 'Standard',
+            kitchen_format: 'Standard',
+            inactive: outlet.is_active === 0,
+            options: {
+              cash: true,
+              card: true,
+              company: false,
+              room_guest: false,
+              staff: false,
+              bill_on_hold: false,
+              credit: false,
+              void: false
+            }
+          }));
+          
+          setRecords(formattedOutlets);
+          console.log('✅ Loaded outlets from database:', formattedOutlets.length, 'records');
+        } else {
+          console.log('ℹ️ No outlets found in database, using empty state');
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to load outlets from database:', error.message);
+        console.log('📊 Using existing records or empty state');
+      }
+    };
+
+    loadOutletsFromDatabase();
+  }, []); // Run once on mount
 
   // Handlers
   const handleChange = e => {
@@ -217,48 +234,74 @@ const initialState = {
       deletePendingRef.current = true;
       return;
     }
-    setRecords(prev => {
-      // Filter out empty/invalid records before saving
-      const filtered = prev.filter(r => r && r.outlet_code && r.options && typeof r.options.cash !== 'undefined');
+
+    try {
+      // Prepare data for API call - match backend schema exactly
+      const outletData = {
+        property: form.property,                    // ✅ Required field
+        applicable_from: form.applicable_from,
+        outlet_code: form.outlet_code,
+        outlet_name: form.outlet_name,
+        short_name: form.short_name,
+        outlet_type: form.outlet_type,
+        item_price_level: form.item_price_level,    // ✅ Correct field name
+        check_prefix: form.check_prefix,            // ✅ Correct field name
+        check_format: form.check_format,            // ✅ Added missing field
+        receipt_format: form.receipt_format,        // ✅ Added missing field
+        kitchen_format: form.kitchen_format,        // ✅ Added missing field
+        options: form.options,                      // ✅ Send as object, not JSON string
+        inactive: form.inactive
+      };
+
+      let response;
       if (action === 'Edit' && selectedRecordIdx !== null) {
-        const updated = [...filtered];
-        updated[selectedRecordIdx] = { ...form };
-        setShowSavePopup(true);
-        setTimeout(() => setShowSavePopup(false), 1800);
-        setIsDirty(false);
-        if (setParentDirty) setParentDirty(false);
-        setSelectedRecordIdx(null);
-        setForm(initialState);
-        return updated;
+        // Update existing record via API
+        const recordId = records[selectedRecordIdx]?.id || selectedRecordIdx + 1;
+        response = await axios.put(`http://localhost:3001/api/outlet-setup/${recordId}`, outletData);
+        console.log('✅ Outlet updated successfully:', response.data);
+        
+        // Update local state
+        setRecords(prev => {
+          const updated = [...prev];
+          updated[selectedRecordIdx] = { ...form, id: recordId };
+          return updated;
+        });
+      } else {
+        // Create new record via API
+        response = await axios.post('http://localhost:3001/api/outlet-setup', outletData);
+        console.log('✅ Outlet created successfully:', response.data);
+        
+        // Update local state
+        setRecords(prev => [...prev, { ...form, id: response.data.insertId }]);
       }
-      // Add mode: check for duplicate outlet_code
-      if (filtered.some(rec => rec.outlet_code === form.outlet_code)) {
-        alert('This Outlet Code already exists. Please enter a unique code.');
-        return filtered;
-      }
+
+      // Show success message
       setShowSavePopup(true);
       setTimeout(() => setShowSavePopup(false), 1800);
       setIsDirty(false);
       if (setParentDirty) setParentDirty(false);
       setSelectedRecordIdx(null);
       setForm(initialState);
-      return [...filtered, { ...form }];
-    });
+      
+    } catch (error) {
+      console.error('❌ Error saving outlet:', error);
+      alert(`Failed to save outlet: ${error.response?.data?.message || error.message}`);
+    }
   };
 
 // Confirmed delete handler
 const handleDeleteConfirmed = async () => {
   deletePendingRef.current = false;
-    if (selectedRecordIdx === null) return;
-    const record = records[selectedRecordIdx];
-    try {
-      // Call backend delete API (adjust endpoint as needed)
-      await axios.delete(`/api/outlets/${record.outlet_code}`);
-    } catch (err) {
-      alert('Failed to delete record from backend.');
-      setShowDeleteConfirm(false);
-      return;
-    }
+  if (selectedRecordIdx === null) return;
+  const record = records[selectedRecordIdx];
+  
+  try {
+    // Call backend delete API with correct endpoint
+    const recordId = record?.id || selectedRecordIdx + 1;
+    await axios.delete(`/api/outlet-setup/${recordId}`);
+    console.log('✅ Outlet deleted successfully');
+    
+    // Update local state
     setRecords(prev => prev.filter((_, i) => i !== selectedRecordIdx));
     setShowSavePopup(true);
     setTimeout(() => setShowSavePopup(false), 1800);
@@ -268,6 +311,11 @@ const handleDeleteConfirmed = async () => {
     setAction('Add');
     if (setParentDirty) setParentDirty(false);
     setShowDeleteConfirm(false);
+  } catch (err) {
+    console.error('❌ Error deleting outlet:', err);
+    alert(`Failed to delete record: ${err.response?.data?.message || err.message}`);
+    setShowDeleteConfirm(false);
+  }
 };
 // Cancel delete
 const handleDeleteCancel = () => {
@@ -731,6 +779,16 @@ useEffect(() => {
       }}>
         <div style={{display:'flex',alignItems:'center',gap:'8px',minWidth:0,flexWrap:'wrap'}}>
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>Outlet Setup</span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="Outlet Setup"
+                mainTable="it_conf_outset"
+                linkedTables={["it_conf_outses", "it_conf_outordtyp"]}
+              />
+            );
+          })()}
           <select
             value={action}
             onChange={e => {
@@ -865,10 +923,11 @@ useEffect(() => {
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Property</label>
-            <select name="property" value={form.property} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action === 'Edit' || action === 'Search') ? '#f3f3f3' : '#fff'}} disabled={action === 'Edit' || action === 'Search'} required>
-              <option value="">Select Property</option>
+            <select name="property" value={form.property} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: (action === 'Edit' || action === 'Search') ? '#f3f3f3' : '#fff'}} disabled={action === 'Edit' || action === 'Search' || loadingPropertyCodes} required>
+              <option value="">{loadingPropertyCodes ? 'Loading properties...' : 'Select Property'}</option>
               {(() => {
-                const applicableCodes = getApplicablePropertyCodes();
+                if (loadingPropertyCodes) return null;
+                const applicableCodes = getApplicablePropertyCodesLocal();
                 return applicableCodes.map(pc => (
                   <option key={pc.property_code || pc.code} value={pc.property_code || pc.code}>
                     {(pc.property_code || pc.code) + (pc.property_name ? ' - ' + pc.property_name : (pc.name ? ' - ' + pc.name : ''))}

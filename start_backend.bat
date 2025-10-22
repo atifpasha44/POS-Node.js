@@ -1,0 +1,6 @@
+@echo off
+echo Starting POS Backend Server...
+cd /d "d:\pos-notejs\POS-Node.js\backend"
+echo Current directory: %CD%
+echo Starting Node.js server...
+node index.js

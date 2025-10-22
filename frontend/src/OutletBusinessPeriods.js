@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import * as XLSX from 'xlsx';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -36,7 +37,38 @@ const OutletBusinessPeriods = ({ setParentDirty, records, setRecords, outletReco
   const [fieldErrors, setFieldErrors] = useState({});
   const [lastAction, setLastAction] = useState('Add');
   const [gridRows, setGridRows] = useState([]);
+  const [loading, setLoading] = useState(false);
   const formRef = useRef(null);
+
+  // Load business periods from database when component mounts
+  useEffect(() => {
+    loadBusinessPeriodsFromDatabase();
+  }, []);
+
+  const loadBusinessPeriodsFromDatabase = async () => {
+    try {
+      setLoading(true);
+      console.log('🔄 Loading business periods from database...');
+      const response = await axios.get('http://localhost:3001/api/business-periods');
+      
+      if (response.data.success && response.data.data) {
+        console.log('✅ Loaded business periods from database:', response.data.data.length, 'records');
+        setRecords(response.data.data);
+      } else {
+        console.log('📊 No business periods found in database');
+        setRecords([]);
+      }
+    } catch (error) {
+      console.error('❌ Error loading business periods from database:', error);
+      if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+        console.log('⚠️ Backend not available, using existing records...');
+      } else {
+        setRecords([]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Validation function
   const validateForm = () => {
@@ -214,7 +246,7 @@ const OutletBusinessPeriods = ({ setParentDirty, records, setRecords, outletReco
     if (setParentDirty) setParentDirty(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedRecordIdx === null || !records || selectedRecordIdx >= records.length) {
       setSelectModalMessage('Please select a record to delete.');
       setShowSelectModal(true);
@@ -226,8 +258,15 @@ const OutletBusinessPeriods = ({ setParentDirty, records, setRecords, outletReco
     
     if (window.confirm(confirmMessage)) {
       try {
-        const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
-        setRecords(updatedRecords);
+        setLoading(true);
+        
+        // Delete record via API
+        const recordId = selectedRecord.id;
+        await axios.delete(`http://localhost:3001/api/business-periods/${recordId}`);
+        console.log('✅ Business period deleted successfully');
+        
+        // Reload data from database to ensure consistency
+        await loadBusinessPeriodsFromDatabase();
         
         setSelectedRecordIdx(null);
         setForm(initialState);
@@ -244,7 +283,18 @@ const OutletBusinessPeriods = ({ setParentDirty, records, setRecords, outletReco
         }, 2000);
         
       } catch (error) {
-        console.error('Error deleting business period:', error);
+        console.error('❌ Error deleting business period:', error);
+        let errorMessage = 'Failed to delete business period';
+        
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        alert(`❌ ${errorMessage}`);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -305,70 +355,48 @@ const OutletBusinessPeriods = ({ setParentDirty, records, setRecords, outletReco
     setGridRows(updatedRows);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      let updatedRecords;
-      let recordsToSave = [];
+      if (!validateForm()) {
+        return;
+      }
 
-      if (gridRows.length > 0) {
-        // Save all rows from grid
-        recordsToSave = gridRows.map(row => ({
-          applicable_from: row.applicable_from,
-          outlet_code: row.outlet_code,
-          period_code: row.period_code,
-          period_name: row.period_name,
-          short_name: row.short_name,
-          start_time: row.start_time,
-          end_time: row.end_time,
-          active_days: row.active_days,
-          is_active: row.is_active,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }));
+      setLoading(true);
+
+      // Prepare data for API call - match backend schema exactly
+      const businessPeriodData = {
+        applicable_from: form.applicable_from,
+        outlet_code: form.outlet_code,
+        period_code: form.period_code,
+        period_name: form.period_name,
+        short_name: form.short_name,
+        start_time: form.start_time + ':00', // Add seconds for TIME format
+        end_time: form.end_time + ':00',     // Add seconds for TIME format
+        active_days: form.active_days,
+        is_active: form.is_active
+      };
+
+      let response;
+      if (action === 'Edit' && selectedRecordIdx !== null && records[selectedRecordIdx]) {
+        // Update existing record via API
+        const recordId = records[selectedRecordIdx].id;
+        response = await axios.put(`http://localhost:3001/api/business-periods/${recordId}`, businessPeriodData);
+        console.log('✅ Business period updated successfully:', response.data);
       } else {
-        // Single record save
-        if (!validateForm()) {
-          return;
-        }
-
-        const newRecord = {
-          applicable_from: form.applicable_from,
-          outlet_code: form.outlet_code,
-          period_code: form.period_code,
-          period_name: form.period_name,
-          short_name: form.short_name,
-          start_time: form.start_time,
-          end_time: form.end_time,
-          active_days: form.active_days,
-          is_active: form.is_active,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        recordsToSave = [newRecord];
+        // Create new record via API
+        response = await axios.post('http://localhost:3001/api/business-periods', businessPeriodData);
+        console.log('✅ Business period created successfully:', response.data);
       }
 
-      if (action === 'Add') {
-        updatedRecords = [...(records || []), ...recordsToSave];
-      } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
-        updatedRecords = [...records];
-        updatedRecords[selectedRecordIdx] = { 
-          ...recordsToSave[0], 
-          created_at: records[selectedRecordIdx].created_at || new Date().toISOString()
-        };
-      } else {
-        updatedRecords = records || [];
-      }
+      // Reload data from database to ensure consistency
+      await loadBusinessPeriodsFromDatabase();
 
-      setRecords(updatedRecords);
-
-      // Clear form and grid after successful save (except for Search action)
-      if (action !== 'Search') {
-        setForm(initialState);
-        setSelectedRecordIdx(null);
-        setAction('Add');
-        setFieldErrors({});
-        setGridRows([]);
-      }
+      // Clear form after successful save
+      setForm(initialState);
+      setSelectedRecordIdx(null);
+      setAction('Add');
+      setFieldErrors({});
+      setGridRows([]);
 
       setLastAction(action);
       setShowSavePopup(true);
@@ -380,7 +408,18 @@ const OutletBusinessPeriods = ({ setParentDirty, records, setRecords, outletReco
       }, 2000);
 
     } catch (error) {
-      console.error('Error saving business period:', error);
+      console.error('❌ Error saving business period:', error);
+      let errorMessage = 'Failed to save business period';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(`❌ ${errorMessage}`);
+    } finally {
+      setLoading(false);
     }
   };
 

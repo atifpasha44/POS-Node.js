@@ -385,7 +385,27 @@ app.delete('/api/item-categories/:id', (req, res) => {
 // OUTLET SETUP API
 // ========================================
 app.get('/api/outlet-setup', (req, res) => {
-    const query = 'SELECT * FROM IT_CONF_OUTSET ORDER BY outlet_code, applicable_from DESC';
+    const query = `SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_name,
+        short_name,
+        outlet_type,
+        item_price_level,
+        check_prefix,
+        check_format,
+        receipt_format,
+        kitchen_format,
+        inactive,
+        options,
+        created_at,
+        updated_at
+    FROM IT_CONF_OUTSET 
+    WHERE inactive = FALSE 
+    ORDER BY outlet_code`;
+    
     db.query(query, (err, results) => {
         if (err) return handleDatabaseError(res, err, 'fetch outlet setup');
         res.json({ success: true, data: results });
@@ -394,38 +414,44 @@ app.get('/api/outlet-setup', (req, res) => {
 
 app.post('/api/outlet-setup', (req, res) => {
     const { 
+        property,
         applicable_from, 
         outlet_code, 
         outlet_name, 
         short_name, 
-        outlet_type = 'Restaurant', 
-        bill_initial, 
-        outlet_setting, 
-        options, 
-        inactive = 0 
+        outlet_type = 'Restaurant',
+        item_price_level = 'Price 1',
+        check_prefix,
+        check_format,
+        receipt_format,
+        kitchen_format,
+        options = {},
+        inactive = false 
     } = req.body;
     
-    if (!applicable_from || !outlet_code || !outlet_name) {
+    if (!property || !applicable_from || !outlet_code || !outlet_name) {
         return res.status(400).json({ 
             success: false, 
-            message: 'Applicable from, outlet code and name are required' 
+            message: 'Property, applicable from, outlet code and name are required' 
         });
     }
 
     const query = `INSERT INTO IT_CONF_OUTSET 
-                   (applicable_from, outlet_code, outlet_name, short_name, outlet_type, 
-                    bill_initial, outlet_setting, options, inactive, created_by) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'admin')`;
+                   (property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, 
+                    item_price_level, check_prefix, check_format, receipt_format, kitchen_format, 
+                    options, inactive) 
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     
     db.query(query, [
-        applicable_from, outlet_code, outlet_name, short_name, outlet_type, 
-        bill_initial, JSON.stringify(outlet_setting), JSON.stringify(options), inactive
+        property, applicable_from, outlet_code, outlet_name, short_name, outlet_type,
+        item_price_level, check_prefix, check_format, receipt_format, kitchen_format,
+        JSON.stringify(options), inactive
     ], (err, result) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ 
                     success: false, 
-                    message: 'Outlet code with this date already exists' 
+                    message: 'Outlet code already exists' 
                 });
             }
             return handleDatabaseError(res, err, 'create outlet setup');
@@ -441,26 +467,32 @@ app.post('/api/outlet-setup', (req, res) => {
 app.put('/api/outlet-setup/:id', (req, res) => {
     const { id } = req.params;
     const { 
+        property,
         applicable_from, 
         outlet_code, 
         outlet_name, 
         short_name, 
-        outlet_type, 
-        bill_initial, 
-        outlet_setting, 
-        options, 
-        inactive 
+        outlet_type,
+        item_price_level,
+        check_prefix,
+        check_format,
+        receipt_format,
+        kitchen_format,
+        options = {},
+        inactive = false
     } = req.body;
     
     const query = `UPDATE IT_CONF_OUTSET 
-                   SET applicable_from = ?, outlet_code = ?, outlet_name = ?, 
-                       short_name = ?, outlet_type = ?, bill_initial = ?, 
-                       outlet_setting = ?, options = ?, inactive = ?, modified_by = 'admin'
+                   SET property = ?, applicable_from = ?, outlet_code = ?, outlet_name = ?, 
+                       short_name = ?, outlet_type = ?, item_price_level = ?, 
+                       check_prefix = ?, check_format = ?, receipt_format = ?, 
+                       kitchen_format = ?, options = ?, inactive = ?
                    WHERE id = ?`;
     
     db.query(query, [
-        applicable_from, outlet_code, outlet_name, short_name, outlet_type, 
-        bill_initial, JSON.stringify(outlet_setting), JSON.stringify(options), inactive, id
+        property, applicable_from, outlet_code, outlet_name, short_name, outlet_type,
+        item_price_level, check_prefix, check_format, receipt_format, kitchen_format,
+        JSON.stringify(options), inactive, id
     ], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'update outlet setup');
         
@@ -584,10 +616,10 @@ app.delete('/api/tax-codes/:code', (req, res) => {
 });
 
 // ========================================
-// TAX STRUCTURE API
+// TAX STRUCTURE API (Existing Schema)
 // ========================================
 app.get('/api/tax-structure', (req, res) => {
-    const query = 'SELECT * FROM IT_CONF_TAXSTRUCTURE ORDER BY tax_structure_code';
+    const query = 'SELECT TAXSTRCODE as tax_structure_code, TAXSTRNAME as tax_structure_name, DESCRIPTION as description, ActiveStatus as is_active FROM IT_CONF_TAXSTRUCTURE WHERE ActiveStatus = 1 ORDER BY TAXSTRCODE';
     db.query(query, (err, results) => {
         if (err) return handleDatabaseError(res, err, 'fetch tax structure');
         res.json({ success: true, data: results });
@@ -710,10 +742,10 @@ app.delete('/api/tax-structure/:id', (req, res) => {
 });
 
 // ========================================
-// UNIT OF MEASUREMENT API
+// UNIT OF MEASUREMENT API (Existing Schema)
 // ========================================
 app.get('/api/uom', (req, res) => {
-    const query = 'SELECT * FROM IT_CONF_UOM ORDER BY uom_code';
+    const query = 'SELECT UOM_CODE as uom_code, UOM_NAME as uom_name, DESCRIPTION as description, ActiveStatus as is_active FROM it_conf_uom WHERE ActiveStatus = 1 ORDER BY UOM_CODE';
     db.query(query, (err, results) => {
         if (err) return handleDatabaseError(res, err, 'fetch UOM');
         res.json({ success: true, data: results });
@@ -1383,43 +1415,85 @@ app.delete('/api/item-master/:id', (req, res) => {
 // EXISTING PROPERTY CODE API (PRESERVED)
 // ========================================
 app.get('/api/property-codes', (req, res) => {
-    const query = 'SELECT * FROM IT_CONF_PROPERTY ORDER BY applicable_from DESC';
+    const query = `SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_name, 
+                       address_name, gst_number, pan_number, group_name, local_currency,
+                       currency_format, symbol, decimal_places, date_format, round_off, 
+                       property_logo, created_at, updated_at
+                   FROM IT_CONF_PROPERTY 
+                   ORDER BY property_code`;
+    
     db.query(query, (err, results) => {
         if (err) return handleDatabaseError(res, err, 'fetch property codes');
-        res.json({ success: true, data: results });
+        
+        // Transform results to match frontend expectations
+        const transformedResults = results.map(row => ({
+            id: row.id,
+            property_code: row.property_code,
+            property_name: row.property_name,
+            nick_name: row.nick_name || '',
+            owner_name: row.owner_name || '',
+            address_name: row.address_name || '',
+            gst_number: row.gst_number || '',
+            pan_number: row.pan_number || '',
+            group_name: row.group_name || '',
+            local_currency: row.local_currency || 'USD',
+            currency_format: row.currency_format || 'en-US',
+            symbol: row.symbol || '$',
+            decimal_places: row.decimal_places || 2,
+            date_format: row.date_format || 'MM/DD/YYYY',
+            round_off: row.round_off || '0.01',
+            property_logo: row.property_logo || null,
+            applicable_from: row.applicable_from ? (row.applicable_from.toISOString ? row.applicable_from.toISOString().split('T')[0] : row.applicable_from) : ''
+        }));
+        
+        res.json({ success: true, data: transformedResults });
     });
 });
 
 app.post('/api/property-codes', (req, res) => {
     const { 
         applicable_from, property_code, property_name, nick_name, owner_name, 
-        address_name, gst_number, pan_number, group_name, local_currency, 
-        currency_format, symbol, decimal_places, date_format, round_off, property_logo 
+        address_name, gst_number, pan_number, group_name, local_currency,
+        currency_format, symbol, decimal_places, date_format, round_off, property_logo
     } = req.body;
     
-    if (!applicable_from || !property_code || !property_name) {
+    if (!property_code || !property_name) {
         return res.status(400).json({ 
             success: false, 
-            message: 'Applicable from, property code and name are required' 
+            message: 'Property code and name are required' 
         });
     }
 
     const query = `INSERT INTO IT_CONF_PROPERTY 
                    (applicable_from, property_code, property_name, nick_name, owner_name, 
-                    address_name, gst_number, pan_number, group_name, local_currency, 
+                    address_name, gst_number, pan_number, group_name, local_currency,
                     currency_format, symbol, decimal_places, date_format, round_off, property_logo) 
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     
     db.query(query, [
-        applicable_from, property_code, property_name, nick_name, owner_name, 
-        address_name, gst_number, pan_number, group_name, local_currency, 
-        currency_format, symbol, decimal_places, date_format, round_off, property_logo
+        applicable_from || null,
+        property_code,
+        property_name,
+        nick_name || null,
+        owner_name || null,
+        address_name || null,
+        gst_number || null,
+        pan_number || null,
+        group_name || null,
+        local_currency || null,
+        currency_format || null,
+        symbol || null,
+        decimal_places || 2,
+        date_format || null,
+        round_off || null,
+        property_logo || null
     ], (err, result) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ 
                     success: false, 
-                    message: 'Property code with this date already exists' 
+                    message: 'Property code already exists' 
                 });
             }
             return handleDatabaseError(res, err, 'create property code');
@@ -1436,21 +1510,34 @@ app.put('/api/property-codes/:id', (req, res) => {
     const { id } = req.params;
     const { 
         applicable_from, property_code, property_name, nick_name, owner_name, 
-        address_name, gst_number, pan_number, group_name, local_currency, 
-        currency_format, symbol, decimal_places, date_format, round_off, property_logo 
+        address_name, gst_number, pan_number, group_name, local_currency,
+        currency_format, symbol, decimal_places, date_format, round_off, property_logo
     } = req.body;
     
     const query = `UPDATE IT_CONF_PROPERTY 
-                   SET applicable_from = ?, property_code = ?, property_name = ?, 
-                       nick_name = ?, owner_name = ?, address_name = ?, gst_number = ?, 
-                       pan_number = ?, group_name = ?, local_currency = ?, currency_format = ?, 
-                       symbol = ?, decimal_places = ?, date_format = ?, round_off = ?, property_logo = ?
+                   SET applicable_from = ?, property_name = ?, nick_name = ?, owner_name = ?, 
+                       address_name = ?, gst_number = ?, pan_number = ?, group_name = ?, 
+                       local_currency = ?, currency_format = ?, symbol = ?, decimal_places = ?, 
+                       date_format = ?, round_off = ?, property_logo = ?, updated_at = CURRENT_TIMESTAMP
                    WHERE id = ?`;
     
     db.query(query, [
-        applicable_from, property_code, property_name, nick_name, owner_name, 
-        address_name, gst_number, pan_number, group_name, local_currency, 
-        currency_format, symbol, decimal_places, date_format, round_off, property_logo, id
+        applicable_from || null,
+        property_name,
+        nick_name || null,
+        owner_name || null,
+        address_name || null,
+        gst_number || null,
+        pan_number || null,
+        group_name || null,
+        local_currency || null,
+        currency_format || null,
+        symbol || null,
+        decimal_places || 2,
+        date_format || null,
+        round_off || null,
+        property_logo || null,
+        id
     ], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'update property code');
         
@@ -1471,7 +1558,7 @@ app.put('/api/property-codes/:id', (req, res) => {
 app.delete('/api/property-codes/:id', (req, res) => {
     const { id } = req.params;
     
-    const query = 'DELETE FROM IT_CONF_PROPERTY WHERE id = ?';
+    const query = 'UPDATE IT_CONF_PROPERTY SET ActiveStatus = 0 WHERE PROPERTY_CODE = ?';
     db.query(query, [id], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'delete property code');
         
@@ -1490,6 +1577,138 @@ app.delete('/api/property-codes/:id', (req, res) => {
 });
 
 // ========================================
+// OUTLET BUSINESS PERIODS API
+// ========================================
+app.get('/api/business-periods', (req, res) => {
+    const query = `SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        period_name,
+        short_name,
+        start_time,
+        end_time,
+        active_days,
+        is_active,
+        created_at,
+        updated_at
+    FROM IT_CONF_BUSINESS_PERIODS 
+    WHERE is_active = TRUE 
+    ORDER BY period_code`;
+    
+    db.query(query, (err, results) => {
+        if (err) return handleDatabaseError(res, err, 'fetch business periods');
+        res.json({ success: true, data: results });
+    });
+});
+
+app.post('/api/business-periods', (req, res) => {
+    const { 
+        applicable_from,
+        outlet_code, 
+        period_code, 
+        period_name, 
+        short_name,
+        start_time,
+        end_time,
+        active_days = {},
+        is_active = true 
+    } = req.body;
+    
+    if (!applicable_from || !outlet_code || !period_code || !period_name || !start_time || !end_time) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Applicable from, outlet code, period code, period name, start time and end time are required' 
+        });
+    }
+
+    const query = `INSERT INTO IT_CONF_BUSINESS_PERIODS 
+                   (applicable_from, outlet_code, period_code, period_name, short_name, 
+                    start_time, end_time, active_days, is_active) 
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    
+    db.query(query, [
+        applicable_from, outlet_code, period_code, period_name, short_name,
+        start_time, end_time, JSON.stringify(active_days), is_active
+    ], (err, result) => {
+        if (err) {
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Period code already exists' 
+                });
+            }
+            return handleDatabaseError(res, err, 'create business period');
+        }
+        res.json({ 
+            success: true, 
+            message: 'Business period created successfully',
+            id: result.insertId 
+        });
+    });
+});
+
+app.put('/api/business-periods/:id', (req, res) => {
+    const { id } = req.params;
+    const { 
+        applicable_from,
+        outlet_code,
+        period_code, 
+        period_name, 
+        short_name,
+        start_time,
+        end_time,
+        active_days = {},
+        is_active = true
+    } = req.body;
+    
+    const query = `UPDATE IT_CONF_BUSINESS_PERIODS 
+                   SET applicable_from = ?, outlet_code = ?, period_code = ?, period_name = ?, 
+                       short_name = ?, start_time = ?, end_time = ?, active_days = ?, is_active = ?
+                   WHERE id = ?`;
+    
+    db.query(query, [
+        applicable_from, outlet_code, period_code, period_name, short_name,
+        start_time, end_time, JSON.stringify(active_days), is_active, id
+    ], (err, result) => {
+        if (err) return handleDatabaseError(res, err, 'update business period');
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Business period not found' 
+            });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Business period updated successfully' 
+        });
+    });
+});
+
+app.delete('/api/business-periods/:id', (req, res) => {
+    const { id } = req.params;
+    
+    const query = 'DELETE FROM IT_CONF_BUSINESS_PERIODS WHERE id = ?';
+    db.query(query, [id], (err, result) => {
+        if (err) return handleDatabaseError(res, err, 'delete business period');
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Business period not found' 
+            });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Business period deleted successfully' 
+        });
+    });
+});
+
 // HEALTH CHECK ENDPOINT
 // ========================================
 app.get('/api/health', (req, res) => {

@@ -4,6 +4,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import InfoTooltip from './InfoTooltip';
 
 const initialState = {
   login_name: '',
@@ -681,6 +682,16 @@ export default function UserSetup({ setParentDirty, propertyCodes, outletRecords
       }}>
         <div style={{display:'flex',alignItems:'center',gap:'8px',minWidth:0,flexWrap:'wrap'}}>
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>User Setup</span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="User Setup"
+                mainTable="it_conf_user_setup"
+                linkedTables={["it_conf_user_groups"]}
+              />
+            );
+          })()}
           <select
             value={action}
             onChange={e => {

@@ -13,22 +13,58 @@
 
 const VERSION_INFO = {
   // Current Version
-  version: "1.2.0",
+  version: "1.3.0",
   
   // Product Information
   productName: "ithots G5 Restaurant Edition",
   productTitle: "iTHOTS POS System",
   
   // Build Information
-  buildDate: "2025-10-15",
-  buildNumber: "20251015001",
+  buildDate: "2025-10-21",
+  buildNumber: "20251021001",
   
   // Release Information
-  releaseName: "Database Documentation & Enhanced Management",
+  releaseName: "Enhanced Database Transparency & InfoTooltip Modal System",
   releaseType: "Minor Release",
   
   // Change Log for Current Version
   changeLog: {
+    "1.3.0": {
+      date: "2025-10-21",
+      type: "Minor Release",
+      features: [
+        "Enhanced InfoTooltip Modal System with Main/Linked Table Categorization",
+        "Software Control Feature for Database Transparency",
+        "Professional Modal Popups for Database Table Information",
+        "Advanced Form-to-Database Mapping Display",
+        "Real-time Database Table Relationship Visualization",
+        "Developer-friendly Database Structure Documentation"
+      ],
+      improvements: [
+        "Improved Modal UI/UX with Professional Styling",
+        "Clear Separation of Main Tables vs Linked Tables",
+        "Enhanced Visual Design with Color-coded Sections",
+        "Better Information Architecture for Database Relationships",
+        "Cleaner Alternating Row Styling for Better Readability",
+        "Responsive Modal Design for All Screen Sizes",
+        "Click-to-open Modal Interface (Similar to Modify/Delete Icons)",
+        "Software Control Toggle for Development/Production Environments"
+      ],
+      bugFixes: [
+        "Fixed InfoTooltip Component API for Better Flexibility",
+        "Resolved Modal Overlay Click-outside Behavior",
+        "Enhanced Backwards Compatibility with Legacy TableName Props",
+        "Improved Component Reusability Across Multiple Forms"
+      ],
+      technicalEnhancements: [
+        "Updated ItemMaster.js with Enhanced InfoTooltip Integration",
+        "Updated TaxStructure.js with Main Table Display",
+        "Updated UnitOfMeasurement.js with Professional Modal",
+        "Updated UserSetup.js with Main/Linked Table Structure",
+        "Added Comprehensive Test File for InfoTooltip Validation",
+        "Created Production-ready Documentation"
+      ]
+    },
     "1.2.0": {
       date: "2025-10-15",
       type: "Minor Release",
@@ -95,8 +131,8 @@ const VERSION_INFO = {
   lastUpdatedBy: "System Administrator",
   
   // API Version
-  apiVersion: "v1.2",
-  databaseVersion: "1.2.0"
+  apiVersion: "v1.3",
+  databaseVersion: "1.3.0"
 };
 
 // Version utility functions

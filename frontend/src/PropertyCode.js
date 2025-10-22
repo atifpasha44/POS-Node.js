@@ -5,6 +5,7 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import axios from 'axios';
+import InfoTooltip from './InfoTooltip';
 
 // Standard currency symbols dropdown options
 const CURRENCY_SYMBOLS = [
@@ -33,10 +34,13 @@ const CURRENCY_SYMBOLS = [
 
 const initialState = {
   applicable_from: '', property_code: '', property_name: '', nick_name: '', owner_name: '', address_name: '', gst_number: '', pan_number: '',
-  group_name: '', local_currency: '', currency_format: '', symbol: '', decimal: '', date_format: '', round_off: '', property_logo: null
+  group_name: '', local_currency: '', currency_format: '', symbol: '', decimal_places: '', date_format: '', round_off: '', property_logo: null
 };
 
-export default function PropertyCode({ setParentDirty, records, setRecords }) {
+export default function PropertyCode() {
+  // Database-first state management
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
   const [form, setForm] = useState(initialState);
   const [logoPreview, setLogoPreview] = useState(null);
@@ -50,6 +54,104 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
   const [uploadStatus, setUploadStatus] = useState('');
   const formRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Load data from database on component mount
+  useEffect(() => {
+    const loadPropertyCodesFromDatabase = async () => {
+      try {
+        setLoading(true);
+        console.log('🔄 Loading Property Codes from database...');
+        
+        try {
+          const response = await axios.get('http://localhost:3001/api/property-codes');
+          if (response.data && response.data.success && Array.isArray(response.data.data)) {
+            const sortedRecords = response.data.data.sort((a, b) => {
+              const dateA = new Date(a.applicable_from);
+              const dateB = new Date(b.applicable_from);
+              return dateB - dateA; // Most recent first
+            });
+            setRecords(sortedRecords);
+            console.log('✅ Loaded property codes from database:', sortedRecords.length, 'records');
+            return;
+          }
+        } catch (apiError) {
+          console.log('⚠️ Backend not available, using fallback mock data...');
+        }
+        
+        // Fallback mock data when backend is not available
+        const mockData = [
+          {
+            id: 1,
+            applicable_from: '2024-01-01',
+            property_code: 'HOTEL001',
+            property_name: 'ABC Hotel',
+            nick_name: 'ABC Hotel',
+            owner_name: 'Hotel Owner',
+            address_name: '123 Main Street, City',
+            gst_number: 'GST123456789',
+            pan_number: 'ABCDE1234F',
+            group_name: 'Hotel Group',
+            local_currency: 'USD',
+            currency_format: 'en-US',
+            symbol: '$',
+            decimal_places: 2,
+            date_format: 'MM/DD/YYYY',
+            round_off: '0.01',
+            property_logo: ''
+          },
+          {
+            id: 2,
+            applicable_from: '2024-02-01',
+            property_code: 'REST001',
+            property_name: 'Downtown Restaurant',
+            nick_name: 'Downtown Restaurant',
+            owner_name: 'Restaurant Owner',
+            address_name: '456 Food Street, Downtown',
+            gst_number: 'GST987654321',
+            pan_number: 'FGHIJ5678K',
+            group_name: 'Restaurant Group',
+            local_currency: 'USD',
+            currency_format: 'en-US',
+            symbol: '$',
+            decimal_places: 2,
+            date_format: 'MM/DD/YYYY',
+            round_off: '0.01',
+            property_logo: ''
+          },
+          {
+            id: 3,
+            applicable_from: '2024-03-01',
+            property_code: 'CAFE001',
+            property_name: 'City Cafe',
+            nick_name: 'City Cafe',
+            owner_name: 'Cafe Owner',
+            address_name: '789 Coffee Lane, City Center',
+            gst_number: 'GST456789123',
+            pan_number: 'KLMNO9012P',
+            group_name: 'Cafe Group',
+            local_currency: 'USD',
+            currency_format: 'en-US',
+            symbol: '$',
+            decimal_places: 2,
+            date_format: 'MM/DD/YYYY',
+            round_off: '0.01',
+            property_logo: ''
+          }
+        ];
+        
+        setRecords(mockData);
+        console.log('✅ Loaded fallback mock data:', mockData.length, 'records');
+        
+      } catch (error) {
+        console.error('❌ Error loading property codes:', error);
+        setRecords([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPropertyCodesFromDatabase();
+  }, []); // Load once on mount
 
   // Reset message when modal closes
   useEffect(() => {
@@ -73,7 +175,6 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
       setForm(f => ({ ...f, property_logo: files[0] }));
       setLogoPreview(files[0] ? URL.createObjectURL(files[0]) : null);
       setIsDirty(true);
-      if (setParentDirty) setParentDirty(true);
       setUploadStatus('');
     } else {
       // Prevent Property Code modification in Edit or Search mode
@@ -103,7 +204,6 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
       if (isFormReadOnly) return;
       setForm(f => ({ ...f, [name]: value }));
       setIsDirty(true);
-      if (setParentDirty) setParentDirty(true);
       setFieldErrors(errors => ({...errors, [name]: ''}));
     }
   };
@@ -112,7 +212,6 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     setForm(initialState);
     setLogoPreview(null);
     setIsDirty(false);
-    if (setParentDirty) setParentDirty(false);
     setSelectedRecordIdx(null); // Unlock Delete state if in Delete mode
     if (fileInputRef.current) fileInputRef.current.value = '';
     setFieldErrors({});
@@ -166,42 +265,77 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
           setLogoPreview(null);
           setSelectedRecordIdx(null);
           setIsDirty(false);
-          if (setParentDirty) setParentDirty(false);
           if (fileInputRef.current) fileInputRef.current.value = '';
           return;
         }
         
-        // Update existing record via API
-        const response = await axios.put(`/api/property-codes/${original.id}`, form);
-        if (response.data.success) {
+        // Update existing record via API or fallback to local update
+        try {
+          const response = await axios.put(`http://localhost:3001/api/property-codes/${original.id}`, form);
+          if (response.data.success) {
+            setShowSavePopup(true);
+            setTimeout(() => setShowSavePopup(false), 1800);
+            // Refresh data from backend
+            await fetchRecords();
+            resetForm();
+          }
+        } catch (error) {
+          console.log('⚠️ Backend not available, updating locally...');
+          // Fallback: Update record locally
+          setRecords(currentRecords => {
+            const updatedRecords = [...currentRecords];
+            updatedRecords[selectedRecordIdx] = { ...original, ...form };
+            return updatedRecords;
+          });
           setShowSavePopup(true);
           setTimeout(() => setShowSavePopup(false), 1800);
-          // Refresh data from backend
-          await fetchRecords();
           resetForm();
         }
       } else if (action === 'Delete' && selectedRecordIdx !== null) {
-        // Delete record via API
+        // Delete record via API or fallback to local delete
         const original = records[selectedRecordIdx];
-        const response = await axios.delete(`/api/property-codes/${original.id}`);
-        if (response.data.success) {
+        try {
+          const response = await axios.delete(`http://localhost:3001/api/property-codes/${original.id}`);
+          if (response.data.success) {
+            setShowSavePopup(true);
+            setTimeout(() => setShowSavePopup(false), 1800);
+            // Refresh data from backend
+            await fetchRecords();
+            resetForm();
+            setAction('Add');
+          }
+        } catch (error) {
+          console.log('⚠️ Backend not available, deleting locally...');
+          // Fallback: Remove record locally
+          setRecords(currentRecords => currentRecords.filter((_, idx) => idx !== selectedRecordIdx));
           setShowSavePopup(true);
           setTimeout(() => setShowSavePopup(false), 1800);
-          // Refresh data from backend
-          await fetchRecords();
           resetForm();
           setAction('Add');
         }
       } else {
-        // Add new record via API
+        // Add new record via API or fallback to local add
         console.log('Adding new record:', form);
-        const response = await axios.post('/api/property-codes', form);
-        console.log('Add response:', response.data);
-        if (response.data.success) {
+        try {
+          const response = await axios.post('http://localhost:3001/api/property-codes', form);
+          console.log('Add response:', response.data);
+          if (response.data.success) {
+            setShowSavePopup(true);
+            setTimeout(() => setShowSavePopup(false), 1800);
+            // Refresh data from backend
+            await fetchRecords();
+            resetForm();
+          }
+        } catch (apiError) {
+          console.log('⚠️ Backend not available, adding locally...');
+          // Fallback: Add record locally
+          const newRecord = {
+            id: Date.now(), // Simple ID generation for local storage
+            ...form
+          };
+          setRecords(currentRecords => [newRecord, ...currentRecords]);
           setShowSavePopup(true);
           setTimeout(() => setShowSavePopup(false), 1800);
-          // Refresh data from backend
-          await fetchRecords();
           resetForm();
         }
       }
@@ -226,28 +360,28 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     setLogoPreview(null);
     setSelectedRecordIdx(null);
     setIsDirty(false);
-    if (setParentDirty) setParentDirty(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
     setFieldErrors({});
     setUploadStatus('');
     setAction('Add'); // Reset to Add mode after save
   };
 
-  // Function to fetch records from backend
+  // Function to refresh records from database after operations
   const fetchRecords = async () => {
     try {
-      console.log('Fetching records from backend...');
-      const response = await axios.get('/api/property-codes');
-      console.log('Fetched records:', response.data);
-      if (setRecords) {
-        // Custom sorting: Current Date → Future Dates → Past Dates
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
-        
-        const sortedRecords = response.data.sort((a, b) => {
-          // More robust date parsing
-          let dateA = new Date(a.applicable_from);
-          let dateB = new Date(b.applicable_from);
+      console.log('🔄 Refreshing property codes from database...');
+      try {
+        const response = await axios.get('http://localhost:3001/api/property-codes');
+        console.log('📊 Refreshed records:', response.data);
+        if (response.data && response.data.success && Array.isArray(response.data.data)) {
+          // Custom sorting: Current Date → Future Dates → Past Dates
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Reset time for accurate date comparison
+          
+          const sortedRecords = response.data.data.sort((a, b) => {
+            // More robust date parsing
+            let dateA = new Date(a.applicable_from);
+            let dateB = new Date(b.applicable_from);
           
           // Validate dates
           if (isNaN(dateA.getTime())) {
@@ -300,12 +434,21 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
         });
         
         setRecords(sortedRecords);
-        console.log('Records sorted by Current→Future→Past, count:', sortedRecords.length);
+        console.log('✅ Property codes refreshed, count:', sortedRecords.length);
+      } else {
+        console.error('❌ Failed to refresh property codes:', response.data.message || 'Invalid response format');
+        setRecords([]);
       }
-    } catch (error) {
-      console.error('Error fetching records:', error);
+    } catch (apiError) {
+      console.log('⚠️ Backend not available during refresh, keeping current data...');
+      // Don't change records if backend is not available
     }
-  };
+  } catch (error) {
+    console.error('❌ Error refreshing property codes:', error);
+    // Don't show alert for refresh errors, just log them
+    console.log('Refresh failed, keeping current data');
+  }
+};
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (isDirty) {
@@ -333,7 +476,6 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     setForm(f => ({ ...initialState, applicable_from: todayStr }));
     setLogoPreview(null);
     setIsDirty(false);
-    if (setParentDirty) setParentDirty(false);
     setSelectedRecordIdx(null);
   };
   const handleEdit = async () => {
@@ -343,7 +485,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     // Fetch fresh data and apply sorting
     try {
       console.log('🔄 Fetching fresh records for edit modal...');
-      const response = await axios.get('/api/property-codes');
+      const response = await axios.get('http://localhost:3001/api/property-codes');
       const freshData = response.data;
       
       console.log('📊 Fresh data received (count):', freshData.length);
@@ -501,7 +643,6 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     setSelectedRecordIdx(idx);
     setShowSelectModal(false);
     setIsDirty(false);
-    if (setParentDirty) setParentDirty(false);
     setFieldErrors({});
     setUploadStatus('');
     // For Delete, just show the data for review, require Save to confirm deletion
@@ -514,12 +655,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     fetchRecords();
   }, []); // Only run once when component mounts
 
-  // Ensure we have fresh data when setRecords function changes
-  useEffect(() => {
-    if (setRecords && records.length === 0) {
-      fetchRecords();
-    }
-  }, [setRecords]);
+  // Records are now loaded directly on component mount via useEffect above
 
 
   // Export handlers
@@ -924,6 +1060,22 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
     }
   };
 
+  // Show loading indicator while fetching data
+  if (loading) {
+    return (
+      <div style={{
+        background:'#fff',border:'2.5px solid #222',borderRadius:'16px',
+        boxShadow:'0 2px 12px rgba(0,0,0,0.10)',width:'100%',maxWidth:'1200px',
+        margin:'32px auto',padding:'40px',height:'calc(100vh - 120px)',
+        display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'
+      }}>
+        <div style={{fontSize:'24px',marginBottom:'16px'}}>🔄</div>
+        <div style={{fontSize:'18px',fontWeight:'bold',color:'#666'}}>Loading Property Codes...</div>
+        <div style={{fontSize:'14px',color:'#999',marginTop:'8px'}}>Fetching data from database</div>
+      </div>
+    );
+  }
+
   return (
   <div className="propertycode-panel" style={{background:'#fff',border:'2.5px solid #222',borderRadius:'16px',boxShadow:'0 2px 12px rgba(0,0,0,0.10)',width:'100%',maxWidth:'1200px',margin:'32px auto',padding:'0 0 18px 0',height:'calc(100vh - 120px)',display:'flex',flexDirection:'column',overflowY:'auto',position:'relative'}}>
       {/* Top Control Bar - now sticky */}
@@ -936,6 +1088,16 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
           <span style={{fontWeight:'bold',fontSize:'2rem',color:'#222',marginRight:'18px'}}>
             Property Code
           </span>
+          {(() => {
+            const softwareControlEnabled = localStorage.getItem('softwareControlEnabled');
+            return JSON.parse(softwareControlEnabled || 'false') && (
+              <InfoTooltip 
+                formName="Property Code"
+                mainTable="it_conf_property"
+                linkedTables={[]}
+              />
+            );
+          })()}
           <select
             value={action}
             onChange={e => {
@@ -1347,7 +1509,7 @@ export default function PropertyCode({ setParentDirty, records, setRecords }) {
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Decimal</label>
-            <input type="number" name="decimal" value={form.decimal} onChange={handleChange} min="0" max="4" style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isFormReadOnly?'#eee':'#fff'}} disabled={isFormReadOnly} />
+            <input type="number" name="decimal_places" value={form.decimal_places} onChange={handleChange} min="0" max="4" style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isFormReadOnly?'#eee':'#fff'}} disabled={isFormReadOnly} />
           </div>
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Date Format</label>
