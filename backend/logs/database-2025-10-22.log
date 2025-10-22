@@ -1,0 +1,555 @@
+2025-10-22 18:44:33.405 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 18:44:48.483 [DEBUG]: 🔍 Query: SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1 | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1","params":"[\"admin@ithots.com\",\"admin\"]","executionTime":null}
+2025-10-22 18:44:48.495 [INFO]: ✅ Query completed - 1 rows (12ms) | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name =","rowsAffected":1,"executionTime":"12ms"}
+2025-10-22 18:45:10.214 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 18:45:10.217 [INFO]: ✅ Query completed - 0 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"2ms"}
+2025-10-22 18:45:10.220 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 18:45:10.222 [INFO]: ✅ Query completed - 0 rows (1ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"1ms"}
+2025-10-22 18:45:19.454 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 18:45:19.457 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 18:45:19.466 [INFO]: ✅ Query completed - 1 rows (11ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"11ms"}
+2025-10-22 18:45:19.469 [INFO]: ✅ Query completed - 1 rows (12ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"12ms"}
+2025-10-22 18:45:19.478 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 18:45:19.481 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 18:45:19.483 [INFO]: ✅ Query completed - 1 rows (5ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"5ms"}
+2025-10-22 18:45:19.490 [INFO]: ✅ Query completed - 1 rows (7ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"7ms"}
+2025-10-22 18:45:24.649 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 18:45:24.651 [INFO]: ✅ Query completed - 0 rows (1ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"1ms"}
+2025-10-22 18:45:24.657 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 18:45:24.663 [INFO]: ✅ Query completed - 0 rows (6ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"6ms"}
+2025-10-22 18:48:44.901 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 18:48:44.908 [INFO]: ✅ Query completed - 1 rows (8ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"8ms"}
+2025-10-22 18:48:44.915 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 18:48:44.917 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 18:48:55.182 [DEBUG]: 🔍 Query: UPDATE IT_CONF_OUTSET 
+                   SET property = ?, applicable_from = ?, outlet_code = ?, ou... | {"sql":"UPDATE IT_CONF_OUTSET SET property = ?, applicable_from = ?, outlet_code = ?, outlet_name = ?, short_name = ?, outlet_type = ?, item_price_level = ?, check_prefix = ?, check_format = ?, receipt_format = ?, kitchen_format = ?, options = ?, inactive = ? WHERE id = ?","params":"[\"DEFAULT\",\"2025-10-21\",\"ABCR\",\"ABC RESTAURANT\",\"ABCR\",\"Restaurant\",\"Price 1\",\"R001\",\"Standard\",\"Standard\",\"Standard\",\"{\\\"cash\\\":true,\\\"card\\\":true,\\\"company\\\":false,\\\"room_guest\\\":false,\\\"staff\\\":false,\\\"bill_on_hold\\\":false,\\\"credit\\\":false,\\\"void\\\":false}\",false,\"4\"]","executionTime":null}
+2025-10-22 18:48:55.231 [INFO]: ✅ Query completed - 1 rows (49ms) | {"sql":"UPDATE IT_CONF_OUTSET SET property = ?, applicable","rowsAffected":1,"executionTime":"49ms"}
+2025-10-22 18:49:23.465 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 18:49:23.467 [INFO]: ✅ Query completed - 0 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"2ms"}
+2025-10-22 18:49:23.473 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 18:49:23.476 [INFO]: ✅ Query completed - 0 rows (4ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"4ms"}
+2025-10-22 18:49:31.647 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 18:49:31.652 [INFO]: ✅ Query completed - 0 rows (4ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"4ms"}
+2025-10-22 18:57:15.977 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 18:57:35.831 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 18:57:35.846 [INFO]: ✅ Query completed - 0 rows (15ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"15ms"}
+2025-10-22 18:57:35.877 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 18:57:35.886 [INFO]: ✅ Query completed - 0 rows (15ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"15ms"}
+2025-10-22 19:05:05.664 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:05:05.667 [INFO]: ✅ Query completed - 0 rows (3ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"3ms"}
+2025-10-22 19:05:05.673 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:05:05.675 [INFO]: ✅ Query completed - 0 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"2ms"}
+2025-10-22 19:06:54.651 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:06:54.653 [INFO]: ✅ Query completed - 0 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"2ms"}
+2025-10-22 19:08:04.953 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:08:04.957 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:08:04.963 [INFO]: ✅ Query completed - 1 rows (9ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"9ms"}
+2025-10-22 19:08:04.974 [INFO]: ✅ Query completed - 1 rows (16ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"16ms"}
+2025-10-22 19:08:05.002 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:08:05.007 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:08:05.017 [INFO]: ✅ Query completed - 1 rows (22ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"22ms"}
+2025-10-22 19:08:05.022 [INFO]: ✅ Query completed - 1 rows (14ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"14ms"}
+2025-10-22 19:08:05.610 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:08:05.613 [INFO]: ✅ Query completed - 0 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"2ms"}
+2025-10-22 19:08:05.618 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:08:05.619 [INFO]: ✅ Query completed - 0 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"2ms"}
+2025-10-22 19:08:16.710 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:08:16.714 [INFO]: ✅ Query completed - 1 rows (3ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"3ms"}
+2025-10-22 19:08:16.725 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:08:16.727 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:08:17.731 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:08:17.732 [INFO]: ✅ Query completed - 0 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"2ms"}
+2025-10-22 19:08:17.737 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:08:17.739 [INFO]: ✅ Query completed - 0 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":0,"executionTime":"2ms"}
+2025-10-22 19:08:41.725 [DEBUG]: 🔍 Query: INSERT INTO IT_CONF_BUSINESS_PERIODS 
+                   (applicable_from, outlet_code, period_code,... | {"sql":"INSERT INTO IT_CONF_BUSINESS_PERIODS (applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)","params":"[\"2025-10-22\",\"ABCR\",\"BF\",\"BREAKFAST\",\"BF\",\"06:00:00\",\"10:59:00\",\"{\\\"sunday\\\":true,\\\"monday\\\":true,\\\"tuesday\\\":true,\\\"wednesday\\\":true,\\\"thursday\\\":true,\\\"friday\\\":true,\\\"saturday\\\":true}\",true]","executionTime":null}
+2025-10-22 19:08:41.765 [INFO]: ✅ Query completed - 1 rows (40ms) | {"sql":"INSERT INTO IT_CONF_BUSINESS_PERIODS (applicable_f","rowsAffected":1,"executionTime":"40ms"}
+2025-10-22 19:08:41.782 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:08:41.784 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:13:01.084 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:13:39.089 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:13:50.254 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:13:50.269 [INFO]: ✅ Query completed - 1 rows (15ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"15ms"}
+2025-10-22 19:16:10.549 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:16:10.550 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:16:14.447 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:16:14.450 [INFO]: ✅ Query completed - 1 rows (4ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"4ms"}
+2025-10-22 19:16:14.460 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:16:14.464 [INFO]: ✅ Query completed - 1 rows (5ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"5ms"}
+2025-10-22 19:16:14.483 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:16:14.486 [INFO]: ✅ Query completed - 1 rows (8ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"8ms"}
+2025-10-22 19:16:14.492 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:16:14.494 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:16:15.764 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:16:15.766 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:16:24.514 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:16:24.518 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:16:24.526 [INFO]: ✅ Query completed - 1 rows (10ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"10ms"}
+2025-10-22 19:16:24.538 [INFO]: ✅ Query completed - 1 rows (18ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"18ms"}
+2025-10-22 19:16:24.547 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:16:24.550 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:16:24.560 [INFO]: ✅ Query completed - 1 rows (14ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"14ms"}
+2025-10-22 19:16:24.565 [INFO]: ✅ Query completed - 1 rows (15ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"15ms"}
+2025-10-22 19:16:38.141 [DEBUG]: 🔍 Query: UPDATE IT_CONF_OUTSET 
+                   SET property = ?, applicable_from = ?, outlet_code = ?, ou... | {"sql":"UPDATE IT_CONF_OUTSET SET property = ?, applicable_from = ?, outlet_code = ?, outlet_name = ?, short_name = ?, outlet_type = ?, item_price_level = ?, check_prefix = ?, check_format = ?, receipt_format = ?, kitchen_format = ?, options = ?, inactive = ? WHERE id = ?","params":"[\"DEFAULT\",\"2025-10-20\",\"ABCR\",\"ABC RESTAURANT\",\"ABCR\",\"Restaurant\",\"Price 1\",\"R001\",\"Standard\",\"Standard\",\"Standard\",\"{\\\"cash\\\":true,\\\"card\\\":true,\\\"company\\\":false,\\\"room_guest\\\":false,\\\"staff\\\":false,\\\"bill_on_hold\\\":false,\\\"credit\\\":false,\\\"void\\\":false}\",false,\"4\"]","executionTime":null}
+2025-10-22 19:16:38.155 [INFO]: ✅ Query completed - 1 rows (15ms) | {"sql":"UPDATE IT_CONF_OUTSET SET property = ?, applicable","rowsAffected":1,"executionTime":"15ms"}
+2025-10-22 19:16:48.150 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:16:48.156 [INFO]: ✅ Query completed - 1 rows (7ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":1,"executionTime":"7ms"}
+2025-10-22 19:16:48.169 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:16:48.173 [INFO]: ✅ Query completed - 1 rows (8ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":1,"executionTime":"8ms"}
+2025-10-22 19:16:58.663 [DEBUG]: 🔍 Query: UPDATE IT_CONF_BUSINESS_PERIODS 
+                   SET applicable_from = ?, outlet_code = ?, period... | {"sql":"UPDATE IT_CONF_BUSINESS_PERIODS SET applicable_from = ?, outlet_code = ?, period_code = ?, period_name = ?, short_name = ?, start_time = ?, end_time = ?, active_days = ?, is_active = ? WHERE id = ?","params":"[\"2025-10-21T18:30:00.000Z\",\"ABCR\",\"BF\",\"BREAKFAST\",\"BF\",\"06:00:00:00\",\"10:59:00:00\",\"{\\\"friday\\\":true,\\\"monday\\\":true,\\\"sunday\\\":true,\\\"tuesday\\\":true,\\\"saturday\\\":true,\\\"thursday\\\":true,\\\"wednesday\\\":true}\",1,\"1\"]","executionTime":null}
+2025-10-22 19:16:58.667 [ERROR]: 💥 DB Error: Incorrect date value: '2025-10-21T18:30:00.000Z' for column 'applicable_from' at row 1 | {"sql":"UPDATE IT_CONF_BUSINESS_PERIODS SET applicable_from = ?, outlet_code = ?, period_code = ?, period_name = ?, short_name = ?, start_time = ?, end_time = ?, active_days = ?, is_active = ? WHERE id = ?","params":"[\"2025-10-21T18:30:00.000Z\",\"ABCR\",\"BF\",\"BREAKFAST\",\"BF\",\"06:00:00:00\",\"10:59:00:00\",\"{\\\"friday\\\":true,\\\"monday\\\":true,\\\"sunday\\\":true,\\\"tuesday\\\":true,\\\"saturday\\\":true,\\\"thursday\\\":true,\\\"wednesday\\\":true}\",1,\"1\"]","error":"Incorrect date value: '2025-10-21T18:30:00.000Z' for column 'applicable_from' at row 1","code":"ER_TRUNCATED_WRONG_VALUE"}
+2025-10-22 19:16:58.680 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:16:58.681 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:17:45.897 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:17:45.902 [INFO]: ✅ Query completed - 1 rows (4ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"4ms"}
+2025-10-22 19:17:45.912 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:17:45.918 [INFO]: ✅ Query completed - 1 rows (4ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"4ms"}
+2025-10-22 19:17:47.921 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:17:47.923 [INFO]: ✅ Query completed - 1 rows (3ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":1,"executionTime":"3ms"}
+2025-10-22 19:17:47.929 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:17:47.931 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:18:18.901 [DEBUG]: 🔍 Query: INSERT INTO IT_CONF_BUSINESS_PERIODS 
+                   (applicable_from, outlet_code, period_code,... | {"sql":"INSERT INTO IT_CONF_BUSINESS_PERIODS (applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)","params":"[\"2025-10-22\",\"ABCR\",\"LN\",\"LUNCH\",\"LN\",\"11:00:00\",\"11:59:00\",\"{\\\"sunday\\\":true,\\\"monday\\\":true,\\\"tuesday\\\":true,\\\"wednesday\\\":true,\\\"thursday\\\":true,\\\"friday\\\":true,\\\"saturday\\\":true}\",true]","executionTime":null}
+2025-10-22 19:18:18.915 [INFO]: ✅ Query completed - 1 rows (13ms) | {"sql":"INSERT INTO IT_CONF_BUSINESS_PERIODS (applicable_f","rowsAffected":1,"executionTime":"13ms"}
+2025-10-22 19:18:18.923 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:18:18.926 [INFO]: ✅ Query completed - 2 rows (3ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":2,"executionTime":"3ms"}
+2025-10-22 19:18:58.256 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:18:58.258 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:18:58.267 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:18:58.270 [INFO]: ✅ Query completed - 1 rows (6ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"6ms"}
+2025-10-22 19:26:34.061 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:30:55.540 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:31:32.024 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:31:34.008 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:31:34.018 [INFO]: ✅ Query completed - 1 rows (10ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"10ms"}
+2025-10-22 19:36:27.089 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:39:58.752 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:43:22.235 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:44:14.612 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:44:16.627 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:44:16.639 [INFO]: ✅ Query completed - 1 rows (13ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"13ms"}
+2025-10-22 19:44:41.379 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:47:35.629 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:47:35.640 [INFO]: ✅ Query completed - 1 rows (11ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"11ms"}
+2025-10-22 19:47:35.652 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:47:35.655 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:47:35.662 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:47:35.666 [INFO]: ✅ Query completed - 1 rows (3ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"3ms"}
+2025-10-22 19:47:35.673 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:47:35.678 [INFO]: ✅ Query completed - 1 rows (3ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"3ms"}
+2025-10-22 19:47:36.812 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:47:36.815 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 19:47:41.249 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:47:41.252 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:47:41.258 [INFO]: ✅ Query completed - 1 rows (7ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"7ms"}
+2025-10-22 19:47:41.265 [INFO]: ✅ Query completed - 1 rows (14ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"14ms"}
+2025-10-22 19:47:41.271 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:47:41.277 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 19:47:41.281 [INFO]: ✅ Query completed - 1 rows (11ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"11ms"}
+2025-10-22 19:47:41.286 [INFO]: ✅ Query completed - 1 rows (9ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"9ms"}
+2025-10-22 19:47:50.465 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:47:50.469 [INFO]: ✅ Query completed - 2 rows (4ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":2,"executionTime":"4ms"}
+2025-10-22 19:47:50.477 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:47:50.479 [INFO]: ✅ Query completed - 2 rows (3ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":2,"executionTime":"3ms"}
+2025-10-22 19:47:53.645 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:47:53.648 [INFO]: ✅ Query completed - 1 rows (5ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"5ms"}
+2025-10-22 19:47:53.652 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:47:53.655 [INFO]: ✅ Query completed - 1 rows (3ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"3ms"}
+2025-10-22 19:51:49.184 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:51:49.187 [INFO]: ✅ Query completed - 2 rows (2ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":2,"executionTime":"2ms"}
+2025-10-22 19:51:49.194 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:51:49.196 [INFO]: ✅ Query completed - 2 rows (3ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":2,"executionTime":"3ms"}
+2025-10-22 19:51:56.548 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:51:56.550 [INFO]: ✅ Query completed - 2 rows (3ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":2,"executionTime":"3ms"}
+2025-10-22 19:51:56.559 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 19:51:56.562 [INFO]: ✅ Query completed - 2 rows (4ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":2,"executionTime":"4ms"}
+2025-10-22 19:52:06.168 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:52:06.171 [INFO]: ✅ Query completed - 1 rows (3ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"3ms"}
+2025-10-22 19:52:06.176 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:52:06.184 [INFO]: ✅ Query completed - 1 rows (3ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"3ms"}
+2025-10-22 19:52:20.002 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 19:52:21.997 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 19:52:22.006 [INFO]: ✅ Query completed - 1 rows (8ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"8ms"}
+2025-10-22 20:00:47.274 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 20:00:53.268 [DEBUG]: 🔍 Query: SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1 | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1","params":"[\"admin@ithots.com\",\"admin\"]","executionTime":null}
+2025-10-22 20:00:53.274 [INFO]: ✅ Query completed - 1 rows (7ms) | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name =","rowsAffected":1,"executionTime":"7ms"}
+2025-10-22 20:01:01.167 [DEBUG]: 🔍 Query: SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1 | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1","params":"[\"admin@ithots.com\",\"admin\"]","executionTime":null}
+2025-10-22 20:01:01.169 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name =","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 20:01:35.338 [DEBUG]: 🔍 Query: SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1 | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1","params":"[\"admin@ithots.com\",\"admin\"]","executionTime":null}
+2025-10-22 20:01:35.341 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name =","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 20:04:04.078 [DEBUG]: 🔍 Query: SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1 | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1","params":"[\"admin@ithots.com\",\"admin\"]","executionTime":null}
+2025-10-22 20:04:04.080 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name =","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 20:06:57.476 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 20:08:26.448 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 20:12:11.073 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 20:12:48.197 [DEBUG]: 🔍 Query: SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1 | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name = ? AND password = ? AND is_active = 1","params":"[\"admin@ithots.com\",\"admin\"]","executionTime":null}
+2025-10-22 20:12:48.203 [INFO]: ✅ Query completed - 1 rows (7ms) | {"sql":"SELECT * FROM IT_CONF_USER_SETUP WHERE user_name =","rowsAffected":1,"executionTime":"7ms"}
+2025-10-22 20:12:51.015 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 20:12:51.017 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 20:12:51.020 [INFO]: ✅ Query completed - 1 rows (5ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"5ms"}
+2025-10-22 20:12:51.024 [INFO]: ✅ Query completed - 1 rows (8ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"8ms"}
+2025-10-22 20:12:51.029 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 20:12:51.032 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 20:12:51.034 [INFO]: ✅ Query completed - 1 rows (5ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"5ms"}
+2025-10-22 20:12:51.039 [INFO]: ✅ Query completed - 1 rows (6ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"6ms"}
+2025-10-22 20:12:59.595 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 20:12:59.597 [INFO]: ✅ Query completed - 1 rows (1ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"1ms"}
+2025-10-22 20:12:59.601 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 20:12:59.603 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 20:12:59.609 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 20:12:59.612 [INFO]: ✅ Query completed - 1 rows (2ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"2ms"}
+2025-10-22 20:12:59.632 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 20:12:59.634 [INFO]: ✅ Query completed - 1 rows (3ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"3ms"}
+2025-10-22 20:13:00.501 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 20:13:00.505 [INFO]: ✅ Query completed - 1 rows (4ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"4ms"}
+2025-10-22 20:13:07.982 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 20:13:07.990 [INFO]: ✅ Query completed - 1 rows (8ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"8ms"}
+2025-10-22 20:13:07.998 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 20:13:08.000 [INFO]: ✅ Query completed - 1 rows (4ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"4ms"}
+2025-10-22 20:16:05.495 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 20:22:15.770 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-22 20:22:26.369 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 20:22:26.374 [INFO]: ✅ Query completed - 1 rows (5ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"5ms"}
+2025-10-22 20:23:00.499 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 20:23:00.505 [INFO]: ✅ Query completed - 2 rows (17ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":2,"executionTime":"17ms"}
+2025-10-22 20:23:00.514 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        applicable_from,
+        outlet_code,
+        period_code,
+        peri... | {"sql":"SELECT id, applicable_from, outlet_code, period_code, period_name, short_name, start_time, end_time, active_days, is_active, created_at, updated_at FROM IT_CONF_BUSINESS_PERIODS WHERE is_active = TRUE ORDER BY period_code","params":null,"executionTime":null}
+2025-10-22 20:23:00.518 [INFO]: ✅ Query completed - 2 rows (5ms) | {"sql":"SELECT id, applicable_from, outlet_code, period_co","rowsAffected":2,"executionTime":"5ms"}
+2025-10-22 20:23:37.475 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 20:23:37.481 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 20:23:37.485 [INFO]: ✅ Query completed - 1 rows (9ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"9ms"}
+2025-10-22 20:23:37.493 [INFO]: ✅ Query completed - 1 rows (13ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"13ms"}
+2025-10-22 20:23:37.502 [DEBUG]: 🔍 Query: SELECT 
+                       id, applicable_from, property_code, property_name, nick_name, owner_n... | {"sql":"SELECT id, applicable_from, property_code, property_name, nick_name, owner_name, address_name, gst_number, pan_number, group_name, local_currency, currency_format, symbol, decimal_places, date_format, round_off, property_logo, created_at, updated_at FROM IT_CONF_PROPERTY ORDER BY property_code","params":null,"executionTime":null}
+2025-10-22 20:23:37.507 [DEBUG]: 🔍 Query: SELECT 
+        id, 
+        property,
+        applicable_from,
+        outlet_code,
+        outlet_... | {"sql":"SELECT id, property, applicable_from, outlet_code, outlet_name, short_name, outlet_type, item_price_level, check_prefix, check_format, receipt_format, kitchen_format, inactive, options, created_at, updated_at FROM IT_CONF_OUTSET WHERE inactive = FALSE ORDER BY outlet_code","params":null,"executionTime":null}
+2025-10-22 20:23:37.511 [INFO]: ✅ Query completed - 1 rows (9ms) | {"sql":"SELECT id, applicable_from, property_code, propert","rowsAffected":1,"executionTime":"9ms"}
+2025-10-22 20:23:37.519 [INFO]: ✅ Query completed - 1 rows (13ms) | {"sql":"SELECT id, property, applicable_from, outlet_code,","rowsAffected":1,"executionTime":"13ms"}
+2025-10-22 20:24:24.546 [DEBUG]: 🔍 Query: UPDATE IT_CONF_OUTSET 
+                   SET property = ?, applicable_from = ?, outlet_code = ?, ou... | {"sql":"UPDATE IT_CONF_OUTSET SET property = ?, applicable_from = ?, outlet_code = ?, outlet_name = ?, short_name = ?, outlet_type = ?, item_price_level = ?, check_prefix = ?, check_format = ?, receipt_format = ?, kitchen_format = ?, options = ?, inactive = ? WHERE id = ?","params":"[\"ABC\",\"2025-10-19\",\"ABCR\",\"ABC RESTAURANT\",\"ABCR\",\"Restaurant\",\"Price 1\",\"R001\",\"BILL\",\"RECEPT\",\"KOT\",\"{\\\"cash\\\":true,\\\"card\\\":true,\\\"company\\\":false,\\\"room_guest\\\":false,\\\"staff\\\":false,\\\"bill_on_hold\\\":false,\\\"credit\\\":false,\\\"void\\\":false}\",false,\"4\"]","executionTime":null}
+2025-10-22 20:24:24.562 [INFO]: ✅ Query completed - 1 rows (15ms) | {"sql":"UPDATE IT_CONF_OUTSET SET property = ?, applicable","rowsAffected":1,"executionTime":"15ms"}

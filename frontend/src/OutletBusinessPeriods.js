@@ -357,67 +357,132 @@ const OutletBusinessPeriods = ({ setParentDirty, records, setRecords, outletReco
 
   const handleSave = async () => {
     try {
-      if (!validateForm()) {
+      // Check if there are items in the grid to save or if current form has data
+      const hasGridData = gridRows && gridRows.length > 0;
+      const hasFormData = form.period_code && form.period_name;
+      
+      if (!hasGridData && !hasFormData) {
+        alert('❌ No data to save. Please add items to the grid first or fill the form.');
         return;
       }
 
       setLoading(true);
+      console.log('🚀 Starting save operation...');
+      
+      let savedCount = 0;
+      let errors = [];
 
-      // Prepare data for API call - match backend schema exactly
-      const businessPeriodData = {
-        applicable_from: form.applicable_from,
-        outlet_code: form.outlet_code,
-        period_code: form.period_code,
-        period_name: form.period_name,
-        short_name: form.short_name,
-        start_time: form.start_time + ':00', // Add seconds for TIME format
-        end_time: form.end_time + ':00',     // Add seconds for TIME format
-        active_days: form.active_days,
-        is_active: form.is_active
-      };
+      // Save grid items to database
+      if (hasGridData) {
+        console.log(`� Saving ${gridRows.length} items from grid to database...`);
+        
+        for (let i = 0; i < gridRows.length; i++) {
+          const gridItem = gridRows[i];
+          
+          try {
+            // Prepare data for API call - match backend schema exactly
+            const businessPeriodData = {
+              applicable_from: gridItem.applicable_from,
+              outlet_code: gridItem.outlet_code,
+              period_code: gridItem.period_code,
+              period_name: gridItem.period_name,
+              short_name: gridItem.short_name,
+              start_time: gridItem.start_time + ':00', // Add seconds for TIME format
+              end_time: gridItem.end_time + ':00',     // Add seconds for TIME format
+              active_days: gridItem.active_days,
+              is_active: gridItem.is_active
+            };
 
-      let response;
-      if (action === 'Edit' && selectedRecordIdx !== null && records[selectedRecordIdx]) {
-        // Update existing record via API
-        const recordId = records[selectedRecordIdx].id;
-        response = await axios.put(`http://localhost:3001/api/business-periods/${recordId}`, businessPeriodData);
-        console.log('✅ Business period updated successfully:', response.data);
-      } else {
-        // Create new record via API
-        response = await axios.post('http://localhost:3001/api/business-periods', businessPeriodData);
-        console.log('✅ Business period created successfully:', response.data);
+            console.log(`📤 Saving grid item ${i + 1}:`, businessPeriodData);
+            
+            // Create new record via API
+            const response = await axios.post('http://localhost:3001/api/business-periods', businessPeriodData);
+            console.log(`✅ Grid item ${i + 1} saved successfully:`, response.data);
+            savedCount++;
+            
+          } catch (error) {
+            console.error(`❌ Error saving grid item ${i + 1}:`, error);
+            errors.push(`Item ${i + 1}: ${error.response?.data?.message || error.message}`);
+          }
+        }
+      }
+      
+      // Save current form if it has valid data
+      if (hasFormData) {
+        if (!validateForm()) {
+          console.log('❌ Form validation failed. Errors:', fieldErrors);
+          alert('❌ Please fix the form validation errors:\n\n' + 
+                Object.entries(fieldErrors).map(([field, error]) => `• ${field}: ${error}`).join('\n'));
+          return;
+        }
+
+        try {
+          console.log('📤 Saving current form data...');
+          
+          const businessPeriodData = {
+            applicable_from: form.applicable_from,
+            outlet_code: form.outlet_code,
+            period_code: form.period_code,
+            period_name: form.period_name,
+            short_name: form.short_name,
+            start_time: form.start_time + ':00',
+            end_time: form.end_time + ':00',
+            active_days: form.active_days,
+            is_active: form.is_active
+          };
+
+          let response;
+          if (action === 'Edit' && selectedRecordIdx !== null && records[selectedRecordIdx]) {
+            // Update existing record via API
+            const recordId = records[selectedRecordIdx].id;
+            response = await axios.put(`http://localhost:3001/api/business-periods/${recordId}`, businessPeriodData);
+            console.log('✅ Business period updated successfully:', response.data);
+          } else {
+            // Create new record via API
+            response = await axios.post('http://localhost:3001/api/business-periods', businessPeriodData);
+            console.log('✅ Business period created successfully:', response.data);
+          }
+          savedCount++;
+        } catch (error) {
+          console.error('❌ Error saving form data:', error);
+          errors.push(`Form data: ${error.response?.data?.message || error.message}`);
+        }
       }
 
       // Reload data from database to ensure consistency
       await loadBusinessPeriodsFromDatabase();
 
-      // Clear form after successful save
+      // Clear form and grid after successful save
       setForm(initialState);
       setSelectedRecordIdx(null);
       setAction('Add');
       setFieldErrors({});
       setGridRows([]);
 
-      setLastAction(action);
-      setShowSavePopup(true);
-      setIsDirty(false);
-      if (setParentDirty) setParentDirty(false);
-      
-      setTimeout(() => {
-        setShowSavePopup(false);
-      }, 2000);
+      // Show result
+      if (savedCount > 0) {
+        console.log(`🎉 Successfully saved ${savedCount} business period(s) to database!`);
+        setLastAction(action);
+        setShowSavePopup(true);
+        setIsDirty(false);
+        if (setParentDirty) setParentDirty(false);
+        
+        setTimeout(() => {
+          setShowSavePopup(false);
+        }, 2000);
+
+        if (errors.length > 0) {
+          alert(`⚠️ Partially successful:\n✅ Saved: ${savedCount}\n❌ Errors: ${errors.length}\n\n${errors.join('\n')}`);
+        } else {
+          alert(`🎉 Successfully saved ${savedCount} business period(s) to database!`);
+        }
+      } else {
+        alert(`❌ Failed to save any records:\n\n${errors.join('\n')}`);
+      }
 
     } catch (error) {
-      console.error('❌ Error saving business period:', error);
-      let errorMessage = 'Failed to save business period';
-      
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-      alert(`❌ ${errorMessage}`);
+      console.error('❌ Unexpected error during save operation:', error);
+      alert(`❌ Unexpected error: ${error.message}`);
     } finally {
       setLoading(false);
     }

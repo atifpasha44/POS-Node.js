@@ -5,6 +5,18 @@ const session = require('express-session');
 const fs = require('fs');
 const path = require('path');
 
+// ========================================
+// LOGGING SETUP (ADDED)
+// ========================================
+const { logger, logSystem } = require('./logger');
+const { 
+  requestLogger, 
+  errorLogger, 
+  sessionLogger, 
+  logDatabaseConnection, 
+  healthCheckLogger 
+} = require('./middleware/logging');
+
 const app = express();
 const PORT = 3001;
 
@@ -25,6 +37,13 @@ app.use(session({
 }));
 
 // ========================================
+// LOGGING MIDDLEWARE (ADDED)
+// ========================================
+app.use(healthCheckLogger);    // Light logging for health checks
+app.use(sessionLogger);        // Session info capture
+app.use(requestLogger);        // Request/response logging
+
+// ========================================
 // DATABASE CONNECTION
 // ========================================
 const db = mysql.createConnection({
@@ -38,10 +57,17 @@ const db = mysql.createConnection({
 db.connect((err) => {
     if (err) {
         console.error('❌ Database connection failed:', err);
+        logger.error('Database connection failed', { error: err.message, code: err.code });
         return;
     }
     console.log('✅ Connected to MySQL database');
+    logger.info('Database connection established successfully');
 });
+
+// ========================================
+// DATABASE LOGGING ENHANCEMENT (ADDED)
+// ========================================
+logDatabaseConnection(db);
 
 // ========================================
 // DATABASE INITIALIZATION
@@ -133,6 +159,9 @@ app.post('/api/login', (req, res) => {
         if (err) return handleDatabaseError(res, err, 'login authentication');
         
         if (results.length === 0) {
+            // Log failed authentication attempt (ADDED)
+            logSystem.auth('login', { email, tin }, false, req.clientInfo);
+            
             return res.status(401).json({ 
                 success: false, 
                 message: 'Invalid credentials' 
@@ -154,6 +183,9 @@ app.post('/api/login', (req, res) => {
         // Store in session
         req.session.user = userData;
         
+        // Log successful authentication (ADDED)
+        logSystem.auth('login', userData, true, req.clientInfo);
+        
         res.json({ 
             success: true, 
             message: 'Login successful',
@@ -163,13 +195,22 @@ app.post('/api/login', (req, res) => {
 });
 
 app.post('/api/logout', (req, res) => {
+    const user = req.session.user; // Store user info before destroying session
+    
     req.session.destroy((err) => {
         if (err) {
+            // Log failed logout (ADDED)
+            logSystem.auth('logout', user, false, req.clientInfo);
+            
             return res.status(500).json({ 
                 success: false, 
                 message: 'Logout failed' 
             });
         }
+        
+        // Log successful logout (ADDED)
+        logSystem.auth('logout', user, true, req.clientInfo);
+        
         res.json({ 
             success: true, 
             message: 'Logout successful' 
@@ -1721,12 +1762,33 @@ app.get('/api/health', (req, res) => {
 });
 
 // ========================================
+// ERROR HANDLING MIDDLEWARE (ADDED)
+// ========================================
+app.use(errorLogger);          // Log all errors
+
+// ========================================
 // SERVER STARTUP
 // ========================================
 app.listen(PORT, () => {
     console.log(`🚀 POS Backend Server running on http://localhost:${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
     console.log(`📝 Total API endpoints: 12 modules with full CRUD operations`);
+    
+    // Log system startup (ADDED)
+    logSystem.startup(PORT, process.env.NODE_ENV || 'development');
+});
+
+// ========================================
+// GRACEFUL SHUTDOWN LOGGING (ADDED)
+// ========================================
+process.on('SIGTERM', () => {
+    logSystem.shutdown('SIGTERM received');
+    process.exit(0);
+});
+
+process.on('SIGINT', () => {
+    logSystem.shutdown('SIGINT received (Ctrl+C)');
+    process.exit(0);
 });
 
 module.exports = app;

@@ -116,17 +116,17 @@ const initialState = {
           // Transform API response to match component format
           const formattedOutlets = response.data.data.map((outlet, index) => ({
             id: outlet.id || index + 1,
-            property: outlet.property_code || 'DEFAULT',
+            property: outlet.property || 'DEFAULT',
             applicable_from: outlet.applicable_from || new Date().toISOString().split('T')[0],
             outlet_code: outlet.outlet_code,
             outlet_name: outlet.outlet_name,
             short_name: outlet.short_name,
             outlet_type: outlet.outlet_type || 'Restaurant',
             item_price_level: outlet.outlet_set || 'Price 1',
-            check_prefix: outlet.bill_initial || '',
-            check_format: 'Standard',
-            receipt_format: 'Standard',
-            kitchen_format: 'Standard',
+            check_prefix: outlet.check_prefix || '',
+            check_format: outlet.check_format || '',
+            receipt_format: outlet.receipt_format || '',
+            kitchen_format: outlet.kitchen_format || '',
             inactive: outlet.is_active === 0,
             options: {
               cash: true,
@@ -755,10 +755,33 @@ useEffect(() => {
       formattedDate = selectedRecord.applicable_from.split('T')[0];
     }
     
+    // Fix property field mapping issue - handle DEFAULT and other invalid values
+    let propertyValue = selectedRecord.property;
+    
+    // If property is DEFAULT or empty, try to get the first available property code
+    if (!propertyValue || propertyValue === 'DEFAULT') {
+      const applicableCodes = getApplicablePropertyCodesLocal();
+      if (applicableCodes.length > 0) {
+        propertyValue = applicableCodes[0].property_code || applicableCodes[0].code;
+        console.log('⚠️ Property was DEFAULT/empty, auto-selecting first available:', propertyValue);
+      } else {
+        propertyValue = ''; // This will show "Select Property" which is better than DEFAULT
+        console.log('⚠️ No property codes available, will show dropdown for selection');
+      }
+    }
+    
     const formattedRecord = {
       ...selectedRecord,
-      applicable_from: formattedDate
+      applicable_from: formattedDate,
+      property: propertyValue
     };
+    
+    console.log('🔍 Selected record for editing:', {
+      original: selectedRecord,
+      formatted: formattedRecord,
+      propertyMapped: `${selectedRecord.property || 'undefined'} -> ${formattedRecord.property}`,
+      reason: selectedRecord.property === 'DEFAULT' ? 'Fixed DEFAULT value' : 'Direct mapping'
+    });
     
     setForm(formattedRecord);
     setSelectedRecordIdx(idx);

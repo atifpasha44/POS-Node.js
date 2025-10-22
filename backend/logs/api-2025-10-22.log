@@ -1,0 +1,309 @@
+2025-10-22 18:43:46.662 [INFO]: 📤 GET /api/health | {"method":"GET","url":"/api/health","bodySize":0,"user":"anonymous"}
+2025-10-22 18:43:46.663 [INFO]: 📥 ✅ GET /api/health - 200 (1ms) | {"method":"GET","url":"/api/health","statusCode":200,"responseTime":"1ms","responseSize":"138 bytes"}
+2025-10-22 18:43:46.663 [INFO]: 📥 ✅ GET /api/health - 200 (2ms) | {"method":"GET","url":"/api/health","statusCode":200,"responseTime":"2ms","responseSize":"138 bytes"}
+2025-10-22 18:44:48.481 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"anonymous"}
+2025-10-22 18:44:48.497 [INFO]: 📥 ✅ POST /api/login - 200 (17ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"17ms","responseSize":"183 bytes"}
+2025-10-22 18:44:48.499 [INFO]: 📥 ✅ POST /api/login - 200 (18ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"18ms","responseSize":"183 bytes"}
+2025-10-22 18:45:10.213 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 18:45:10.217 [INFO]: 📥 ✅ GET /api/business-periods - 200 (5ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"5ms","responseSize":"26 bytes"}
+2025-10-22 18:45:10.217 [INFO]: 📥 ✅ GET /api/business-periods - 200 (5ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"5ms","responseSize":"26 bytes"}
+2025-10-22 18:45:10.219 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 18:45:10.222 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"26 bytes"}
+2025-10-22 18:45:10.223 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"26 bytes"}
+2025-10-22 18:45:19.453 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 18:45:19.456 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 18:45:19.467 [INFO]: 📥 ✅ GET /api/property-codes - 200 (13ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"13ms","responseSize":"414 bytes"}
+2025-10-22 18:45:19.467 [INFO]: 📥 ✅ GET /api/property-codes - 200 (14ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"14ms","responseSize":"414 bytes"}
+2025-10-22 18:45:19.470 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (14ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"14ms","responseSize":"544 bytes"}
+2025-10-22 18:45:19.470 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (14ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"14ms","responseSize":"544 bytes"}
+2025-10-22 18:45:19.477 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 18:45:19.480 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 18:45:19.484 [INFO]: 📥 ✅ GET /api/property-codes - 200 (7ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"7ms","responseSize":"414 bytes"}
+2025-10-22 18:45:19.484 [INFO]: 📥 ✅ GET /api/property-codes - 200 (8ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"8ms","responseSize":"414 bytes"}
+2025-10-22 18:45:19.491 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (11ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"11ms","responseSize":"544 bytes"}
+2025-10-22 18:45:19.492 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (12ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"12ms","responseSize":"544 bytes"}
+2025-10-22 18:45:24.648 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 18:45:24.652 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"26 bytes"}
+2025-10-22 18:45:24.652 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"26 bytes"}
+2025-10-22 18:45:24.656 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 18:45:24.664 [INFO]: 📥 ✅ GET /api/business-periods - 200 (8ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"8ms","responseSize":"26 bytes"}
+2025-10-22 18:45:24.664 [INFO]: 📥 ✅ GET /api/business-periods - 200 (9ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"9ms","responseSize":"26 bytes"}
+2025-10-22 18:48:44.899 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 18:48:44.910 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (16ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"16ms","responseSize":"544 bytes"}
+2025-10-22 18:48:44.911 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (17ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"17ms","responseSize":"544 bytes"}
+2025-10-22 18:48:44.914 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 18:48:44.918 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (3ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"3ms","responseSize":"544 bytes"}
+2025-10-22 18:48:44.919 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (4ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"4ms","responseSize":"544 bytes"}
+2025-10-22 18:48:55.180 [INFO]: 📤 PUT /api/outlet-setup/4 | {"method":"PUT","url":"/api/outlet-setup/4","bodySize":436,"user":"anonymous"}
+2025-10-22 18:48:55.231 [INFO]: 📥 ✅ PUT /api/outlet-setup/4 - 200 (51ms) | {"method":"PUT","url":"/api/outlet-setup/4","statusCode":200,"responseTime":"51ms","responseSize":"62 bytes"}
+2025-10-22 18:48:55.232 [INFO]: 📥 ✅ PUT /api/outlet-setup/4 - 200 (52ms) | {"method":"PUT","url":"/api/outlet-setup/4","statusCode":200,"responseTime":"52ms","responseSize":"62 bytes"}
+2025-10-22 18:49:23.464 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 18:49:23.467 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"26 bytes"}
+2025-10-22 18:49:23.467 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"26 bytes"}
+2025-10-22 18:49:23.471 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 18:49:23.477 [INFO]: 📥 ✅ GET /api/business-periods - 200 (5ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"5ms","responseSize":"26 bytes"}
+2025-10-22 18:49:23.477 [INFO]: 📥 ✅ GET /api/business-periods - 200 (6ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"6ms","responseSize":"26 bytes"}
+2025-10-22 18:49:31.647 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 18:49:31.653 [INFO]: 📥 ✅ GET /api/business-periods - 200 (6ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"6ms","responseSize":"26 bytes"}
+2025-10-22 18:49:31.653 [INFO]: 📥 ✅ GET /api/business-periods - 200 (7ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"7ms","responseSize":"26 bytes"}
+2025-10-22 18:57:35.825 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 18:57:35.848 [INFO]: 📥 ✅ GET /api/business-periods - 200 (25ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"25ms","responseSize":"26 bytes"}
+2025-10-22 18:57:35.849 [INFO]: 📥 ✅ GET /api/business-periods - 200 (27ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"27ms","responseSize":"26 bytes"}
+2025-10-22 18:57:35.869 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 18:57:35.887 [INFO]: 📥 ✅ GET /api/business-periods - 200 (18ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"18ms","responseSize":"26 bytes"}
+2025-10-22 18:57:35.887 [INFO]: 📥 ✅ GET /api/business-periods - 200 (19ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"19ms","responseSize":"26 bytes"}
+2025-10-22 19:05:05.663 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:05:05.668 [INFO]: 📥 ✅ GET /api/business-periods - 200 (6ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"6ms","responseSize":"26 bytes"}
+2025-10-22 19:05:05.669 [INFO]: 📥 ✅ GET /api/business-periods - 200 (7ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"7ms","responseSize":"26 bytes"}
+2025-10-22 19:05:05.673 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:05:05.675 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"26 bytes"}
+2025-10-22 19:05:05.676 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"26 bytes"}
+2025-10-22 19:06:54.649 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:06:54.653 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"26 bytes"}
+2025-10-22 19:06:54.654 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"26 bytes"}
+2025-10-22 19:08:04.951 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:04.956 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:04.964 [INFO]: 📥 ✅ GET /api/property-codes - 200 (13ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"13ms","responseSize":"414 bytes"}
+2025-10-22 19:08:04.965 [INFO]: 📥 ✅ GET /api/property-codes - 200 (14ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"14ms","responseSize":"414 bytes"}
+2025-10-22 19:08:04.974 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (20ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"20ms","responseSize":"559 bytes"}
+2025-10-22 19:08:04.975 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (21ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"21ms","responseSize":"559 bytes"}
+2025-10-22 19:08:04.994 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:05.005 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:05.018 [INFO]: 📥 ✅ GET /api/property-codes - 200 (35ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"35ms","responseSize":"414 bytes"}
+2025-10-22 19:08:05.018 [INFO]: 📥 ✅ GET /api/property-codes - 200 (35ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"35ms","responseSize":"414 bytes"}
+2025-10-22 19:08:05.023 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (17ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"17ms","responseSize":"559 bytes"}
+2025-10-22 19:08:05.023 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (18ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"18ms","responseSize":"559 bytes"}
+2025-10-22 19:08:05.609 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:05.614 [INFO]: 📥 ✅ GET /api/business-periods - 200 (6ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"6ms","responseSize":"26 bytes"}
+2025-10-22 19:08:05.615 [INFO]: 📥 ✅ GET /api/business-periods - 200 (7ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"7ms","responseSize":"26 bytes"}
+2025-10-22 19:08:05.617 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:05.619 [INFO]: 📥 ✅ GET /api/business-periods - 200 (2ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"2ms","responseSize":"26 bytes"}
+2025-10-22 19:08:05.620 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"26 bytes"}
+2025-10-22 19:08:16.709 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:16.716 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (7ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"7ms","responseSize":"559 bytes"}
+2025-10-22 19:08:16.718 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (9ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"9ms","responseSize":"559 bytes"}
+2025-10-22 19:08:16.723 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:16.730 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (6ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"6ms","responseSize":"559 bytes"}
+2025-10-22 19:08:16.733 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (9ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"9ms","responseSize":"559 bytes"}
+2025-10-22 19:08:17.729 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:17.733 [INFO]: 📥 ✅ GET /api/business-periods - 200 (5ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"5ms","responseSize":"26 bytes"}
+2025-10-22 19:08:17.734 [INFO]: 📥 ✅ GET /api/business-periods - 200 (6ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"6ms","responseSize":"26 bytes"}
+2025-10-22 19:08:17.737 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:17.740 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"26 bytes"}
+2025-10-22 19:08:17.740 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"26 bytes"}
+2025-10-22 19:08:41.724 [INFO]: 📤 POST /api/business-periods | {"method":"POST","url":"/api/business-periods","bodySize":301,"user":"anonymous"}
+2025-10-22 19:08:41.765 [INFO]: 📥 ✅ POST /api/business-periods - 200 (42ms) | {"method":"POST","url":"/api/business-periods","statusCode":200,"responseTime":"42ms","responseSize":"72 bytes"}
+2025-10-22 19:08:41.766 [INFO]: 📥 ✅ POST /api/business-periods - 200 (42ms) | {"method":"POST","url":"/api/business-periods","statusCode":200,"responseTime":"42ms","responseSize":"72 bytes"}
+2025-10-22 19:08:41.781 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:08:41.784 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"425 bytes"}
+2025-10-22 19:08:41.785 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"425 bytes"}
+2025-10-22 19:13:50.250 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:13:50.270 [INFO]: 📥 ✅ GET /api/property-codes - 200 (23ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"23ms","responseSize":"414 bytes"}
+2025-10-22 19:13:50.271 [INFO]: 📥 ✅ GET /api/property-codes - 200 (24ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"24ms","responseSize":"414 bytes"}
+2025-10-22 19:16:10.547 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:10.551 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-22 19:16:10.551 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-22 19:16:14.446 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:14.451 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-22 19:16:14.451 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-22 19:16:14.456 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:14.464 [INFO]: 📥 ✅ GET /api/property-codes - 200 (10ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"10ms","responseSize":"414 bytes"}
+2025-10-22 19:16:14.465 [INFO]: 📥 ✅ GET /api/property-codes - 200 (11ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"11ms","responseSize":"414 bytes"}
+2025-10-22 19:16:14.473 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:14.486 [INFO]: 📥 ✅ GET /api/property-codes - 200 (18ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"18ms","responseSize":"414 bytes"}
+2025-10-22 19:16:14.487 [INFO]: 📥 ✅ GET /api/property-codes - 200 (18ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"18ms","responseSize":"414 bytes"}
+2025-10-22 19:16:14.490 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:14.494 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-22 19:16:14.495 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-22 19:16:15.762 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:15.766 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-22 19:16:15.766 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-22 19:16:24.513 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:24.517 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:24.526 [INFO]: 📥 ✅ GET /api/property-codes - 200 (13ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"13ms","responseSize":"414 bytes"}
+2025-10-22 19:16:24.529 [INFO]: 📥 ✅ GET /api/property-codes - 200 (13ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"13ms","responseSize":"414 bytes"}
+2025-10-22 19:16:24.539 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (21ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"21ms","responseSize":"559 bytes"}
+2025-10-22 19:16:24.539 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (22ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"22ms","responseSize":"559 bytes"}
+2025-10-22 19:16:24.542 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:24.550 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:24.561 [INFO]: 📥 ✅ GET /api/property-codes - 200 (19ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"19ms","responseSize":"414 bytes"}
+2025-10-22 19:16:24.562 [INFO]: 📥 ✅ GET /api/property-codes - 200 (20ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"20ms","responseSize":"414 bytes"}
+2025-10-22 19:16:24.567 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (17ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"17ms","responseSize":"559 bytes"}
+2025-10-22 19:16:24.568 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (18ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"18ms","responseSize":"559 bytes"}
+2025-10-22 19:16:38.140 [INFO]: 📤 PUT /api/outlet-setup/4 | {"method":"PUT","url":"/api/outlet-setup/4","bodySize":436,"user":"anonymous"}
+2025-10-22 19:16:38.156 [INFO]: 📥 ✅ PUT /api/outlet-setup/4 - 200 (17ms) | {"method":"PUT","url":"/api/outlet-setup/4","statusCode":200,"responseTime":"17ms","responseSize":"62 bytes"}
+2025-10-22 19:16:38.156 [INFO]: 📥 ✅ PUT /api/outlet-setup/4 - 200 (17ms) | {"method":"PUT","url":"/api/outlet-setup/4","statusCode":200,"responseTime":"17ms","responseSize":"62 bytes"}
+2025-10-22 19:16:48.148 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:48.157 [INFO]: 📥 ✅ GET /api/business-periods - 200 (10ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"10ms","responseSize":"425 bytes"}
+2025-10-22 19:16:48.159 [INFO]: 📥 ✅ GET /api/business-periods - 200 (10ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"10ms","responseSize":"425 bytes"}
+2025-10-22 19:16:48.163 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:48.174 [INFO]: 📥 ✅ GET /api/business-periods - 200 (10ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"10ms","responseSize":"425 bytes"}
+2025-10-22 19:16:48.174 [INFO]: 📥 ✅ GET /api/business-periods - 200 (11ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"11ms","responseSize":"425 bytes"}
+2025-10-22 19:16:58.662 [INFO]: 📤 PUT /api/business-periods/1 | {"method":"PUT","url":"/api/business-periods/1","bodySize":318,"user":"anonymous"}
+2025-10-22 19:16:58.672 [ERROR]: 📥 ❌ PUT /api/business-periods/1 - 500 (9ms) | {"method":"PUT","url":"/api/business-periods/1","statusCode":500,"responseTime":"9ms","responseSize":"171 bytes"}
+2025-10-22 19:16:58.673 [ERROR]: 📥 ❌ PUT /api/business-periods/1 - 500 (10ms) | {"method":"PUT","url":"/api/business-periods/1","statusCode":500,"responseTime":"10ms","responseSize":"171 bytes"}
+2025-10-22 19:16:58.679 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:16:58.682 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"425 bytes"}
+2025-10-22 19:16:58.682 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"425 bytes"}
+2025-10-22 19:17:45.896 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:17:45.903 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (10ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"10ms","responseSize":"559 bytes"}
+2025-10-22 19:17:45.904 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (11ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"11ms","responseSize":"559 bytes"}
+2025-10-22 19:17:45.909 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:17:45.920 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (10ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"10ms","responseSize":"559 bytes"}
+2025-10-22 19:17:45.921 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (11ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"11ms","responseSize":"559 bytes"}
+2025-10-22 19:17:47.919 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:17:47.924 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"425 bytes"}
+2025-10-22 19:17:47.925 [INFO]: 📥 ✅ GET /api/business-periods - 200 (5ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"5ms","responseSize":"425 bytes"}
+2025-10-22 19:17:47.928 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:17:47.932 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"425 bytes"}
+2025-10-22 19:17:47.932 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"425 bytes"}
+2025-10-22 19:18:18.900 [INFO]: 📤 POST /api/business-periods | {"method":"POST","url":"/api/business-periods","bodySize":297,"user":"anonymous"}
+2025-10-22 19:18:18.915 [INFO]: 📥 ✅ POST /api/business-periods - 200 (15ms) | {"method":"POST","url":"/api/business-periods","statusCode":200,"responseTime":"15ms","responseSize":"72 bytes"}
+2025-10-22 19:18:18.916 [INFO]: 📥 ✅ POST /api/business-periods - 200 (16ms) | {"method":"POST","url":"/api/business-periods","statusCode":200,"responseTime":"16ms","responseSize":"72 bytes"}
+2025-10-22 19:18:18.922 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:18:18.926 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"821 bytes"}
+2025-10-22 19:18:18.926 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"821 bytes"}
+2025-10-22 19:18:58.255 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:18:58.259 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (4ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"4ms","responseSize":"559 bytes"}
+2025-10-22 19:18:58.259 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (4ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"4ms","responseSize":"559 bytes"}
+2025-10-22 19:18:58.263 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:18:58.270 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (8ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"8ms","responseSize":"559 bytes"}
+2025-10-22 19:18:58.271 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (8ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"8ms","responseSize":"559 bytes"}
+2025-10-22 19:31:34.005 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:31:34.018 [INFO]: 📥 ✅ GET /api/property-codes - 200 (13ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"13ms","responseSize":"414 bytes"}
+2025-10-22 19:31:34.019 [INFO]: 📥 ✅ GET /api/property-codes - 200 (14ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"14ms","responseSize":"414 bytes"}
+2025-10-22 19:44:16.625 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:44:16.640 [INFO]: 📥 ✅ GET /api/property-codes - 200 (16ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"16ms","responseSize":"414 bytes"}
+2025-10-22 19:44:16.641 [INFO]: 📥 ✅ GET /api/property-codes - 200 (17ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"17ms","responseSize":"414 bytes"}
+2025-10-22 19:47:35.626 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:35.642 [INFO]: 📥 ✅ GET /api/property-codes - 200 (17ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"17ms","responseSize":"414 bytes"}
+2025-10-22 19:47:35.643 [INFO]: 📥 ✅ GET /api/property-codes - 200 (19ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"19ms","responseSize":"414 bytes"}
+2025-10-22 19:47:35.651 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:35.655 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-22 19:47:35.657 [INFO]: 📥 ✅ GET /api/property-codes - 200 (7ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"7ms","responseSize":"414 bytes"}
+2025-10-22 19:47:35.662 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:35.666 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-22 19:47:35.667 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-22 19:47:35.672 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:35.678 [INFO]: 📥 ✅ GET /api/property-codes - 200 (7ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"7ms","responseSize":"414 bytes"}
+2025-10-22 19:47:35.679 [INFO]: 📥 ✅ GET /api/property-codes - 200 (7ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"7ms","responseSize":"414 bytes"}
+2025-10-22 19:47:36.811 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:36.816 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-22 19:47:36.817 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-22 19:47:41.248 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:41.251 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:41.259 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (10ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"10ms","responseSize":"559 bytes"}
+2025-10-22 19:47:41.260 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (12ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"12ms","responseSize":"559 bytes"}
+2025-10-22 19:47:41.266 [INFO]: 📥 ✅ GET /api/property-codes - 200 (16ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"16ms","responseSize":"414 bytes"}
+2025-10-22 19:47:41.266 [INFO]: 📥 ✅ GET /api/property-codes - 200 (16ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"16ms","responseSize":"414 bytes"}
+2025-10-22 19:47:41.269 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:41.276 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:41.281 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (13ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"13ms","responseSize":"559 bytes"}
+2025-10-22 19:47:41.281 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (13ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"13ms","responseSize":"559 bytes"}
+2025-10-22 19:47:41.287 [INFO]: 📥 ✅ GET /api/property-codes - 200 (11ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"11ms","responseSize":"414 bytes"}
+2025-10-22 19:47:41.287 [INFO]: 📥 ✅ GET /api/property-codes - 200 (12ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"12ms","responseSize":"414 bytes"}
+2025-10-22 19:47:50.464 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:50.470 [INFO]: 📥 ✅ GET /api/business-periods - 200 (6ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"6ms","responseSize":"821 bytes"}
+2025-10-22 19:47:50.471 [INFO]: 📥 ✅ GET /api/business-periods - 200 (7ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"7ms","responseSize":"821 bytes"}
+2025-10-22 19:47:50.475 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:50.480 [INFO]: 📥 ✅ GET /api/business-periods - 200 (5ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"5ms","responseSize":"821 bytes"}
+2025-10-22 19:47:50.483 [INFO]: 📥 ✅ GET /api/business-periods - 200 (7ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"7ms","responseSize":"821 bytes"}
+2025-10-22 19:47:53.641 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:53.648 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (9ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"9ms","responseSize":"559 bytes"}
+2025-10-22 19:47:53.649 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (10ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"10ms","responseSize":"559 bytes"}
+2025-10-22 19:47:53.651 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:47:53.657 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (5ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"5ms","responseSize":"559 bytes"}
+2025-10-22 19:47:53.657 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (6ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"6ms","responseSize":"559 bytes"}
+2025-10-22 19:51:49.183 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:51:49.188 [INFO]: 📥 ✅ GET /api/business-periods - 200 (6ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"6ms","responseSize":"821 bytes"}
+2025-10-22 19:51:49.189 [INFO]: 📥 ✅ GET /api/business-periods - 200 (8ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"8ms","responseSize":"821 bytes"}
+2025-10-22 19:51:49.193 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:51:49.197 [INFO]: 📥 ✅ GET /api/business-periods - 200 (3ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"3ms","responseSize":"821 bytes"}
+2025-10-22 19:51:49.197 [INFO]: 📥 ✅ GET /api/business-periods - 200 (4ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"4ms","responseSize":"821 bytes"}
+2025-10-22 19:51:56.547 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:51:56.552 [INFO]: 📥 ✅ GET /api/business-periods - 200 (5ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"5ms","responseSize":"821 bytes"}
+2025-10-22 19:51:56.552 [INFO]: 📥 ✅ GET /api/business-periods - 200 (6ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"6ms","responseSize":"821 bytes"}
+2025-10-22 19:51:56.557 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 19:51:56.563 [INFO]: 📥 ✅ GET /api/business-periods - 200 (7ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"7ms","responseSize":"821 bytes"}
+2025-10-22 19:51:56.564 [INFO]: 📥 ✅ GET /api/business-periods - 200 (8ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"8ms","responseSize":"821 bytes"}
+2025-10-22 19:52:06.166 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:52:06.172 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (5ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"5ms","responseSize":"559 bytes"}
+2025-10-22 19:52:06.172 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (6ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"6ms","responseSize":"559 bytes"}
+2025-10-22 19:52:06.175 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:52:06.187 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (11ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"11ms","responseSize":"559 bytes"}
+2025-10-22 19:52:06.187 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (13ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"13ms","responseSize":"559 bytes"}
+2025-10-22 19:52:21.996 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 19:52:22.006 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (11ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"11ms","responseSize":"559 bytes"}
+2025-10-22 19:52:22.007 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (12ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"12ms","responseSize":"559 bytes"}
+2025-10-22 20:00:53.266 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"anonymous"}
+2025-10-22 20:00:53.276 [INFO]: 📥 ✅ POST /api/login - 200 (11ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"11ms","responseSize":"183 bytes"}
+2025-10-22 20:00:53.277 [INFO]: 📥 ✅ POST /api/login - 200 (12ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"12ms","responseSize":"183 bytes"}
+2025-10-22 20:01:01.166 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"ADMIN"}
+2025-10-22 20:01:01.170 [INFO]: 📥 ✅ POST /api/login - 200 (6ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"6ms","responseSize":"183 bytes"}
+2025-10-22 20:01:01.171 [INFO]: 📥 ✅ POST /api/login - 200 (6ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"6ms","responseSize":"183 bytes"}
+2025-10-22 20:01:35.337 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"ADMIN"}
+2025-10-22 20:01:35.342 [INFO]: 📥 ✅ POST /api/login - 200 (5ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"5ms","responseSize":"183 bytes"}
+2025-10-22 20:01:35.343 [INFO]: 📥 ✅ POST /api/login - 200 (6ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"6ms","responseSize":"183 bytes"}
+2025-10-22 20:04:04.078 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"ADMIN"}
+2025-10-22 20:04:04.081 [INFO]: 📥 ✅ POST /api/login - 200 (4ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"4ms","responseSize":"183 bytes"}
+2025-10-22 20:04:04.081 [INFO]: 📥 ✅ POST /api/login - 200 (4ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"4ms","responseSize":"183 bytes"}
+2025-10-22 20:12:48.196 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"anonymous"}
+2025-10-22 20:12:48.205 [INFO]: 📥 ✅ POST /api/login - 200 (9ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"9ms","responseSize":"183 bytes"}
+2025-10-22 20:12:48.205 [INFO]: 📥 ✅ POST /api/login - 200 (10ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"10ms","responseSize":"183 bytes"}
+2025-10-22 20:12:51.013 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 20:12:51.016 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 20:12:51.020 [INFO]: 📥 ✅ GET /api/property-codes - 200 (8ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"8ms","responseSize":"414 bytes"}
+2025-10-22 20:12:51.020 [INFO]: 📥 ✅ GET /api/property-codes - 200 (8ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"8ms","responseSize":"414 bytes"}
+2025-10-22 20:12:51.025 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (9ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"9ms","responseSize":"559 bytes"}
+2025-10-22 20:12:51.026 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (9ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"9ms","responseSize":"559 bytes"}
+2025-10-22 20:12:51.028 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 20:12:51.031 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 20:12:51.035 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-22 20:12:51.035 [INFO]: 📥 ✅ GET /api/property-codes - 200 (7ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"7ms","responseSize":"414 bytes"}
+2025-10-22 20:12:51.039 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (8ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"8ms","responseSize":"559 bytes"}
+2025-10-22 20:12:51.039 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (8ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"8ms","responseSize":"559 bytes"}
+2025-10-22 20:12:59.595 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 20:12:59.597 [INFO]: 📥 ✅ GET /api/property-codes - 200 (3ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"3ms","responseSize":"414 bytes"}
+2025-10-22 20:12:59.598 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-22 20:12:59.600 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 20:12:59.604 [INFO]: 📥 ✅ GET /api/property-codes - 200 (3ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"3ms","responseSize":"414 bytes"}
+2025-10-22 20:12:59.604 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-22 20:12:59.608 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 20:12:59.614 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-22 20:12:59.617 [INFO]: 📥 ✅ GET /api/property-codes - 200 (8ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"8ms","responseSize":"414 bytes"}
+2025-10-22 20:12:59.631 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 20:12:59.636 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-22 20:12:59.640 [INFO]: 📥 ✅ GET /api/property-codes - 200 (7ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"7ms","responseSize":"414 bytes"}
+2025-10-22 20:13:00.500 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 20:13:00.509 [INFO]: 📥 ✅ GET /api/property-codes - 200 (7ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"7ms","responseSize":"414 bytes"}
+2025-10-22 20:13:00.509 [INFO]: 📥 ✅ GET /api/property-codes - 200 (10ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"10ms","responseSize":"414 bytes"}
+2025-10-22 20:13:07.981 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 20:13:07.991 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (9ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"9ms","responseSize":"559 bytes"}
+2025-10-22 20:13:07.991 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (10ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"10ms","responseSize":"559 bytes"}
+2025-10-22 20:13:07.995 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 20:13:08.001 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (6ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"6ms","responseSize":"559 bytes"}
+2025-10-22 20:13:08.001 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (7ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"7ms","responseSize":"559 bytes"}
+2025-10-22 20:22:26.367 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 20:22:26.374 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (8ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"8ms","responseSize":"559 bytes"}
+2025-10-22 20:22:26.375 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (9ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"9ms","responseSize":"559 bytes"}
+2025-10-22 20:23:00.480 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 20:23:00.506 [INFO]: 📥 ✅ GET /api/business-periods - 200 (32ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"32ms","responseSize":"821 bytes"}
+2025-10-22 20:23:00.507 [INFO]: 📥 ✅ GET /api/business-periods - 200 (33ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"33ms","responseSize":"821 bytes"}
+2025-10-22 20:23:00.511 [INFO]: 📤 GET /api/business-periods | {"method":"GET","url":"/api/business-periods","bodySize":0,"user":"anonymous"}
+2025-10-22 20:23:00.520 [INFO]: 📥 ✅ GET /api/business-periods - 200 (8ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"8ms","responseSize":"821 bytes"}
+2025-10-22 20:23:00.521 [INFO]: 📥 ✅ GET /api/business-periods - 200 (9ms) | {"method":"GET","url":"/api/business-periods","statusCode":200,"responseTime":"9ms","responseSize":"821 bytes"}
+2025-10-22 20:23:37.474 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 20:23:37.478 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 20:23:37.487 [INFO]: 📥 ✅ GET /api/property-codes - 200 (12ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"12ms","responseSize":"414 bytes"}
+2025-10-22 20:23:37.488 [INFO]: 📥 ✅ GET /api/property-codes - 200 (14ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"14ms","responseSize":"414 bytes"}
+2025-10-22 20:23:37.493 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (15ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"15ms","responseSize":"559 bytes"}
+2025-10-22 20:23:37.494 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (16ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"16ms","responseSize":"559 bytes"}
+2025-10-22 20:23:37.499 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-22 20:23:37.505 [INFO]: 📤 GET /api/outlet-setup | {"method":"GET","url":"/api/outlet-setup","bodySize":0,"user":"anonymous"}
+2025-10-22 20:23:37.516 [INFO]: 📥 ✅ GET /api/property-codes - 200 (17ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"17ms","responseSize":"414 bytes"}
+2025-10-22 20:23:37.517 [INFO]: 📥 ✅ GET /api/property-codes - 200 (20ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"20ms","responseSize":"414 bytes"}
+2025-10-22 20:23:37.520 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (16ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"16ms","responseSize":"559 bytes"}
+2025-10-22 20:23:37.522 [INFO]: 📥 ✅ GET /api/outlet-setup - 200 (17ms) | {"method":"GET","url":"/api/outlet-setup","statusCode":200,"responseTime":"17ms","responseSize":"559 bytes"}
+2025-10-22 20:24:24.545 [INFO]: 📤 PUT /api/outlet-setup/4 | {"method":"PUT","url":"/api/outlet-setup/4","bodySize":421,"user":"anonymous"}
+2025-10-22 20:24:24.563 [INFO]: 📥 ✅ PUT /api/outlet-setup/4 - 200 (18ms) | {"method":"PUT","url":"/api/outlet-setup/4","statusCode":200,"responseTime":"18ms","responseSize":"62 bytes"}
+2025-10-22 20:24:24.563 [INFO]: 📥 ✅ PUT /api/outlet-setup/4 - 200 (19ms) | {"method":"PUT","url":"/api/outlet-setup/4","statusCode":200,"responseTime":"19ms","responseSize":"62 bytes"}

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 import logo from './logo.png';
+import logger from './utils/simpleLogger'; // ADDED: Frontend logging
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -11,9 +12,29 @@ function Login() {
   const navigate = useNavigate();
 
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // ADDED: Log component mount
+    logger.componentMounted('Login');
+    logger.info('page', 'Login page loaded');
+    
+    return () => {
+      logger.componentUnmounted('Login');
+    };
+  }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // ADDED: Log login attempt
+    logger.userAction('login_attempt', {
+      loginMethod: tin ? 'tin' : 'email_password',
+      email: email || 'N/A',
+      hasPassword: !!password,
+      hasTin: !!tin,
+      remember
+    });
+    
     try {
       const res = await fetch('/api/login', {
         method: 'POST',
@@ -22,12 +43,30 @@ function Login() {
       });
       const data = await res.json();
       if (data.success) {
+        // ADDED: Log successful login
+        logger.userAction('login_success', {
+          user: data.user.user_code || data.user.user_name,
+          loginMethod: tin ? 'tin' : 'email_password'
+        });
+        
         localStorage.setItem('user', JSON.stringify(data.user));
         navigate('/dashboard');
       } else {
+        // ADDED: Log login failure
+        logger.userAction('login_failure', {
+          reason: data.message,
+          loginMethod: tin ? 'tin' : 'email_password'
+        });
+        
         setError(data.message || 'Login failed');
       }
     } catch (err) {
+      // ADDED: Log network error
+      logger.error('auth', 'Login network error', {
+        error: err.message,
+        stack: err.stack
+      });
+      
       setError('Network error');
     }
   };

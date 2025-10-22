@@ -15,13 +15,18 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
  * Load property codes from database with caching
  * @returns {Promise<Array>} Array of property codes
  */
-export const loadPropertyCodes = async () => {
+export const loadPropertyCodes = async (forceRefresh = false) => {
   try {
-    // Check if cache is still valid
+    // Check if cache is still valid (but don't use cache if it's empty and we're not forcing refresh)
     const now = Date.now();
-    if (propertyCodesCache && cacheTimestamp && (now - cacheTimestamp) < CACHE_DURATION) {
-      console.log('📋 Using cached property codes:', propertyCodesCache.length, 'records');
-      return propertyCodesCache;
+    if (!forceRefresh && propertyCodesCache && cacheTimestamp && (now - cacheTimestamp) < CACHE_DURATION) {
+      // Don't use cached empty results - always try to fetch fresh data if cache is empty
+      if (propertyCodesCache.length > 0) {
+        console.log('📋 Using cached property codes:', propertyCodesCache.length, 'records');
+        return propertyCodesCache;
+      } else {
+        console.log('⚠️ Cache is empty, forcing refresh...');
+      }
     }
 
     console.log('🔄 Loading property codes from database...');
@@ -35,12 +40,16 @@ export const loadPropertyCodes = async () => {
     if (response.data && response.data.success && Array.isArray(response.data.data)) {
       const data = response.data.data;
       
-      // Update cache
+      // Only update cache if we have actual data (don't cache empty results unless it's really empty in DB)
       propertyCodesCache = data;
       cacheTimestamp = now;
       
       console.log('✅ Loaded property codes from database:', data.length, 'records');
-      console.log('📋 Property codes:', data.map(p => `${p.property_code} - ${p.property_name}`));
+      if (data.length > 0) {
+        console.log('📋 Property codes:', data.map(p => `${p.property_code} - ${p.property_name}`));
+      } else {
+        console.log('⚠️ No property codes found in database');
+      }
       return data;
     } else {
       console.error('❌ Failed to load property codes - Invalid response format');
@@ -69,6 +78,21 @@ export const clearPropertyCodesCache = () => {
 };
 
 /**
+ * Force refresh property codes (clears cache and reloads)
+ */
+export const forceRefreshPropertyCodes = async () => {
+  console.log('🔄 Force refreshing property codes...');
+  clearPropertyCodesCache();
+  return await loadPropertyCodes(true);
+};
+
+// Make cache clearing available globally for debugging
+if (typeof window !== 'undefined') {
+  window.clearPropertyCodesCache = clearPropertyCodesCache;
+  window.forceRefreshPropertyCodes = forceRefreshPropertyCodes;
+}
+
+/**
  * React hook for loading property codes in components
  * @returns {Object} { propertyCodes, loading, reload }
  */
@@ -76,11 +100,18 @@ export const usePropertyCodes = () => {
   const [propertyCodes, setPropertyCodes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
+  const loadData = async (forceRefresh = false) => {
     setLoading(true);
     try {
-      const data = await loadPropertyCodes();
+      const data = await loadPropertyCodes(forceRefresh);
       setPropertyCodes(data);
+      
+      // If no data found and we haven't tried force refresh yet, try once more
+      if (data.length === 0 && !forceRefresh) {
+        console.log('⚠️ No property codes found, trying force refresh...');
+        const freshData = await loadPropertyCodes(true);
+        setPropertyCodes(freshData);
+      }
     } catch (error) {
       console.error('Error in usePropertyCodes:', error);
       setPropertyCodes([]);
@@ -95,7 +126,7 @@ export const usePropertyCodes = () => {
 
   const reload = () => {
     clearPropertyCodesCache();
-    loadData();
+    loadData(true);
   };
 
   return { propertyCodes, loading, reload };

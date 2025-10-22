@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\.38630444eba69fb947427cd7bae477a1647a2fd9-audit.json",
+    "files": [
+        {
+            "date": 1761138612487,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\api-2025-10-22.log",
+            "hash": "339eee487860bcbaa54d1e03477b8048f44770836e36ebf30a43e0771288b6d9"
+        }
+    ],
+    "hashType": "sha256"
+}
