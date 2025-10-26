@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import api from './api';
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -36,6 +37,7 @@ const ReasonCodes = ({ setParentDirty, records, setRecords }) => {
   const [selectModalMessage, setSelectModalMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [lastAction, setLastAction] = useState('Add');
+  const [backendError, setBackendError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOperation, setFilterOperation] = useState('');
   const [sortField, setSortField] = useState('display_sequence');
@@ -112,6 +114,23 @@ const ReasonCodes = ({ setParentDirty, records, setRecords }) => {
     }
   };
 
+  // Load initial data from backend when component mounts if parent hasn't provided records
+  useEffect(() => {
+    const loadFromBackend = async () => {
+      try {
+        const json = await api.get('/api/reason-codes');
+        if (json && json.success && Array.isArray(json.data)) setRecords(json.data);
+      } catch (err) {
+        console.warn('Could not load reason codes from backend, using local records if any', err);
+        setBackendError(err && err.message ? err.message : String(err));
+      }
+    };
+
+    if (!records || records.length === 0) {
+      loadFromBackend();
+    }
+  }, []);
+
   // Handlers
   const handleAdd = () => {
     setAction('Add');
@@ -154,24 +173,32 @@ const ReasonCodes = ({ setParentDirty, records, setRecords }) => {
     const confirmMessage = `Are you sure you want to delete "${selectedRecord.reason_description}" (${selectedRecord.reason_code})?`;
     
     if (window.confirm(confirmMessage)) {
-      try {
-        const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
-        setRecords(updatedRecords);
-        setSelectedRecordIdx(null);
-        setForm(initialState);
-        setAction('Add');
-        setFieldErrors({});
-        setLastAction('Delete');
-        setShowSavePopup(true);
-        setIsDirty(false);
-        if (setParentDirty) setParentDirty(false);
-        
-        setTimeout(() => {
-          setShowSavePopup(false);
-        }, 2000);
-      } catch (error) {
-        console.error('Error deleting reason code:', error);
-      }
+      (async () => {
+        try {
+          const target = records[selectedRecordIdx];
+          const targetCode = target && target.reason_code;
+          if (targetCode) {
+            await api.delete(`/api/reason-codes/${encodeURIComponent(targetCode)}`);
+          }
+
+          const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
+          setRecords(updatedRecords);
+          setSelectedRecordIdx(null);
+          setForm(initialState);
+          setAction('Add');
+          setFieldErrors({});
+          setLastAction('Delete');
+          setShowSavePopup(true);
+          setIsDirty(false);
+          if (setParentDirty) setParentDirty(false);
+
+          setTimeout(() => {
+            setShowSavePopup(false);
+          }, 2000);
+        } catch (error) {
+          console.error('Error deleting reason code:', error);
+        }
+      })();
     }
   };
 
@@ -222,7 +249,7 @@ const ReasonCodes = ({ setParentDirty, records, setRecords }) => {
     if (setParentDirty) setParentDirty(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
@@ -238,17 +265,98 @@ const ReasonCodes = ({ setParentDirty, records, setRecords }) => {
         updated_at: new Date().toISOString()
       };
       
-      let updatedRecords;
+      let updatedRecords = records ? [...records] : [];
+
+      // Persist to backend
       if (action === 'Add') {
-        updatedRecords = [...(records || []), newRecord];
+        // POST via helper
+        try {
+          const json = await api.post('/api/reason-codes', {
+            reason_code: newRecord.reason_code,
+            reason_description: newRecord.reason_description,
+            operation_type: newRecord.operation_type,
+            display_sequence: newRecord.display_sequence,
+            is_active: newRecord.is_active
+          });
+          if (json && json.success && json.data) {
+            updatedRecords.push(json.data);
+          } else {
+            const msg = json && json.message ? json.message : JSON.stringify(json);
+            setBackendError(msg);
+            alert('Server error saving reason code: ' + msg);
+            return;
+          }
+        } catch (err) {
+          console.error('Failed to POST reason code, aborting save', err);
+          const msg = err && err.message ? err.message : String(err);
+          setBackendError(msg);
+          alert('Network/server error saving reason code: ' + msg);
+          return;
+        }
       } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
-        updatedRecords = [...records];
-        updatedRecords[selectedRecordIdx] = {
-          ...newRecord,
-          created_at: records[selectedRecordIdx].created_at || newRecord.created_at
-        };
-      } else {
-        updatedRecords = records || [];
+        const targetCode = records[selectedRecordIdx] && records[selectedRecordIdx].reason_code;
+        if (targetCode) {
+          try {
+            const json = await api.put(`/api/reason-codes/${encodeURIComponent(targetCode)}`, {
+              reason_code: newRecord.reason_code,
+              reason_description: newRecord.reason_description,
+              operation_type: newRecord.operation_type,
+              display_sequence: newRecord.display_sequence,
+              is_active: newRecord.is_active
+            });
+
+            if (json && json.success && json.data) {
+              updatedRecords[selectedRecordIdx] = json.data;
+            } else {
+              const msg = json && json.message ? json.message : JSON.stringify(json);
+              setBackendError(msg);
+              alert('Server error updating reason code: ' + msg);
+              return;
+            }
+          } catch (err) {
+            // If server responded 404, offer to create the record instead
+            if (err && err.status === 404) {
+              const createConfirm = window.confirm('Record not found on server. Create it instead?');
+              if (createConfirm) {
+                try {
+                  const createJson = await api.post('/api/reason-codes', {
+                    reason_code: newRecord.reason_code,
+                    reason_description: newRecord.reason_description,
+                    operation_type: newRecord.operation_type,
+                    display_sequence: newRecord.display_sequence,
+                    is_active: newRecord.is_active
+                  });
+                  if (createJson && createJson.success && createJson.data) {
+                    updatedRecords[selectedRecordIdx] = createJson.data;
+                  } else {
+                    const cmsg = createJson && createJson.message ? createJson.message : JSON.stringify(createJson);
+                    setBackendError(cmsg);
+                    alert('Server error creating reason code: ' + cmsg);
+                    return;
+                  }
+                } catch (createErr) {
+                  const cmsg = createErr && createErr.message ? createErr.message : String(createErr);
+                  setBackendError(cmsg);
+                  alert('Server error creating reason code: ' + cmsg);
+                  return;
+                }
+              } else {
+                const msg = err && err.message ? err.message : String(err);
+                setBackendError(msg);
+                alert('Server error updating reason code: ' + msg);
+                return;
+              }
+            }
+            console.error('Failed to PUT reason code, aborting update', err);
+            const msg = err && err.message ? err.message : String(err);
+            setBackendError(msg);
+            alert('Network error updating reason code: ' + msg);
+            return;
+          }
+        } else {
+          // no id, fallback to local replace
+          updatedRecords[selectedRecordIdx] = { ...newRecord, created_at: records[selectedRecordIdx].created_at };
+        }
       }
       
       // Sort by operation type, then by display sequence
@@ -259,7 +367,7 @@ const ReasonCodes = ({ setParentDirty, records, setRecords }) => {
         return a.display_sequence - b.display_sequence;
       });
       
-      setRecords(updatedRecords);
+  setRecords(updatedRecords);
       
       if (action !== 'Search') {
         setForm(initialState);

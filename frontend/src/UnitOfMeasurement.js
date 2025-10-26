@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import api from './api';
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -135,7 +136,7 @@ const UnitOfMeasurement = ({ setParentDirty, records, setRecords }) => {
     if (setParentDirty) setParentDirty(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedRecordIdx === null || !records || selectedRecordIdx >= records.length) {
       setSelectModalMessage('Please select a record to delete.');
       setShowSelectModal(true);
@@ -147,6 +148,20 @@ const UnitOfMeasurement = ({ setParentDirty, records, setRecords }) => {
     
     if (window.confirm(confirmMessage)) {
       try {
+        const selectedRecord = records[selectedRecordIdx];
+
+        // If the record has an id (server-backed), attempt to delete on server first
+        if (selectedRecord && selectedRecord.id) {
+          try {
+            await api.delete(`/api/uom/${selectedRecord.id}`);
+          } catch (err) {
+            console.error('Server delete failed, aborting local delete:', err);
+            alert('Failed to delete UOM on server: ' + (err.message || String(err)));
+            return;
+          }
+        }
+
+        // Remove locally
         const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
         setRecords(updatedRecords);
         setSelectedRecordIdx(null);
@@ -157,7 +172,7 @@ const UnitOfMeasurement = ({ setParentDirty, records, setRecords }) => {
         setShowSavePopup(true);
         setIsDirty(false);
         if (setParentDirty) setParentDirty(false);
-        
+
         setTimeout(() => {
           setShowSavePopup(false);
         }, 2000);
@@ -215,7 +230,7 @@ const UnitOfMeasurement = ({ setParentDirty, records, setRecords }) => {
     if (setParentDirty) setParentDirty(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
@@ -233,12 +248,50 @@ const UnitOfMeasurement = ({ setParentDirty, records, setRecords }) => {
       
       let updatedRecords;
       if (action === 'Add') {
+        // Attempt to save to server first
+        try {
+          const body = await api.post('/api/uom', {
+            uom_code: newRecord.uom_code,
+            uom_name: newRecord.uom_name,
+            container_unit: null,
+            container_size: null,
+            contained_unit: null,
+            is_active: newRecord.is_active ? 1 : 0
+          });
+          if (body && body.id) newRecord.id = body.id;
+        } catch (err) {
+          console.error('Failed to save UOM to server:', err);
+          alert('Failed to save UOM to server: ' + (err.message || String(err)) + '\n\nThe record was not saved.');
+          return; // abort local save when server save fails
+        }
+
         updatedRecords = [...(records || []), newRecord];
+
       } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
+        // Try update on server if record has id
+        const existing = records[selectedRecordIdx];
+        if (existing && existing.id) {
+          try {
+            await api.put(`/api/uom/${existing.id}`, {
+              uom_code: newRecord.uom_code,
+              uom_name: newRecord.uom_name,
+              container_unit: null,
+              container_size: null,
+              contained_unit: null,
+              is_active: newRecord.is_active ? 1 : 0
+            });
+          } catch (err) {
+            console.error('Failed to update UOM on server:', err);
+            alert('Failed to update UOM on server: ' + (err.message || String(err)) + '\n\nThe record was not updated.');
+            return; // abort local update on server failure
+          }
+        }
+
         updatedRecords = [...records];
         updatedRecords[selectedRecordIdx] = {
           ...newRecord,
-          created_at: records[selectedRecordIdx].created_at || newRecord.created_at
+          created_at: records[selectedRecordIdx].created_at || newRecord.created_at,
+          id: existing && existing.id ? existing.id : newRecord.id
         };
       } else {
         updatedRecords = records || [];
@@ -257,7 +310,7 @@ const UnitOfMeasurement = ({ setParentDirty, records, setRecords }) => {
       }
       
       setLastAction(action);
-      setShowSavePopup(true);
+  setShowSavePopup(true);
       setIsDirty(false);
       if (setParentDirty) setParentDirty(false);
       
@@ -266,6 +319,7 @@ const UnitOfMeasurement = ({ setParentDirty, records, setRecords }) => {
       }, 2000);
     } catch (error) {
       console.error('Error saving UOM:', error);
+      alert('Unexpected error saving UOM: ' + error.message);
     }
   };
 

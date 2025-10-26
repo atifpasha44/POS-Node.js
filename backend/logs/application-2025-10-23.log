@@ -1,0 +1,15 @@
+2025-10-23 11:18:49.848 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-10-23 11:18:49.886 [INFO]: Database connection established successfully
+2025-10-23 11:19:12.763 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+2025-10-23 11:19:29.599 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+2025-10-23 11:59:11.088 [INFO]: Database connection established successfully
+2025-10-23 12:46:14.444 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-10-23 12:46:14.467 [INFO]: Database connection established successfully
+2025-10-23 12:46:34.838 [INFO]: 🛑 Server shutting down: SIGINT received (Ctrl+C) | {"reason":"SIGINT received (Ctrl+C)"}
+2025-10-23 12:48:10.303 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-10-23 12:48:10.326 [INFO]: Database connection established successfully
+2025-10-23 13:05:45.143 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-10-23 13:05:45.176 [INFO]: Database connection established successfully
+2025-10-23 13:06:11.821 [INFO]: 🛑 Server shutting down: SIGINT received (Ctrl+C) | {"reason":"SIGINT received (Ctrl+C)"}
+2025-10-23 13:06:44.911 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-10-23 13:06:44.937 [INFO]: Database connection established successfully

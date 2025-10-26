@@ -1038,8 +1038,20 @@ function Dashboard({ user, setUser }) {
 
   useEffect(() => {
     if (dataLoaded) {
-      saveToLocalStorage('uomRecords', uomRecords);
-      console.log('Saving uomRecords to localStorage:', uomRecords);
+      // Only persist local-only UOM records as a fallback to avoid overwriting server state.
+      // Records that have a server `id` are considered authoritative and should not be saved back to localStorage.
+      try {
+        const localOnly = (uomRecords || []).filter(r => !r || !r.id);
+        if (localOnly.length > 0) {
+          saveToLocalStorage('uomRecords', localOnly);
+          console.log('Saving local-only uomRecords to localStorage (fallback):', localOnly);
+        } else {
+          // No local-only records — remove stale key to avoid confusion
+          localStorage.removeItem('uomRecords');
+        }
+      } catch (e) {
+        console.warn('Failed to persist uomRecords fallback to localStorage:', e);
+      }
     }
   }, [uomRecords, dataLoaded]);
 

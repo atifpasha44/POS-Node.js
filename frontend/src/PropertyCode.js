@@ -7,6 +7,31 @@ import autoTable from 'jspdf-autotable';
 import axios from 'axios';
 import InfoTooltip from './InfoTooltip';
 
+// Normalize date strings to YYYY-MM-DD to avoid timezone shifts when creating Date objects
+const normalizeDateString = (dateStr) => {
+  if (!dateStr) return null;
+  // Already in YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  // Common display format DD-MM-YYYY
+  if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+    const [dd, mm, yyyy] = dateStr.split('-');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  // ISO-like string with time -> take date part
+  if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) return dateStr.split('T')[0];
+  // Fallback: try Date parse but extract local date components to preserve user's selected date
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return null;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  } catch (e) {
+    return null;
+  }
+};
+
 // Standard currency symbols dropdown options
 const CURRENCY_SYMBOLS = [
   { value: '$', label: '$ - US Dollar' },
@@ -34,7 +59,9 @@ const CURRENCY_SYMBOLS = [
 
 const initialState = {
   applicable_from: '', property_code: '', property_name: '', nick_name: '', owner_name: '', address_name: '', gst_number: '', pan_number: '',
-  group_name: '', local_currency: '', currency_format: '', symbol: '', decimal_places: '', date_format: '', round_off: '', property_logo: null
+  group_name: '', local_currency: '', currency_format: '', symbol: '', decimal_places: '', date_format: '', round_off: '', property_logo: null,
+  // New audit/reserve fields
+  // Audit/reserve fields are server-managed and intentionally omitted from client state
 };
 
 export default function PropertyCode() {
@@ -269,9 +296,10 @@ export default function PropertyCode() {
           return;
         }
         
-        // Update existing record via API or fallback to local update
+        // Update existing record via API. Normalize date to avoid timezone shifts.
         try {
-          const response = await axios.put(`http://localhost:3001/api/property-codes/${original.id}`, form);
+          const payload = { ...form, applicable_from: normalizeDateString(form.applicable_from) };
+          const response = await axios.put(`http://localhost:3001/api/property-codes/${original.id}`, payload);
           if (response.data.success) {
             setShowSavePopup(true);
             setTimeout(() => setShowSavePopup(false), 1800);
@@ -280,16 +308,11 @@ export default function PropertyCode() {
             resetForm();
           }
         } catch (error) {
-          console.log('⚠️ Backend not available, updating locally...');
-          // Fallback: Update record locally
-          setRecords(currentRecords => {
-            const updatedRecords = [...currentRecords];
-            updatedRecords[selectedRecordIdx] = { ...original, ...form };
-            return updatedRecords;
-          });
-          setShowSavePopup(true);
-          setTimeout(() => setShowSavePopup(false), 1800);
-          resetForm();
+          console.error('❌ Failed to update property on server:', error);
+          const msg = error?.response?.data?.message || error.message || 'Backend unavailable';
+          alert('Failed to save changes to server: ' + msg + '\n\nPlease check your network or try again.');
+          // Do not perform a local-only update to avoid UI/DB divergence
+          return;
         }
       } else if (action === 'Delete' && selectedRecordIdx !== null) {
         // Delete record via API or fallback to local delete
@@ -305,19 +328,17 @@ export default function PropertyCode() {
             setAction('Add');
           }
         } catch (error) {
-          console.log('⚠️ Backend not available, deleting locally...');
-          // Fallback: Remove record locally
-          setRecords(currentRecords => currentRecords.filter((_, idx) => idx !== selectedRecordIdx));
-          setShowSavePopup(true);
-          setTimeout(() => setShowSavePopup(false), 1800);
-          resetForm();
-          setAction('Add');
+          console.error('❌ Failed to delete property on server:', error);
+          const msg = error?.response?.data?.message || error.message || 'Backend unavailable';
+          alert('Failed to delete record on server: ' + msg + '\n\nPlease check your network or try again.');
+          return;
         }
       } else {
-        // Add new record via API or fallback to local add
-        console.log('Adding new record:', form);
+        // Add new record via API. Normalize date to avoid timezone shifts.
+        const payload = { ...form, applicable_from: normalizeDateString(form.applicable_from) };
+        console.log('Adding new record:', payload);
         try {
-          const response = await axios.post('http://localhost:3001/api/property-codes', form);
+          const response = await axios.post('http://localhost:3001/api/property-codes', payload);
           console.log('Add response:', response.data);
           if (response.data.success) {
             setShowSavePopup(true);
@@ -327,16 +348,11 @@ export default function PropertyCode() {
             resetForm();
           }
         } catch (apiError) {
-          console.log('⚠️ Backend not available, adding locally...');
-          // Fallback: Add record locally
-          const newRecord = {
-            id: Date.now(), // Simple ID generation for local storage
-            ...form
-          };
-          setRecords(currentRecords => [newRecord, ...currentRecords]);
-          setShowSavePopup(true);
-          setTimeout(() => setShowSavePopup(false), 1800);
-          resetForm();
+          console.error('❌ Failed to create property on server:', apiError);
+          const msg = apiError?.response?.data?.message || apiError.message || 'Backend unavailable';
+          alert('Failed to create record on server: ' + msg + '\n\nPlease check your network or try again.');
+          // Do NOT create local-only records to avoid divergence between UI and DB
+          return;
         }
       }
     } catch (error) {
@@ -1473,6 +1489,7 @@ export default function PropertyCode() {
             <input type="text" name="group_name" value={form.group_name} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isFormReadOnly?'#eee':'#fff'}} disabled={isFormReadOnly} />
             {fieldErrors.group_name && <span style={{color:'red',fontSize:'0.98rem',marginLeft:'12px'}}>{fieldErrors.group_name}</span>}
           </div>
+          {/* Audit and reserve fields are server-managed. They were removed from the UI to prevent client-side tampering. */}
           <div style={{display:'flex',alignItems:'center'}}>
             <label style={{width:'180px',fontWeight:'bold',fontSize:'1.15rem',color:'#222'}}>Local Currency</label>
             <input type="text" name="local_currency" value={form.local_currency} onChange={handleChange} style={{width:'80%',height:'36px',fontSize:'1.08rem',border:'2px solid #bbb',borderRadius:'6px',padding:'0 8px',background: isFormReadOnly?'#eee':'#fff'}} disabled={isFormReadOnly} />

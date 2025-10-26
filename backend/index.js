@@ -67,6 +67,7 @@ db.connect((err) => {
 // ========================================
 // DATABASE LOGGING ENHANCEMENT (ADDED)
 // ========================================
+// Database logging enhancement
 logDatabaseConnection(db);
 
 // ========================================
@@ -105,6 +106,7 @@ const initializeDatabase = async () => {
     }
 };
 
+// Initialize database on startup
 // Initialize database on startup
 initializeDatabase();
 
@@ -1096,7 +1098,16 @@ app.delete('/api/user-setup/:id', (req, res) => {
 // REASON CODES API
 // ========================================
 app.get('/api/reason-codes', (req, res) => {
-    const query = 'SELECT * FROM IT_CONF_REASONS ORDER BY reason_code';
+    // Map DB columns (REASON_CODE, REASON_DESC, ActiveStatus, display_sequence) to frontend shape
+    const query = `SELECT
+        REASON_CODE AS reason_code,
+        REASON_DESC AS reason_description,
+                IFNULL(OPERATION_TYPE, 'General') AS operation_type,
+        IFNULL(display_sequence, 0) AS display_sequence,
+        IFNULL(ActiveStatus, 1) AS is_active
+      FROM IT_CONF_REASONS
+      ORDER BY REASON_CODE`;
+
     db.query(query, (err, results) => {
         if (err) return handleDatabaseError(res, err, 'fetch reason codes');
         res.json({ success: true, data: results });
@@ -1104,20 +1115,21 @@ app.get('/api/reason-codes', (req, res) => {
 });
 
 app.post('/api/reason-codes', (req, res) => {
-    const { reason_code, reason_name, reason_type, is_active = 1 } = req.body;
-    
-    if (!reason_code || !reason_name || !reason_type) {
+    // Frontend sends: reason_code, reason_description, display_sequence, is_active
+    const { reason_code, reason_description, operation_type = 'General', display_sequence = null, is_active = 1 } = req.body;
+
+    if (!reason_code || !reason_description) {
         return res.status(400).json({ 
             success: false, 
-            message: 'Reason code, name and type are required' 
+            message: 'Reason code and description are required' 
         });
     }
 
     const query = `INSERT INTO IT_CONF_REASONS 
-                   (reason_code, reason_name, reason_type, is_active, created_by) 
-                   VALUES (?, ?, ?, ?, 'admin')`;
-    
-    db.query(query, [reason_code, reason_name, reason_type, is_active], (err, result) => {
+                   (REASON_CODE, REASON_DESC, OPERATION_TYPE, display_sequence, ActiveStatus) 
+                   VALUES (?, ?, ?, ?, ?)`;
+
+    db.query(query, [reason_code, reason_description, operation_type, display_sequence, is_active], (err, result) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ 
@@ -1127,54 +1139,58 @@ app.post('/api/reason-codes', (req, res) => {
             }
             return handleDatabaseError(res, err, 'create reason code');
         }
-        res.json({ 
-            success: true, 
-            message: 'Reason code created successfully',
-            id: result.insertId 
+
+        // Return the created row
+    const selectQuery = `SELECT REASON_CODE AS reason_code, REASON_DESC AS reason_description, IFNULL(OPERATION_TYPE,'General') AS operation_type, IFNULL(display_sequence,0) AS display_sequence, IFNULL(ActiveStatus,1) AS is_active FROM IT_CONF_REASONS WHERE REASON_CODE = ?`;
+        db.query(selectQuery, [reason_code], (err2, rows) => {
+            if (err2) return handleDatabaseError(res, err2, 'fetch created reason code');
+            res.json({ success: true, message: 'Reason code created successfully', data: rows[0] });
         });
     });
 });
 
-app.put('/api/reason-codes/:id', (req, res) => {
-    const { id } = req.params;
-    const { reason_code, reason_name, reason_type, is_active } = req.body;
-    
+app.put('/api/reason-codes/:code', (req, res) => {
+    const { code } = req.params;
+    // Accept frontend field names and map to DB columns
+    const { reason_description, operation_type = 'General', display_sequence = null, is_active } = req.body;
+
     const query = `UPDATE IT_CONF_REASONS 
-                   SET reason_code = ?, reason_name = ?, reason_type = ?, 
-                       is_active = ?, modified_by = 'admin'
-                   WHERE id = ?`;
-    
-    db.query(query, [reason_code, reason_name, reason_type, is_active, id], (err, result) => {
+                   SET REASON_DESC = ?, OPERATION_TYPE = ?, display_sequence = ?, ActiveStatus = ?
+                   WHERE REASON_CODE = ?`;
+
+    db.query(query, [reason_description, operation_type, display_sequence, is_active, code], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'update reason code');
-        
+
         if (result.affectedRows === 0) {
             return res.status(404).json({ 
                 success: false, 
                 message: 'Reason code not found' 
             });
         }
-        
-        res.json({ 
-            success: true, 
-            message: 'Reason code updated successfully' 
+
+        // Return updated row
+    const selectQuery = `SELECT REASON_CODE AS reason_code, REASON_DESC AS reason_description, IFNULL(OPERATION_TYPE,'General') AS operation_type, IFNULL(display_sequence,0) AS display_sequence, IFNULL(ActiveStatus,1) AS is_active FROM IT_CONF_REASONS WHERE REASON_CODE = ?`;
+        db.query(selectQuery, [code], (err2, rows) => {
+            if (err2) return handleDatabaseError(res, err2, 'fetch updated reason code');
+            res.json({ success: true, message: 'Reason code updated successfully', data: rows[0] });
         });
     });
 });
 
-app.delete('/api/reason-codes/:id', (req, res) => {
-    const { id } = req.params;
-    
-    const query = 'DELETE FROM IT_CONF_REASONS WHERE id = ?';
-    db.query(query, [id], (err, result) => {
+app.delete('/api/reason-codes/:code', (req, res) => {
+    const { code } = req.params;
+
+    const query = 'DELETE FROM IT_CONF_REASONS WHERE REASON_CODE = ?';
+    db.query(query, [code], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'delete reason code');
-        
+
         if (result.affectedRows === 0) {
             return res.status(404).json({ 
                 success: false, 
                 message: 'Reason code not found' 
             });
         }
-        
+
         res.json({ 
             success: true, 
             message: 'Reason code deleted successfully' 
@@ -1460,7 +1476,8 @@ app.get('/api/property-codes', (req, res) => {
                        id, applicable_from, property_code, property_name, nick_name, owner_name, 
                        address_name, gst_number, pan_number, group_name, local_currency,
                        currency_format, symbol, decimal_places, date_format, round_off, 
-                       property_logo, created_at, updated_at
+                       property_logo, created_at, updated_at,
+                       created_user_id, updated_user_id, reserve_1, reserve_2
                    FROM IT_CONF_PROPERTY 
                    ORDER BY property_code`;
     
@@ -1485,7 +1502,18 @@ app.get('/api/property-codes', (req, res) => {
             date_format: row.date_format || 'MM/DD/YYYY',
             round_off: row.round_off || '0.01',
             property_logo: row.property_logo || null,
-            applicable_from: row.applicable_from ? (row.applicable_from.toISOString ? row.applicable_from.toISOString().split('T')[0] : row.applicable_from) : ''
+            applicable_from: row.applicable_from ? (row.applicable_from.toISOString ? (() => {
+                // Build local YYYY-MM-DD from Date object to preserve the date as seen by users
+                const d = row.applicable_from;
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            })() : row.applicable_from) : '',
+            created_user_id: row.created_user_id || null,
+            updated_user_id: row.updated_user_id || null,
+            reserve_1: row.reserve_1 || null,
+            reserve_2: row.reserve_2 || null
         }));
         
         res.json({ success: true, data: transformedResults });
@@ -1498,6 +1526,13 @@ app.post('/api/property-codes', (req, res) => {
         address_name, gst_number, pan_number, group_name, local_currency,
         currency_format, symbol, decimal_places, date_format, round_off, property_logo
     } = req.body;
+    // Server-controls audit/reserve fields to prevent client tampering
+    // Use numeric DB id for audit columns. If no session user, leave null so DB records system nulls.
+    const sessionUserId = req.session && req.session.user ? req.session.user.id : null;
+    const created_user_id = sessionUserId;
+    const updated_user_id = sessionUserId;
+    const reserve_1 = null;
+    const reserve_2 = null;
     
     if (!property_code || !property_name) {
         return res.status(400).json({ 
@@ -1506,13 +1541,16 @@ app.post('/api/property-codes', (req, res) => {
         });
     }
 
+    // Use STR_TO_DATE to store the date part exactly as provided (YYYY-MM-DD) and avoid timezone shifts
     const query = `INSERT INTO IT_CONF_PROPERTY 
                    (applicable_from, property_code, property_name, nick_name, owner_name, 
                     address_name, gst_number, pan_number, group_name, local_currency,
-                    currency_format, symbol, decimal_places, date_format, round_off, property_logo) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-    
-    db.query(query, [
+                    currency_format, symbol, decimal_places, date_format, round_off, property_logo,
+                    created_user_id, updated_user_id, reserve_1, reserve_2) 
+                   VALUES (STR_TO_DATE(?, '%Y-%m-%d'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    // Debug: log query and values to diagnose column/value mismatch
+    const insertValues = [
         applicable_from || null,
         property_code,
         property_name,
@@ -1528,8 +1566,17 @@ app.post('/api/property-codes', (req, res) => {
         decimal_places || 2,
         date_format || null,
         round_off || null,
-        property_logo || null
-    ], (err, result) => {
+        property_logo || null,
+        created_user_id,
+        updated_user_id,
+        reserve_1,
+        reserve_2
+    ];
+
+    console.log('DEBUG: property insert query=\n', query);
+    console.log('DEBUG: property insert values=', insertValues);
+
+    db.query(query, insertValues, (err, result) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ 
@@ -1552,16 +1599,23 @@ app.put('/api/property-codes/:id', (req, res) => {
     const { 
         applicable_from, property_code, property_name, nick_name, owner_name, 
         address_name, gst_number, pan_number, group_name, local_currency,
-        currency_format, symbol, decimal_places, date_format, round_off, property_logo
+        currency_format, symbol, decimal_places, date_format, round_off, property_logo,
+        // Audit/reserve fields ignored from client
+        reserve_1, reserve_2
     } = req.body;
-    
+    // Server Populates updated_user_id from session; created_user_id is preserved
+    const sessionUserId = req.session && req.session.user ? req.session.user.id : null;
+    const updated_user_id = sessionUserId;
+
     const query = `UPDATE IT_CONF_PROPERTY 
-                   SET applicable_from = ?, property_name = ?, nick_name = ?, owner_name = ?, 
+                   SET applicable_from = STR_TO_DATE(?, '%Y-%m-%d'), property_name = ?, nick_name = ?, owner_name = ?, 
                        address_name = ?, gst_number = ?, pan_number = ?, group_name = ?, 
                        local_currency = ?, currency_format = ?, symbol = ?, decimal_places = ?, 
-                       date_format = ?, round_off = ?, property_logo = ?, updated_at = CURRENT_TIMESTAMP
+                       date_format = ?, round_off = ?, property_logo = ?,
+                       updated_user_id = ?, reserve_1 = ?, reserve_2 = ?,
+                       updated_at = CURRENT_TIMESTAMP
                    WHERE id = ?`;
-    
+
     db.query(query, [
         applicable_from || null,
         property_name,
@@ -1578,6 +1632,9 @@ app.put('/api/property-codes/:id', (req, res) => {
         date_format || null,
         round_off || null,
         property_logo || null,
+        updated_user_id,
+        reserve_1 || null,
+        reserve_2 || null,
         id
     ], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'update property code');
@@ -1599,7 +1656,7 @@ app.put('/api/property-codes/:id', (req, res) => {
 app.delete('/api/property-codes/:id', (req, res) => {
     const { id } = req.params;
     
-    const query = 'UPDATE IT_CONF_PROPERTY SET ActiveStatus = 0 WHERE PROPERTY_CODE = ?';
+    const query = 'DELETE FROM IT_CONF_PROPERTY WHERE id = ?';
     db.query(query, [id], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'delete property code');
         
@@ -1776,6 +1833,7 @@ app.listen(PORT, () => {
     
     // Log system startup (ADDED)
     logSystem.startup(PORT, process.env.NODE_ENV || 'development');
+    console.log('✅ app.listen callback executed');
 });
 
 // ========================================

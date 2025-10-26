@@ -1,0 +1,1 @@
+✅ Database schema initialization skipped (using existing pos_db schema)

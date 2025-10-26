@@ -1,0 +1,118 @@
+2025-10-23 11:19:12.756 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"anonymous"}
+2025-10-23 11:19:12.763 [INFO]: 📥 ✅ POST /api/login - 200 (8ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"8ms","responseSize":"183 bytes"}
+2025-10-23 11:19:12.764 [INFO]: 📥 ✅ POST /api/login - 200 (9ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"9ms","responseSize":"183 bytes"}
+2025-10-23 11:19:12.981 [INFO]: 📤 GET /favicon.ico | {"method":"GET","url":"/favicon.ico","bodySize":0,"user":"ADMIN"}
+2025-10-23 11:19:29.596 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"ADMIN"}
+2025-10-23 11:19:29.599 [INFO]: 📥 ✅ POST /api/login - 200 (3ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"3ms","responseSize":"183 bytes"}
+2025-10-23 11:19:29.599 [INFO]: 📥 ✅ POST /api/login - 200 (3ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"3ms","responseSize":"183 bytes"}
+2025-10-23 11:19:35.393 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:19:35.398 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-23 11:19:35.399 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-23 11:19:35.401 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:19:35.406 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:19:35.406 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-23 11:19:35.409 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:19:35.415 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-23 11:19:35.416 [INFO]: 📥 ✅ GET /api/property-codes - 200 (7ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"7ms","responseSize":"414 bytes"}
+2025-10-23 11:19:35.419 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:19:35.430 [INFO]: 📥 ✅ GET /api/property-codes - 200 (11ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"11ms","responseSize":"414 bytes"}
+2025-10-23 11:19:35.431 [INFO]: 📥 ✅ GET /api/property-codes - 200 (12ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"12ms","responseSize":"414 bytes"}
+2025-10-23 11:19:36.964 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:19:36.967 [INFO]: 📥 ✅ GET /api/property-codes - 200 (3ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"3ms","responseSize":"414 bytes"}
+2025-10-23 11:19:36.967 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:53:32.397 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:53:32.401 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:53:32.402 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:53:32.406 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:53:32.409 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:53:32.409 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:53:32.415 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:53:32.420 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-23 11:53:32.420 [INFO]: 📥 ✅ GET /api/property-codes - 200 (7ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"7ms","responseSize":"414 bytes"}
+2025-10-23 11:53:32.425 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:53:32.434 [INFO]: 📥 ✅ GET /api/property-codes - 200 (10ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"10ms","responseSize":"414 bytes"}
+2025-10-23 11:53:32.435 [INFO]: 📥 ✅ GET /api/property-codes - 200 (13ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"13ms","responseSize":"414 bytes"}
+2025-10-23 11:53:48.019 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:53:48.023 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:53:48.023 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:53:48.026 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:53:48.029 [INFO]: 📥 ✅ GET /api/property-codes - 200 (3ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"3ms","responseSize":"414 bytes"}
+2025-10-23 11:53:48.030 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:53:48.036 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:53:48.039 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 11:53:48.040 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-23 11:53:48.045 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 11:53:48.048 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-23 11:53:48.051 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-23 12:16:47.902 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 12:16:47.907 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 12:16:47.907 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-23 12:26:43.597 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 12:26:43.601 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-23 12:26:43.602 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-23 12:26:43.604 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 12:26:43.610 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-23 12:26:43.610 [INFO]: 📥 ✅ GET /api/property-codes - 200 (6ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"6ms","responseSize":"414 bytes"}
+2025-10-23 12:26:43.615 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 12:26:43.620 [INFO]: 📥 ✅ GET /api/property-codes - 200 (4ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"4ms","responseSize":"414 bytes"}
+2025-10-23 12:26:43.620 [INFO]: 📥 ✅ GET /api/property-codes - 200 (5ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"5ms","responseSize":"414 bytes"}
+2025-10-23 12:26:43.629 [INFO]: 📤 GET /api/property-codes | {"method":"GET","url":"/api/property-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 12:26:43.635 [INFO]: 📥 ✅ GET /api/property-codes - 200 (9ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"9ms","responseSize":"414 bytes"}
+2025-10-23 12:26:43.636 [INFO]: 📥 ✅ GET /api/property-codes - 200 (9ms) | {"method":"GET","url":"/api/property-codes","statusCode":200,"responseTime":"9ms","responseSize":"414 bytes"}
+2025-10-23 12:36:21.012 [INFO]: 📤 GET /api/reason-codes | {"method":"GET","url":"/api/reason-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 12:36:21.018 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (7ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"7ms","responseSize":"26 bytes"}
+2025-10-23 12:36:21.019 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (8ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"8ms","responseSize":"26 bytes"}
+2025-10-23 12:41:22.663 [INFO]: 📤 POST /api/reason-codes | {"method":"POST","url":"/api/reason-codes","bodySize":119,"user":"anonymous"}
+2025-10-23 12:41:22.664 [WARN]: 📥 ❌ POST /api/reason-codes - 400 (2ms) | {"method":"POST","url":"/api/reason-codes","statusCode":400,"responseTime":"2ms","responseSize":"69 bytes"}
+2025-10-23 12:41:22.665 [WARN]: 📥 ❌ POST /api/reason-codes - 400 (2ms) | {"method":"POST","url":"/api/reason-codes","statusCode":400,"responseTime":"2ms","responseSize":"69 bytes"}
+2025-10-23 12:41:22.679 [INFO]: 📤 GET /api/reason-codes | {"method":"GET","url":"/api/reason-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 12:41:22.682 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (4ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"4ms","responseSize":"26 bytes"}
+2025-10-23 12:41:22.683 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (4ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"4ms","responseSize":"26 bytes"}
+2025-10-23 12:48:39.233 [INFO]: 📤 POST /api/reason-codes | {"method":"POST","url":"/api/reason-codes","bodySize":119,"user":"anonymous"}
+2025-10-23 12:48:39.240 [ERROR]: 📥 ❌ POST /api/reason-codes - 500 (8ms) | {"method":"POST","url":"/api/reason-codes","statusCode":500,"responseTime":"8ms","responseSize":"125 bytes"}
+2025-10-23 12:48:39.241 [ERROR]: 📥 ❌ POST /api/reason-codes - 500 (9ms) | {"method":"POST","url":"/api/reason-codes","statusCode":500,"responseTime":"9ms","responseSize":"125 bytes"}
+2025-10-23 12:48:39.256 [INFO]: 📤 GET /api/reason-codes | {"method":"GET","url":"/api/reason-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 12:48:39.259 [ERROR]: 📥 ❌ GET /api/reason-codes - 500 (4ms) | {"method":"GET","url":"/api/reason-codes","statusCode":500,"responseTime":"4ms","responseSize":"116 bytes"}
+2025-10-23 12:48:39.259 [ERROR]: 📥 ❌ GET /api/reason-codes - 500 (4ms) | {"method":"GET","url":"/api/reason-codes","statusCode":500,"responseTime":"4ms","responseSize":"116 bytes"}
+2025-10-23 12:50:55.034 [INFO]: 📤 POST /api/reason-codes | {"method":"POST","url":"/api/reason-codes","bodySize":92,"user":"anonymous"}
+2025-10-23 12:50:55.034 [WARN]: 📥 ❌ POST /api/reason-codes - 400 (1ms) | {"method":"POST","url":"/api/reason-codes","statusCode":400,"responseTime":"1ms","responseSize":"86 bytes"}
+2025-10-23 12:50:55.034 [WARN]: 📥 ❌ POST /api/reason-codes - 400 (1ms) | {"method":"POST","url":"/api/reason-codes","statusCode":400,"responseTime":"1ms","responseSize":"86 bytes"}
+2025-10-23 12:50:55.045 [INFO]: 📤 GET /api/reason-codes | {"method":"GET","url":"/api/reason-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 12:50:55.047 [ERROR]: 📥 ❌ GET /api/reason-codes - 500 (2ms) | {"method":"GET","url":"/api/reason-codes","statusCode":500,"responseTime":"2ms","responseSize":"116 bytes"}
+2025-10-23 12:50:55.047 [ERROR]: 📥 ❌ GET /api/reason-codes - 500 (2ms) | {"method":"GET","url":"/api/reason-codes","statusCode":500,"responseTime":"2ms","responseSize":"116 bytes"}
+2025-10-23 13:07:06.436 [INFO]: 📤 POST /api/reason-codes | {"method":"POST","url":"/api/reason-codes","bodySize":92,"user":"anonymous"}
+2025-10-23 13:07:06.455 [INFO]: 📥 ✅ POST /api/reason-codes - 200 (19ms) | {"method":"POST","url":"/api/reason-codes","statusCode":200,"responseTime":"19ms","responseSize":"161 bytes"}
+2025-10-23 13:07:06.455 [INFO]: 📥 ✅ POST /api/reason-codes - 200 (20ms) | {"method":"POST","url":"/api/reason-codes","statusCode":200,"responseTime":"20ms","responseSize":"161 bytes"}
+2025-10-23 13:07:06.469 [INFO]: 📤 GET /api/reason-codes | {"method":"GET","url":"/api/reason-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 13:07:06.472 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (3ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"3ms","responseSize":"118 bytes"}
+2025-10-23 13:07:06.472 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (3ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"3ms","responseSize":"118 bytes"}
+2025-10-23 13:14:00.837 [INFO]: 📤 PUT /api/reason-codes/VD | {"method":"PUT","url":"/api/reason-codes/VD","bodySize":122,"user":"anonymous"}
+2025-10-23 13:14:00.839 [WARN]: 📥 ❌ PUT /api/reason-codes/VD - 404 (3ms) | {"method":"PUT","url":"/api/reason-codes/VD","statusCode":404,"responseTime":"3ms","responseSize":"51 bytes"}
+2025-10-23 13:14:00.839 [WARN]: 📥 ❌ PUT /api/reason-codes/VD - 404 (3ms) | {"method":"PUT","url":"/api/reason-codes/VD","statusCode":404,"responseTime":"3ms","responseSize":"51 bytes"}
+2025-10-23 13:30:21.396 [INFO]: 📤 POST /api/reason-codes | {"method":"POST","url":"/api/reason-codes","bodySize":134,"user":"anonymous"}
+2025-10-23 13:30:21.411 [INFO]: 📥 ✅ POST /api/reason-codes - 200 (15ms) | {"method":"POST","url":"/api/reason-codes","statusCode":200,"responseTime":"15ms","responseSize":"177 bytes"}
+2025-10-23 13:30:21.412 [INFO]: 📥 ✅ POST /api/reason-codes - 200 (15ms) | {"method":"POST","url":"/api/reason-codes","statusCode":200,"responseTime":"15ms","responseSize":"177 bytes"}
+2025-10-23 13:30:21.425 [INFO]: 📤 GET /api/reason-codes | {"method":"GET","url":"/api/reason-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 13:30:21.428 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (2ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"2ms","responseSize":"227 bytes"}
+2025-10-23 13:30:21.428 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (3ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"3ms","responseSize":"227 bytes"}
+2025-10-23 13:30:21.433 [INFO]: 📤 PUT /api/reason-codes/IT_TEST | {"method":"PUT","url":"/api/reason-codes/IT_TEST","bodySize":115,"user":"anonymous"}
+2025-10-23 13:30:21.445 [INFO]: 📥 ✅ PUT /api/reason-codes/IT_TEST - 200 (13ms) | {"method":"PUT","url":"/api/reason-codes/IT_TEST","statusCode":200,"responseTime":"13ms","responseSize":"182 bytes"}
+2025-10-23 13:30:21.445 [INFO]: 📥 ✅ PUT /api/reason-codes/IT_TEST - 200 (13ms) | {"method":"PUT","url":"/api/reason-codes/IT_TEST","statusCode":200,"responseTime":"13ms","responseSize":"182 bytes"}
+2025-10-23 13:30:21.450 [INFO]: 📤 DELETE /api/reason-codes/IT_TEST | {"method":"DELETE","url":"/api/reason-codes/IT_TEST","bodySize":0,"user":"anonymous"}
+2025-10-23 13:30:21.464 [INFO]: 📥 ✅ DELETE /api/reason-codes/IT_TEST - 200 (14ms) | {"method":"DELETE","url":"/api/reason-codes/IT_TEST","statusCode":200,"responseTime":"14ms","responseSize":"61 bytes"}
+2025-10-23 13:30:21.464 [INFO]: 📥 ✅ DELETE /api/reason-codes/IT_TEST - 200 (14ms) | {"method":"DELETE","url":"/api/reason-codes/IT_TEST","statusCode":200,"responseTime":"14ms","responseSize":"61 bytes"}
+2025-10-23 13:56:17.852 [INFO]: 📤 POST /api/reason-codes | {"method":"POST","url":"/api/reason-codes","bodySize":134,"user":"anonymous"}
+2025-10-23 13:56:17.870 [INFO]: 📥 ✅ POST /api/reason-codes - 200 (19ms) | {"method":"POST","url":"/api/reason-codes","statusCode":200,"responseTime":"19ms","responseSize":"177 bytes"}
+2025-10-23 13:56:17.870 [INFO]: 📥 ✅ POST /api/reason-codes - 200 (19ms) | {"method":"POST","url":"/api/reason-codes","statusCode":200,"responseTime":"19ms","responseSize":"177 bytes"}
+2025-10-23 13:56:17.889 [INFO]: 📤 GET /api/reason-codes | {"method":"GET","url":"/api/reason-codes","bodySize":0,"user":"anonymous"}
+2025-10-23 13:56:17.892 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (3ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"3ms","responseSize":"227 bytes"}
+2025-10-23 13:56:17.892 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (3ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"3ms","responseSize":"227 bytes"}
+2025-10-23 13:56:17.903 [INFO]: 📤 PUT /api/reason-codes/IT_TEST | {"method":"PUT","url":"/api/reason-codes/IT_TEST","bodySize":115,"user":"anonymous"}
+2025-10-23 13:56:17.921 [INFO]: 📥 ✅ PUT /api/reason-codes/IT_TEST - 200 (18ms) | {"method":"PUT","url":"/api/reason-codes/IT_TEST","statusCode":200,"responseTime":"18ms","responseSize":"182 bytes"}
+2025-10-23 13:56:17.921 [INFO]: 📥 ✅ PUT /api/reason-codes/IT_TEST - 200 (18ms) | {"method":"PUT","url":"/api/reason-codes/IT_TEST","statusCode":200,"responseTime":"18ms","responseSize":"182 bytes"}
+2025-10-23 13:56:17.927 [INFO]: 📤 DELETE /api/reason-codes/IT_TEST | {"method":"DELETE","url":"/api/reason-codes/IT_TEST","bodySize":0,"user":"anonymous"}
+2025-10-23 13:56:17.944 [INFO]: 📥 ✅ DELETE /api/reason-codes/IT_TEST - 200 (17ms) | {"method":"DELETE","url":"/api/reason-codes/IT_TEST","statusCode":200,"responseTime":"17ms","responseSize":"61 bytes"}
+2025-10-23 13:56:17.944 [INFO]: 📥 ✅ DELETE /api/reason-codes/IT_TEST - 200 (17ms) | {"method":"DELETE","url":"/api/reason-codes/IT_TEST","statusCode":200,"responseTime":"17ms","responseSize":"61 bytes"}
+2025-10-23 13:59:22.147 [INFO]: 📤 PUT /api/reason-codes/VD | {"method":"PUT","url":"/api/reason-codes/VD","bodySize":123,"user":"anonymous"}
+2025-10-23 13:59:22.149 [WARN]: 📥 ❌ PUT /api/reason-codes/VD - 404 (2ms) | {"method":"PUT","url":"/api/reason-codes/VD","statusCode":404,"responseTime":"2ms","responseSize":"51 bytes"}
+2025-10-23 13:59:22.150 [WARN]: 📥 ❌ PUT /api/reason-codes/VD - 404 (2ms) | {"method":"PUT","url":"/api/reason-codes/VD","statusCode":404,"responseTime":"2ms","responseSize":"51 bytes"}

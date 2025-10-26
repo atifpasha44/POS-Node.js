@@ -26,6 +26,12 @@ CREATE TABLE IF NOT EXISTS IT_CONF_PROPERTY (
     property_logo VARCHAR(512),
     
     -- Indexes for performance
+    -- audit + reserve fields
+    created_user_id INT DEFAULT NULL,
+    updated_user_id INT DEFAULT NULL,
+    reserve_1 VARCHAR(128) DEFAULT NULL,
+    reserve_2 VARCHAR(128) DEFAULT NULL,
+
     INDEX idx_property_code (property_code),
     INDEX idx_applicable_from (applicable_from)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -9,6 +9,26 @@
             "date": 1761138612483,
             "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\application-2025-10-22.log",
             "hash": "09b5b60cd9f7b92adb7c3cb8f37fad4f85f0fa508b4e287368adfa71c98c7dd1"
+        },
+        {
+            "date": 1761198529803,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\application-2025-10-23.log",
+            "hash": "72cc0dadd67244728945ea966348ca313ace16ef74be8c55b60849cb94ca8563"
+        },
+        {
+            "date": 1761284690944,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\application-2025-10-24.log",
+            "hash": "ce72e4910556f6ad78cb8fc23c554b8ec7feed6edad35430a64559ac7acff423"
+        },
+        {
+            "date": 1761372644900,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\application-2025-10-25.log",
+            "hash": "84d6136b146c6929178a89d587ecf3acbc421ea41cada370ee97518cbb478722"
+        },
+        {
+            "date": 1761480533572,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\application-2025-10-26.log",
+            "hash": "077bce13555496ac213dc94714b52b704b3b851cdd262dbd928f0628076f3349"
         }
     ],
     "hashType": "sha256"

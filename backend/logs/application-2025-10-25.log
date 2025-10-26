@@ -1,0 +1,11 @@
+2025-10-25 11:40:44.954 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-10-25 11:40:44.988 [INFO]: Database connection established successfully
+2025-10-25 11:40:58.390 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+2025-10-25 11:41:10.488 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+2025-10-25 11:51:51.964 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-10-25 11:51:52.002 [INFO]: Database connection established successfully
+2025-10-25 11:52:19.515 [INFO]: 🛑 Server shutting down: SIGINT received (Ctrl+C) | {"reason":"SIGINT received (Ctrl+C)"}
+2025-10-25 11:52:26.701 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-10-25 11:52:26.783 [INFO]: Database connection established successfully
+2025-10-25 11:54:38.899 [WARN]: 🚫 Auth login: FAILED | {"action":"login","user":"admin@pos.com","success":false,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+2025-10-25 11:54:45.578 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}

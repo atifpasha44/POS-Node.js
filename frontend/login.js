@@ -5,8 +5,10 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   const tin = document.getElementById('tin').value;
   const remember = document.getElementById('remember').checked;
 
-  const res = await fetch('http://localhost:5000/api/login', {
+  // Use relative path so frontend dev server proxy is applied and include credentials (cookies/session)
+  const res = await fetch('/api/login', {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password, tin, remember })
   });
