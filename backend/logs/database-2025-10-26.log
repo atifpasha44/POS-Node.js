@@ -203,3 +203,4 @@
   ... | {"sql":"INSERT INTO IT_CONF_UOM (uom_code, uom_name, container_unit, container_size, contained_unit, is_active, created_by) VALUES (?, ?, ?, ?, ?, ?, 'admin')","params":"[\"POR\",\"portion\",null,null,null,1]","executionTime":null}
 2025-10-26 20:17:40.926 [ERROR]: 💥 DB Error: Unknown column 'container_unit' in 'field list' | {"sql":"INSERT INTO IT_CONF_UOM (uom_code, uom_name, container_unit, container_size, contained_unit, is_active, created_by) VALUES (?, ?, ?, ?, ?, ?, 'admin')","params":"[\"POR\",\"portion\",null,null,null,1]","error":"Unknown column 'container_unit' in 'field list'","code":"ER_BAD_FIELD_ERROR"}
 2025-10-26 20:20:03.426 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
+2025-10-26 20:22:53.803 [INFO]: 🔗 Database connected | {"host":"localhost","port":3307,"database":"pos_db"}
