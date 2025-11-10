@@ -6,29 +6,19 @@
     "auditLog": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\.0fc3875e52835e9e72e5a700e4915e93913b89d5-audit.json",
     "files": [
         {
-            "date": 1761138612488,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\database-2025-10-22.log",
-            "hash": "13cb827be71b0cb45fe31c168bdfe450594b78169f2098a52c41142d45490ef8"
+            "date": 1762272502967,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\database-2025-11-04.log",
+            "hash": "15767d38fd60c0b20a19cf1f55087553e39419117ccfdd85afa427efa6756c82"
         },
         {
-            "date": 1761198529810,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\database-2025-10-23.log",
-            "hash": "42ca83f986a82b417275803649c01665212f37f3ce96d5b4b919897132fd97ad"
+            "date": 1762324605676,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\database-2025-11-05.log",
+            "hash": "040139d6f88930c34879e29cb245cb5ddad5cd8a3c77a3f2a11461cd521634b7"
         },
         {
-            "date": 1761284690953,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\database-2025-10-24.log",
-            "hash": "c3337c9dc092f36b134bf4c351d6382f3ae512a272ad22491ceef1e6974a10c0"
-        },
-        {
-            "date": 1761372644908,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\database-2025-10-25.log",
-            "hash": "b5ed530138f5dce5f734f0f5b369fb828d5fabdc2b87dcab6613ebd7a1f0e089"
-        },
-        {
-            "date": 1761480515266,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\database-2025-10-26.log",
-            "hash": "8a1992cf7ac6cae5c960103ee490ccdd25b1391ec5f248d70ceca7032dae51d0"
+            "date": 1762788831609,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\database-2025-11-10.log",
+            "hash": "c270ecc0e7b2229e0918c98a95faa879f906c89aca6944a328a436e0aacd12a6"
         }
     ],
     "hashType": "sha256"

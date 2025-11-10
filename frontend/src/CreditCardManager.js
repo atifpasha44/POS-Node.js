@@ -245,59 +245,78 @@ const CreditCardManager = ({ setParentDirty, records, setRecords }) => {
       return;
     }
 
-    try {
-      const newRecord = {
-        card_code: form.card_code.trim(),
-        card_name: form.card_name.trim(),
-        card_type: form.card_type,
-        bank_issuer: form.bank_issuer.trim(),
-        is_active: form.is_active,
-        transaction_fee: form.transaction_fee ? parseFloat(form.transaction_fee) : null,
-        transaction_charges: form.transaction_charges ? parseFloat(form.transaction_charges) : null,
-        effective_from: form.effective_from || null,
-        effective_to: form.effective_to || null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+    // Prepare record for API
+    const newRecord = {
+      card_code: form.card_code.trim(),
+      card_name: form.card_name.trim(),
+      card_type: form.card_type,
+      bank_issuer: form.bank_issuer.trim(),
+      is_active: form.is_active,
+      transaction_fee: form.transaction_fee ? parseFloat(form.transaction_fee) : null,
+      transaction_charges: form.transaction_charges ? parseFloat(form.transaction_charges) : null,
+      effective_from: form.effective_from || null,
+      effective_to: form.effective_to || null
+    };
 
-      let updatedRecords;
-      if (action === 'Add') {
-        updatedRecords = [...(records || []), newRecord];
-      } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
-        updatedRecords = [...records];
-        updatedRecords[selectedRecordIdx] = { 
-          ...newRecord, 
-          created_at: records[selectedRecordIdx].created_at || newRecord.created_at
-        };
-      } else {
-        updatedRecords = records || [];
+    // Use your API helper if available, otherwise use fetch
+    const saveCard = async () => {
+      try {
+        let response, data;
+        if (action === 'Add') {
+          response = await fetch('/api/credit-cards', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newRecord)
+          });
+        } else if (action === 'Edit' && selectedRecordIdx !== null && records && records[selectedRecordIdx] && records[selectedRecordIdx].id) {
+          // Use PUT for edit
+          response = await fetch(`/api/credit-cards/${records[selectedRecordIdx].id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newRecord)
+          });
+        }
+        if (!response || !response.ok) {
+          const errMsg = response ? await response.text() : 'No response from server';
+          alert('Failed to save credit card: ' + errMsg);
+          return;
+        }
+        data = await response.json();
+
+        // On success, update local state
+        let updatedRecords;
+        if (action === 'Add') {
+          // Add the new record with id from server
+          updatedRecords = [...(records || []), { ...newRecord, id: data.id }];
+        } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
+          updatedRecords = [...records];
+          updatedRecords[selectedRecordIdx] = { ...newRecord, id: records[selectedRecordIdx].id };
+        } else {
+          updatedRecords = records || [];
+        }
+        updatedRecords.sort((a, b) => a.card_code.localeCompare(b.card_code));
+        setRecords(updatedRecords);
+
+        // Clear form after successful save (except for Search action)
+        if (action !== 'Search') {
+          setForm(initialState);
+          setSelectedRecordIdx(null);
+          setAction('Add');
+          setFieldErrors({});
+        }
+        setLastAction(action);
+        setShowSavePopup(true);
+        setIsDirty(false);
+        if (setParentDirty) setParentDirty(false);
+        setTimeout(() => {
+          setShowSavePopup(false);
+        }, 2000);
+      } catch (error) {
+        console.error('Error saving credit card:', error);
+        alert('Error saving credit card: ' + (error.message || String(error)));
       }
-
-      // Sort by card code
-      updatedRecords.sort((a, b) => a.card_code.localeCompare(b.card_code));
-      
-      setRecords(updatedRecords);
-
-      // Clear form after successful save (except for Search action)
-      if (action !== 'Search') {
-        setForm(initialState);
-        setSelectedRecordIdx(null);
-        setAction('Add');
-        setFieldErrors({});
-      }
-
-      setLastAction(action);
-      setShowSavePopup(true);
-      setIsDirty(false);
-      if (setParentDirty) setParentDirty(false);
-      
-      setTimeout(() => {
-        setShowSavePopup(false);
-      }, 2000);
-
-    } catch (error) {
-      console.error('Error saving credit card:', error);
-    }
+    };
+    saveCard();
   };
 
   // Export handlers

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import api from './api';
 
 /**
  * Shared utility for loading property codes from database
@@ -30,15 +31,14 @@ export const loadPropertyCodes = async (forceRefresh = false) => {
     }
 
     console.log('🔄 Loading property codes from database...');
-    console.log('🌐 API URL:', 'http://localhost:3001/api/property-codes');
-    
-    const response = await axios.get('http://localhost:3001/api/property-codes');
-    
-    console.log('📡 API Response Status:', response.status);
-    console.log('📡 API Response Data:', response.data);
-    
-    if (response.data && response.data.success && Array.isArray(response.data.data)) {
-      const data = response.data.data;
+    console.log('🌐 API URL:', '/api/property-codes');
+
+    const response = await api.get('/api/property-codes');
+
+    console.log('📡 API Response:', response);
+
+    if (response && response.success && Array.isArray(response.data)) {
+      const data = response.data;
       
       // Only update cache if we have actual data (don't cache empty results unless it's really empty in DB)
       propertyCodesCache = data;

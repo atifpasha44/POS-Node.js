@@ -250,12 +250,12 @@ const UnitOfMeasurement = ({ setParentDirty, records, setRecords }) => {
       if (action === 'Add') {
         // Attempt to save to server first
         try {
+          // Send only fields that the current backend/schema expects.
+          // The backend stores DESCRIPTION / ActiveStatus on this installation.
           const body = await api.post('/api/uom', {
             uom_code: newRecord.uom_code,
             uom_name: newRecord.uom_name,
-            container_unit: null,
-            container_size: null,
-            contained_unit: null,
+            description: null,
             is_active: newRecord.is_active ? 1 : 0
           });
           if (body && body.id) newRecord.id = body.id;
@@ -272,12 +272,11 @@ const UnitOfMeasurement = ({ setParentDirty, records, setRecords }) => {
         const existing = records[selectedRecordIdx];
         if (existing && existing.id) {
           try {
+            // Update using the fields the backend actually persists.
             await api.put(`/api/uom/${existing.id}`, {
               uom_code: newRecord.uom_code,
               uom_name: newRecord.uom_name,
-              container_unit: null,
-              container_size: null,
-              contained_unit: null,
+              description: null,
               is_active: newRecord.is_active ? 1 : 0
             });
           } catch (err) {

@@ -1,0 +1,16 @@
+2025-11-10 21:03:51.658 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-10 21:03:51.697 [INFO]: Database connection established successfully
+2025-11-10 21:04:28.744 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"}
+2025-11-10 21:20:46.422 [INFO]: 🛑 Server shutting down: SIGINT received (Ctrl+C) | {"reason":"SIGINT received (Ctrl+C)"}
+2025-11-10 21:20:53.493 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-10 21:20:53.524 [INFO]: Database connection established successfully
+2025-11-10 21:25:51.548 [INFO]: 🛑 Server shutting down: SIGINT received (Ctrl+C) | {"reason":"SIGINT received (Ctrl+C)"}
+2025-11-10 21:26:02.785 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-10 21:26:02.819 [INFO]: Database connection established successfully
+2025-11-10 21:33:21.708 [INFO]: 🛑 Server shutting down: SIGINT received (Ctrl+C) | {"reason":"SIGINT received (Ctrl+C)"}
+2025-11-10 21:33:27.133 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-10 21:33:27.167 [INFO]: Database connection established successfully
+2025-11-10 21:52:15.339 [INFO]: 🛑 Server shutting down: SIGINT received (Ctrl+C) | {"reason":"SIGINT received (Ctrl+C)"}
+2025-11-10 21:52:22.345 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-10 21:52:22.375 [INFO]: Database connection established successfully
+2025-11-10 21:54:57.382 [INFO]: 🛑 Server shutting down: SIGINT received (Ctrl+C) | {"reason":"SIGINT received (Ctrl+C)"}

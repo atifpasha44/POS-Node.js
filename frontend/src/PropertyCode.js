@@ -5,6 +5,7 @@ import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import axios from 'axios';
+import api from './api';
 import InfoTooltip from './InfoTooltip';
 
 // Normalize date strings to YYYY-MM-DD to avoid timezone shifts when creating Date objects
@@ -299,8 +300,8 @@ export default function PropertyCode() {
         // Update existing record via API. Normalize date to avoid timezone shifts.
         try {
           const payload = { ...form, applicable_from: normalizeDateString(form.applicable_from) };
-          const response = await axios.put(`http://localhost:3001/api/property-codes/${original.id}`, payload);
-          if (response.data.success) {
+          const response = await api.put(`/api/property-codes/${original.id}`, payload);
+          if (response && response.success) {
             setShowSavePopup(true);
             setTimeout(() => setShowSavePopup(false), 1800);
             // Refresh data from backend
@@ -318,8 +319,8 @@ export default function PropertyCode() {
         // Delete record via API or fallback to local delete
         const original = records[selectedRecordIdx];
         try {
-          const response = await axios.delete(`http://localhost:3001/api/property-codes/${original.id}`);
-          if (response.data.success) {
+          const response = await api.delete(`/api/property-codes/${original.id}`);
+          if (response && response.success) {
             setShowSavePopup(true);
             setTimeout(() => setShowSavePopup(false), 1800);
             // Refresh data from backend
@@ -338,9 +339,9 @@ export default function PropertyCode() {
         const payload = { ...form, applicable_from: normalizeDateString(form.applicable_from) };
         console.log('Adding new record:', payload);
         try {
-          const response = await axios.post('http://localhost:3001/api/property-codes', payload);
-          console.log('Add response:', response.data);
-          if (response.data.success) {
+      const response = await api.post('/api/property-codes', payload);
+      console.log('Add response:', response);
+      if (response && response.success) {
             setShowSavePopup(true);
             setTimeout(() => setShowSavePopup(false), 1800);
             // Refresh data from backend

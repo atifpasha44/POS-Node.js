@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import api from './api';
 import * as XLSX from 'xlsx';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -315,27 +316,61 @@ const TaxStructure = ({ setParentDirty, records, setRecords, taxCodesRecords }) 
     const confirmMessage = `Are you sure you want to delete "${selectedRecord.tax_structure_name}" (${selectedRecord.tax_structure_code})?`;
     
     if (window.confirm(confirmMessage)) {
-      try {
-        const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
-        setRecords(updatedRecords);
-        
-        setSelectedRecordIdx(null);
-        setForm(initialState);
-        setAction('Add');
-        setFieldErrors({});
-        
-        setLastAction('Delete');
-        setShowSavePopup(true);
-        setIsDirty(false);
-        if (setParentDirty) setParentDirty(false);
-        
-        setTimeout(() => {
-          setShowSavePopup(false);
-        }, 2000);
-        
-      } catch (error) {
-        console.error('Error deleting tax structure:', error);
-      }
+      // Try server-first delete if record has an id
+      const selectedRecord = records[selectedRecordIdx];
+      const tryServerDelete = async () => {
+        try {
+          if (selectedRecord && selectedRecord.id) {
+            await api.delete(`/api/tax-structure/${selectedRecord.id}`);
+            // Refresh from server
+            const resp = await api.get('/api/tax-structure');
+            if (resp && resp.data) {
+              setRecords(resp.data.map(r => ({
+                ...r,
+                included_taxes: r.included_taxes || []
+              })));
+            }
+          } else {
+            // No id available, fallback to local delete
+            const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
+            setRecords(updatedRecords);
+          }
+
+          setSelectedRecordIdx(null);
+          setForm(initialState);
+          setAction('Add');
+          setFieldErrors({});
+
+          setLastAction('Delete');
+          setShowSavePopup(true);
+          setIsDirty(false);
+          if (setParentDirty) setParentDirty(false);
+
+          setTimeout(() => {
+            setShowSavePopup(false);
+          }, 2000);
+        } catch (error) {
+          console.warn('Server delete failed, falling back to local delete:', error.message || error);
+          // Fallback to local delete
+          const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
+          setRecords(updatedRecords);
+          setSelectedRecordIdx(null);
+          setForm(initialState);
+          setAction('Add');
+          setFieldErrors({});
+
+          setLastAction('Delete');
+          setShowSavePopup(true);
+          setIsDirty(false);
+          if (setParentDirty) setParentDirty(false);
+
+          setTimeout(() => {
+            setShowSavePopup(false);
+          }, 2000);
+        }
+      };
+
+      tryServerDelete();
     }
   };
 
@@ -384,45 +419,152 @@ const TaxStructure = ({ setParentDirty, records, setRecords, taxCodesRecords }) 
         updated_at: new Date().toISOString()
       };
 
-      let updatedRecords;
-      if (action === 'Add') {
-        updatedRecords = [...(records || []), newRecord];
-      } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
-        updatedRecords = [...records];
-        updatedRecords[selectedRecordIdx] = { 
-          ...newRecord, 
-          created_at: records[selectedRecordIdx].created_at || newRecord.created_at
-        };
-      } else {
-        updatedRecords = records || [];
-      }
+      // Try server-first save for Add and Edit when possible
+      const tryServerSave = async () => {
+        try {
+          if (action === 'Add') {
+            // Payload includes included_taxes so backend can persist child rows
+            await api.post('/api/tax-structure', {
+              tax_structure_code: newRecord.tax_structure_code,
+              tax_structure_name: newRecord.tax_structure_name,
+              is_active: newRecord.is_active ? 1 : 0,
+              included_taxes: newRecord.included_taxes
+            });
 
-      // Sort by tax structure code
-      updatedRecords.sort((a, b) => a.tax_structure_code.localeCompare(b.tax_structure_code));
-      
-      setRecords(updatedRecords);
+            // Refresh list from server
+            const resp = await api.get('/api/tax-structure');
+            if (resp && resp.data) {
+              setRecords(resp.data.map(r => ({
+                ...r,
+                included_taxes: r.included_taxes || []
+              })));
+            }
+          } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
+            const existing = records[selectedRecordIdx];
+            if (existing && existing.id) {
+              await api.put(`/api/tax-structure/${existing.id}`, {
+                tax_structure_code: newRecord.tax_structure_code,
+                tax_structure_name: newRecord.tax_structure_name,
+                is_active: newRecord.is_active ? 1 : 0,
+                included_taxes: newRecord.included_taxes
+              });
 
-      // Clear form after successful save (except for Search action)
-      if (action !== 'Search') {
-        setForm(initialState);
-        setSelectedRecordIdx(null);
-        setAction('Add');
-        setFieldErrors({});
-      }
+              const resp = await api.get('/api/tax-structure');
+              if (resp && resp.data) {
+                setRecords(resp.data.map(r => ({ ...r, included_taxes: r.included_taxes || [] }))); 
+              }
+            } else {
+              // Cannot perform server edit without an id — fallback to local edit
+              const updatedRecords = [...records];
+              updatedRecords[selectedRecordIdx] = { 
+                ...newRecord, 
+                created_at: records[selectedRecordIdx].created_at || newRecord.created_at
+              };
+              updatedRecords.sort((a, b) => a.tax_structure_code.localeCompare(b.tax_structure_code));
+              setRecords(updatedRecords);
+            }
+          }
 
-      setLastAction(action);
-      setShowSavePopup(true);
-      setIsDirty(false);
-      if (setParentDirty) setParentDirty(false);
-      
-      setTimeout(() => {
-        setShowSavePopup(false);
-      }, 2000);
+          // Clear form after successful save (except for Search action)
+          if (action !== 'Search') {
+            setForm(initialState);
+            setSelectedRecordIdx(null);
+            setAction('Add');
+            setFieldErrors({});
+          }
+
+          setLastAction(action);
+          setShowSavePopup(true);
+          setIsDirty(false);
+          if (setParentDirty) setParentDirty(false);
+
+          setTimeout(() => {
+            setShowSavePopup(false);
+          }, 2000);
+        } catch (error) {
+          console.warn('Server save failed, falling back to local save:', error.message || error);
+
+          // Fallback to previous local-only behavior
+          let updatedRecords;
+          if (action === 'Add') {
+            updatedRecords = [...(records || []), newRecord];
+          } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
+            updatedRecords = [...records];
+            updatedRecords[selectedRecordIdx] = { 
+              ...newRecord, 
+              created_at: records[selectedRecordIdx].created_at || newRecord.created_at
+            };
+          } else {
+            updatedRecords = records || [];
+          }
+
+          // Sort by tax structure code
+          updatedRecords.sort((a, b) => a.tax_structure_code.localeCompare(b.tax_structure_code));
+          
+          setRecords(updatedRecords);
+
+          // Clear form after successful save (except for Search action)
+          if (action !== 'Search') {
+            setForm(initialState);
+            setSelectedRecordIdx(null);
+            setAction('Add');
+            setFieldErrors({});
+          }
+
+          setLastAction(action);
+          setShowSavePopup(true);
+          setIsDirty(false);
+          if (setParentDirty) setParentDirty(false);
+          
+          setTimeout(() => {
+            setShowSavePopup(false);
+          }, 2000);
+        }
+      };
+
+      tryServerSave();
 
     } catch (error) {
       console.error('Error saving tax structure:', error);
     }
   };
+
+  // Load tax structures from server on mount (server-first). If server call fails, leave existing records (local) intact.
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      try {
+        const resp = await api.get('/api/tax-structure');
+        if (mounted && resp && resp.data) {
+          // Normalize records — ensure included_taxes exists for UI.
+          // Backend may return a single tax_code (linked to tax codes table). If so,
+          // convert that to the `included_taxes` array expected by the UI.
+          const normalized = resp.data.map(r => {
+            const base = { ...r };
+            // If server returned included_taxes (future-proof), use it; otherwise
+            // if a tax_code is provided (single code), synthesize included_taxes so UI shows it.
+            if (!base.included_taxes || base.included_taxes.length === 0) {
+              if (base.tax_code) {
+                base.included_taxes = [{
+                  tax_code: base.tax_code,
+                  sequence: 1,
+                  calculation_method: base.calculation_type || 'Percentage'
+                }];
+              } else {
+                base.included_taxes = [];
+              }
+            }
+            return base;
+          });
+          setRecords(normalized);
+        }
+      } catch (err) {
+        console.warn('Could not load tax structures from server, using local data if available:', err.message || err);
+      }
+    };
+    load();
+    return () => { mounted = false; };
+  }, []);
 
   // Export handlers
   const exportToExcel = async () => {

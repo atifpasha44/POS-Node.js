@@ -1,0 +1,16 @@
+2025-11-05 12:06:45.722 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-05 12:06:45.817 [INFO]: Database connection established successfully
+2025-11-05 12:44:36.800 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"}
+2025-11-05 16:18:01.235 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-05 16:18:01.272 [INFO]: Database connection established successfully
+2025-11-05 16:18:23.112 [INFO]: 🛑 Server shutting down: SIGINT received (Ctrl+C) | {"reason":"SIGINT received (Ctrl+C)"}
+2025-11-05 16:19:19.970 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-05 16:19:20.014 [INFO]: Database connection established successfully
+2025-11-05 16:29:06.184 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-05 16:29:06.230 [INFO]: Database connection established successfully
+2025-11-05 16:30:41.417 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-05 16:30:41.443 [INFO]: Database connection established successfully
+2025-11-05 16:31:30.715 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-05 16:31:30.758 [INFO]: Database connection established successfully
+2025-11-05 17:42:25.120 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-05 17:42:25.154 [INFO]: Database connection established successfully

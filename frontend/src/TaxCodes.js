@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import InfoTooltip from './InfoTooltip';
+import api from './api';
 
 const initialState = {
   tax_code: '',
@@ -27,6 +28,34 @@ const TaxCodes = ({ setParentDirty, records, setRecords }) => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [lastAction, setLastAction] = useState('Add');
   const formRef = useRef(null);
+
+  // Load tax codes from backend on mount. If backend is unavailable, fall back to existing `records` prop/localStorage.
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const resp = await api.get('/api/tax-codes');
+        if (resp && resp.success && Array.isArray(resp.data) && mounted) {
+          setRecords(resp.data.map(r => ({
+            id: r.id || null,
+            tax_code: r.tax_code,
+            tax_name: r.tax_name,
+            tax_percentage: r.tax_percentage,
+            applicable_on: r.applicable_on || '',
+            is_active: r.is_active === 1 || r.is_active === true,
+            effective_from: r.effective_from || null,
+            effective_to: r.effective_to || null,
+            created_at: r.created_at || null,
+            updated_at: r.updated_at || null
+          })));
+        }
+      } catch (err) {
+        // Backend likely not running — keep using local state/localStorage silently
+        console.warn('TaxCodes: Could not load from API, falling back to local data.', err.message || err);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []); // run once on mount
 
   // Applicable On options
   const applicableOnOptions = [
@@ -185,27 +214,67 @@ const TaxCodes = ({ setParentDirty, records, setRecords }) => {
     const confirmMessage = `Are you sure you want to delete "${selectedRecord.tax_name}" (${selectedRecord.tax_code})?`;
     
     if (window.confirm(confirmMessage)) {
-      try {
-        const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
-        setRecords(updatedRecords);
-        
-        setSelectedRecordIdx(null);
-        setForm(initialState);
-        setAction('Add');
-        setFieldErrors({});
-        
-        setLastAction('Delete');
-        setShowSavePopup(true);
-        setIsDirty(false);
-        if (setParentDirty) setParentDirty(false);
-        
-        setTimeout(() => {
-          setShowSavePopup(false);
-        }, 2000);
-        
-      } catch (error) {
-        console.error('Error deleting tax code:', error);
-      }
+      (async () => {
+        try {
+          // Try server delete first
+          await api.delete(`/api/tax-codes/${encodeURIComponent(selectedRecord.tax_code)}`);
+
+          // Refresh list from server
+          try {
+            const resp = await api.get('/api/tax-codes');
+            if (resp && resp.success && Array.isArray(resp.data)) {
+              setRecords(resp.data.map(r => ({
+                id: r.id || null,
+                tax_code: r.tax_code,
+                tax_name: r.tax_name,
+                tax_percentage: r.tax_percentage,
+                applicable_on: r.applicable_on || '',
+                is_active: r.is_active === 1 || r.is_active === true,
+                effective_from: r.effective_from || null,
+                effective_to: r.effective_to || null,
+                created_at: r.created_at || null,
+                updated_at: r.updated_at || null
+              })));
+            }
+          } catch (e) {
+            console.warn('Could not refresh Tax Codes from API after delete:', e.message || e);
+          }
+
+          setSelectedRecordIdx(null);
+          setForm(initialState);
+          setAction('Add');
+          setFieldErrors({});
+
+          setLastAction('Delete');
+          setShowSavePopup(true);
+          setIsDirty(false);
+          if (setParentDirty) setParentDirty(false);
+
+          setTimeout(() => {
+            setShowSavePopup(false);
+          }, 2000);
+
+        } catch (err) {
+          console.error('Server delete failed, falling back to local delete:', err);
+          // Fallback to local delete
+          try {
+            const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
+            setRecords(updatedRecords);
+            setSelectedRecordIdx(null);
+            setForm(initialState);
+            setAction('Add');
+            setFieldErrors({});
+            setLastAction('Delete');
+            setShowSavePopup(true);
+            setIsDirty(false);
+            if (setParentDirty) setParentDirty(false);
+            setTimeout(() => setShowSavePopup(false), 2000);
+          } catch (fallbackErr) {
+            console.error('Fallback delete also failed:', fallbackErr);
+            alert('Error deleting tax code. Please try again.');
+          }
+        }
+      })();
     }
   };
 
@@ -238,41 +307,50 @@ const TaxCodes = ({ setParentDirty, records, setRecords }) => {
     if (setParentDirty) setParentDirty(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
 
-    try {
-      const newRecord = {
-        tax_code: form.tax_code.trim(),
-        tax_name: form.tax_name.trim(),
-        tax_percentage: parseFloat(form.tax_percentage),
-        applicable_on: form.applicable_on.trim(),
-        is_active: form.is_active,
-        effective_from: form.effective_from || null,
-        effective_to: form.effective_to || null,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+    const payload = {
+      tax_code: form.tax_code.trim(),
+      tax_name: form.tax_name.trim(),
+      tax_percentage: parseFloat(form.tax_percentage) || 0,
+      applicable_on: form.applicable_on.trim(),
+      is_active: form.is_active ? 1 : 0,
+      effective_from: form.effective_from || null,
+      effective_to: form.effective_to || null
+    };
 
-      let updatedRecords;
+    try {
+      // Prefer server-first: call backend API and then refresh list from server
       if (action === 'Add') {
-        updatedRecords = [...(records || []), newRecord];
-      } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
-        updatedRecords = [...records];
-        updatedRecords[selectedRecordIdx] = { 
-          ...newRecord, 
-          created_at: records[selectedRecordIdx].created_at || newRecord.created_at
-        };
-      } else {
-        updatedRecords = records || [];
+        await api.post('/api/tax-codes', payload);
+      } else if (action === 'Edit' && selectedRecordIdx !== null && records && records[selectedRecordIdx]) {
+        const originalCode = records[selectedRecordIdx].tax_code;
+        await api.put(`/api/tax-codes/${encodeURIComponent(originalCode)}`, payload);
       }
 
-      // Sort by tax code
-      updatedRecords.sort((a, b) => a.tax_code.localeCompare(b.tax_code));
-      
-      setRecords(updatedRecords);
+      // Refresh from server
+      try {
+        const resp = await api.get('/api/tax-codes');
+        if (resp && resp.success && Array.isArray(resp.data)) {
+          setRecords(resp.data.map(r => ({
+            id: r.id || null,
+            tax_code: r.tax_code,
+            tax_name: r.tax_name,
+            tax_percentage: r.tax_percentage,
+            applicable_on: r.applicable_on || '',
+            is_active: r.is_active === 1 || r.is_active === true,
+            effective_from: r.effective_from || null,
+            effective_to: r.effective_to || null,
+            created_at: r.created_at || null,
+            updated_at: r.updated_at || null
+          })));
+        }
+      } catch (e) {
+        console.warn('Could not refresh Tax Codes from API after save:', e.message || e);
+      }
 
       // Clear form after successful save (except for Search action)
       if (action !== 'Search') {
@@ -292,7 +370,55 @@ const TaxCodes = ({ setParentDirty, records, setRecords }) => {
       }, 2000);
 
     } catch (error) {
-      console.error('Error saving tax code:', error);
+      // If server fails, fallback to local-only save to avoid blocking user
+      console.error('Server save failed, falling back to local save:', error);
+      try {
+        const newRecord = {
+          tax_code: form.tax_code.trim(),
+          tax_name: form.tax_name.trim(),
+          tax_percentage: parseFloat(form.tax_percentage),
+          applicable_on: form.applicable_on.trim(),
+          is_active: form.is_active,
+          effective_from: form.effective_from || null,
+          effective_to: form.effective_to || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        let updatedRecords;
+        if (action === 'Add') {
+          updatedRecords = [...(records || []), newRecord];
+        } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
+          updatedRecords = [...records];
+          updatedRecords[selectedRecordIdx] = { 
+            ...newRecord, 
+            created_at: records[selectedRecordIdx].created_at || newRecord.created_at
+          };
+        } else {
+          updatedRecords = records || [];
+        }
+
+        updatedRecords.sort((a, b) => a.tax_code.localeCompare(b.tax_code));
+        setRecords(updatedRecords);
+
+        if (action !== 'Search') {
+          setForm(initialState);
+          setSelectedRecordIdx(null);
+          setAction('Add');
+          setFieldErrors({});
+        }
+
+        setLastAction(action);
+        setShowSavePopup(true);
+        setIsDirty(false);
+        if (setParentDirty) setParentDirty(false);
+
+        setTimeout(() => setShowSavePopup(false), 2000);
+
+      } catch (fallbackErr) {
+        console.error('Fallback local save also failed:', fallbackErr);
+        alert('Error saving tax code. Please try again.');
+      }
     }
   };
 

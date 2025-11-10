@@ -1,0 +1,43 @@
+2025-11-10 21:04:28.713 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"anonymous"}
+2025-11-10 21:04:28.746 [INFO]: 📥 ✅ POST /api/login - 200 (34ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"34ms","responseSize":"183 bytes"}
+2025-11-10 21:04:28.748 [INFO]: 📥 ✅ POST /api/login - 200 (37ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"37ms","responseSize":"183 bytes"}
+2025-11-10 21:04:28.918 [INFO]: 📤 GET /favicon.ico | {"method":"GET","url":"/favicon.ico","bodySize":0,"user":"ADMIN"}
+2025-11-10 21:21:12.316 [INFO]: 📤 GET /api/tax-structure | {"method":"GET","url":"/api/tax-structure","bodySize":0,"user":"anonymous"}
+2025-11-10 21:21:12.334 [ERROR]: 📥 ❌ GET /api/tax-structure - 500 (18ms) | {"method":"GET","url":"/api/tax-structure","statusCode":500,"responseTime":"18ms","responseSize":"136 bytes"}
+2025-11-10 21:21:12.337 [ERROR]: 📥 ❌ GET /api/tax-structure - 500 (21ms) | {"method":"GET","url":"/api/tax-structure","statusCode":500,"responseTime":"21ms","responseSize":"136 bytes"}
+2025-11-10 21:21:12.560 [INFO]: 📤 GET /api/tax-structure | {"method":"GET","url":"/api/tax-structure","bodySize":0,"user":"anonymous"}
+2025-11-10 21:21:12.567 [ERROR]: 📥 ❌ GET /api/tax-structure - 500 (7ms) | {"method":"GET","url":"/api/tax-structure","statusCode":500,"responseTime":"7ms","responseSize":"136 bytes"}
+2025-11-10 21:21:12.568 [ERROR]: 📥 ❌ GET /api/tax-structure - 500 (8ms) | {"method":"GET","url":"/api/tax-structure","statusCode":500,"responseTime":"8ms","responseSize":"136 bytes"}
+2025-11-10 21:21:16.364 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"anonymous"}
+2025-11-10 21:21:16.395 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (36ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"36ms","responseSize":"105 bytes"}
+2025-11-10 21:21:16.397 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (37ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"37ms","responseSize":"105 bytes"}
+2025-11-10 21:21:16.726 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"anonymous"}
+2025-11-10 21:21:16.730 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (5ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"5ms","responseSize":"105 bytes"}
+2025-11-10 21:21:16.731 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (5ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"5ms","responseSize":"105 bytes"}
+2025-11-10 21:21:18.817 [INFO]: 📤 GET /api/tax-structure | {"method":"GET","url":"/api/tax-structure","bodySize":0,"user":"anonymous"}
+2025-11-10 21:21:18.823 [ERROR]: 📥 ❌ GET /api/tax-structure - 500 (6ms) | {"method":"GET","url":"/api/tax-structure","statusCode":500,"responseTime":"6ms","responseSize":"136 bytes"}
+2025-11-10 21:21:18.824 [ERROR]: 📥 ❌ GET /api/tax-structure - 500 (7ms) | {"method":"GET","url":"/api/tax-structure","statusCode":500,"responseTime":"7ms","responseSize":"136 bytes"}
+2025-11-10 21:21:19.149 [INFO]: 📤 GET /api/tax-structure | {"method":"GET","url":"/api/tax-structure","bodySize":0,"user":"anonymous"}
+2025-11-10 21:21:19.153 [ERROR]: 📥 ❌ GET /api/tax-structure - 500 (5ms) | {"method":"GET","url":"/api/tax-structure","statusCode":500,"responseTime":"5ms","responseSize":"136 bytes"}
+2025-11-10 21:21:19.154 [ERROR]: 📥 ❌ GET /api/tax-structure - 500 (6ms) | {"method":"GET","url":"/api/tax-structure","statusCode":500,"responseTime":"6ms","responseSize":"136 bytes"}
+2025-11-10 21:22:20.462 [INFO]: 📤 POST /api/tax-structure | {"method":"POST","url":"/api/tax-structure","bodySize":161,"user":"anonymous"}
+2025-11-10 21:22:20.472 [ERROR]: 📥 ❌ POST /api/tax-structure - 500 (10ms) | {"method":"POST","url":"/api/tax-structure","statusCode":500,"responseTime":"10ms","responseSize":"141 bytes"}
+2025-11-10 21:22:20.473 [ERROR]: 📥 ❌ POST /api/tax-structure - 500 (11ms) | {"method":"POST","url":"/api/tax-structure","statusCode":500,"responseTime":"11ms","responseSize":"141 bytes"}
+2025-11-10 21:27:06.191 [INFO]: 📤 POST /api/tax-structure | {"method":"POST","url":"/api/tax-structure","bodySize":161,"user":"anonymous"}
+2025-11-10 21:27:06.225 [INFO]: 📥 ✅ POST /api/tax-structure - 200 (34ms) | {"method":"POST","url":"/api/tax-structure","statusCode":200,"responseTime":"34ms","responseSize":"70 bytes"}
+2025-11-10 21:27:06.227 [INFO]: 📥 ✅ POST /api/tax-structure - 200 (36ms) | {"method":"POST","url":"/api/tax-structure","statusCode":200,"responseTime":"36ms","responseSize":"70 bytes"}
+2025-11-10 21:27:06.391 [INFO]: 📤 GET /api/tax-structure | {"method":"GET","url":"/api/tax-structure","bodySize":0,"user":"anonymous"}
+2025-11-10 21:27:06.410 [INFO]: 📥 ✅ GET /api/tax-structure - 200 (18ms) | {"method":"GET","url":"/api/tax-structure","statusCode":200,"responseTime":"18ms","responseSize":"1916 bytes"}
+2025-11-10 21:27:06.411 [INFO]: 📥 ✅ GET /api/tax-structure - 200 (19ms) | {"method":"GET","url":"/api/tax-structure","statusCode":200,"responseTime":"19ms","responseSize":"1916 bytes"}
+2025-11-10 21:41:13.006 [INFO]: 📤 POST /api/credit-cards | {"method":"POST","url":"/api/credit-cards","bodySize":206,"user":"anonymous"}
+2025-11-10 21:41:13.021 [ERROR]: 📥 ❌ POST /api/credit-cards - 500 (15ms) | {"method":"POST","url":"/api/credit-cards","statusCode":500,"responseTime":"15ms","responseSize":"123 bytes"}
+2025-11-10 21:41:13.023 [ERROR]: 📥 ❌ POST /api/credit-cards - 500 (18ms) | {"method":"POST","url":"/api/credit-cards","statusCode":500,"responseTime":"18ms","responseSize":"123 bytes"}
+2025-11-10 21:49:59.957 [INFO]: 📤 POST /api/credit-cards | {"method":"POST","url":"/api/credit-cards","bodySize":206,"user":"anonymous"}
+2025-11-10 21:49:59.961 [ERROR]: 📥 ❌ POST /api/credit-cards - 500 (5ms) | {"method":"POST","url":"/api/credit-cards","statusCode":500,"responseTime":"5ms","responseSize":"135 bytes"}
+2025-11-10 21:49:59.962 [ERROR]: 📥 ❌ POST /api/credit-cards - 500 (6ms) | {"method":"POST","url":"/api/credit-cards","statusCode":500,"responseTime":"6ms","responseSize":"135 bytes"}
+2025-11-10 21:52:26.779 [INFO]: 📤 POST /api/credit-cards | {"method":"POST","url":"/api/credit-cards","bodySize":206,"user":"anonymous"}
+2025-11-10 21:52:26.791 [ERROR]: 📥 ❌ POST /api/credit-cards - 500 (12ms) | {"method":"POST","url":"/api/credit-cards","statusCode":500,"responseTime":"12ms","responseSize":"124 bytes"}
+2025-11-10 21:52:26.792 [ERROR]: 📥 ❌ POST /api/credit-cards - 500 (14ms) | {"method":"POST","url":"/api/credit-cards","statusCode":500,"responseTime":"14ms","responseSize":"124 bytes"}
+2025-11-10 21:53:18.231 [INFO]: 📤 POST /api/credit-cards | {"method":"POST","url":"/api/credit-cards","bodySize":203,"user":"anonymous"}
+2025-11-10 21:53:18.236 [ERROR]: 📥 ❌ POST /api/credit-cards - 500 (5ms) | {"method":"POST","url":"/api/credit-cards","statusCode":500,"responseTime":"5ms","responseSize":"124 bytes"}
+2025-11-10 21:53:18.236 [ERROR]: 📥 ❌ POST /api/credit-cards - 500 (6ms) | {"method":"POST","url":"/api/credit-cards","statusCode":500,"responseTime":"6ms","responseSize":"124 bytes"}

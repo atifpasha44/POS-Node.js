@@ -1,0 +1,5 @@
+2025-11-04 21:38:23.033 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
+2025-11-04 21:38:23.186 [INFO]: Database connection established successfully
+2025-11-04 21:39:10.124 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"}
+2025-11-04 21:39:19.601 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"}
+2025-11-04 21:39:31.617 [INFO]: 🔐 Auth login: SUCCESS | {"action":"login","user":"ADMIN","success":true,"ip":"127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"}

@@ -6,29 +6,19 @@
     "auditLog": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\.38630444eba69fb947427cd7bae477a1647a2fd9-audit.json",
     "files": [
         {
-            "date": 1761138612487,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\api-2025-10-22.log",
-            "hash": "339eee487860bcbaa54d1e03477b8048f44770836e36ebf30a43e0771288b6d9"
+            "date": 1762272502960,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\api-2025-11-04.log",
+            "hash": "48f151ad859d63111cf41344e888ea0fb670c431f13853de05348fe1ec967ec0"
         },
         {
-            "date": 1761198529808,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\api-2025-10-23.log",
-            "hash": "6e8cdea0fdf5ab75a47560f7dba2bc8c1d6be83fc50e01ec5417006291211eb2"
+            "date": 1762324605675,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\api-2025-11-05.log",
+            "hash": "3f3cd22d53e92f63b17db3202fbc3a608715100f17f37bcff019081ba6699023"
         },
         {
-            "date": 1761284690951,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\api-2025-10-24.log",
-            "hash": "95e429ffd5ed065bb7554d8112b8748f123646d62773834df966d1d9c5e8839e"
-        },
-        {
-            "date": 1761372644906,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\api-2025-10-25.log",
-            "hash": "3c6741ca49661b4d7419d2e3324e9387ccab1b1d93774e3f120ac85bec2c1270"
-        },
-        {
-            "date": 1761480515262,
-            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\api-2025-10-26.log",
-            "hash": "e0b33f92384fdf438051d4815f54eca5dec85926451fbda5fb643f04fd0184ff"
+            "date": 1762788831606,
+            "name": "D:\\pos-notejs\\POS-NodeJS\\POS-Node.js\\backend\\logs\\api-2025-11-10.log",
+            "hash": "97f16679bcc66b2983173ebfb2492b41f9e71b96a49fb68dbd21f61bf9bed8ed"
         }
     ],
     "hashType": "sha256"

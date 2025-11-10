@@ -1,0 +1,52 @@
+2025-11-04 21:39:10.098 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"anonymous"}
+2025-11-04 21:39:10.125 [INFO]: 📥 ✅ POST /api/login - 200 (27ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"27ms","responseSize":"183 bytes"}
+2025-11-04 21:39:10.126 [INFO]: 📥 ✅ POST /api/login - 200 (29ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"29ms","responseSize":"183 bytes"}
+2025-11-04 21:39:10.312 [INFO]: 📤 GET /favicon.ico | {"method":"GET","url":"/favicon.ico","bodySize":0,"user":"ADMIN"}
+2025-11-04 21:39:19.597 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"ADMIN"}
+2025-11-04 21:39:19.602 [INFO]: 📥 ✅ POST /api/login - 200 (4ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"4ms","responseSize":"183 bytes"}
+2025-11-04 21:39:19.602 [INFO]: 📥 ✅ POST /api/login - 200 (5ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"5ms","responseSize":"183 bytes"}
+2025-11-04 21:39:31.610 [INFO]: 📤 POST /api/login | {"method":"POST","url":"/api/login","bodySize":73,"user":"ADMIN"}
+2025-11-04 21:39:31.618 [INFO]: 📥 ✅ POST /api/login - 200 (9ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"9ms","responseSize":"183 bytes"}
+2025-11-04 21:39:31.619 [INFO]: 📥 ✅ POST /api/login - 200 (10ms) | {"method":"POST","url":"/api/login","statusCode":200,"responseTime":"10ms","responseSize":"183 bytes"}
+2025-11-04 21:44:41.969 [INFO]: 📤 POST /api/uom | {"method":"POST","url":"/api/uom","bodySize":68,"user":"ADMIN"}
+2025-11-04 21:44:42.061 [INFO]: 📥 ✅ POST /api/uom - 200 (92ms) | {"method":"POST","url":"/api/uom","statusCode":200,"responseTime":"92ms","responseSize":"129 bytes"}
+2025-11-04 21:44:42.062 [INFO]: 📥 ✅ POST /api/uom - 200 (93ms) | {"method":"POST","url":"/api/uom","statusCode":200,"responseTime":"93ms","responseSize":"129 bytes"}
+2025-11-04 21:56:59.500 [INFO]: 📤 POST /api/uom | {"method":"POST","url":"/api/uom","bodySize":74,"user":"ADMIN"}
+2025-11-04 21:56:59.525 [INFO]: 📥 ✅ POST /api/uom - 200 (26ms) | {"method":"POST","url":"/api/uom","statusCode":200,"responseTime":"26ms","responseSize":"135 bytes"}
+2025-11-04 21:56:59.527 [INFO]: 📥 ✅ POST /api/uom - 200 (27ms) | {"method":"POST","url":"/api/uom","statusCode":200,"responseTime":"27ms","responseSize":"135 bytes"}
+2025-11-04 22:12:34.669 [INFO]: 📤 GET /api/reason-codes | {"method":"GET","url":"/api/reason-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:12:34.679 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (11ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"11ms","responseSize":"762 bytes"}
+2025-11-04 22:12:34.680 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (12ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"12ms","responseSize":"762 bytes"}
+2025-11-04 22:12:34.911 [INFO]: 📤 GET /api/reason-codes | {"method":"GET","url":"/api/reason-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:12:34.916 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (5ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"5ms","responseSize":"762 bytes"}
+2025-11-04 22:12:34.917 [INFO]: 📥 ✅ GET /api/reason-codes - 200 (5ms) | {"method":"GET","url":"/api/reason-codes","statusCode":200,"responseTime":"5ms","responseSize":"762 bytes"}
+2025-11-04 22:12:48.479 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:12:48.532 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (48ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"48ms","responseSize":"26 bytes"}
+2025-11-04 22:12:48.537 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (67ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"67ms","responseSize":"26 bytes"}
+2025-11-04 22:12:48.587 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:12:48.597 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (14ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"14ms","responseSize":"26 bytes"}
+2025-11-04 22:12:48.599 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (14ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"14ms","responseSize":"26 bytes"}
+2025-11-04 22:13:06.776 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:13:06.781 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (6ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"6ms","responseSize":"26 bytes"}
+2025-11-04 22:13:06.782 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (7ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"7ms","responseSize":"26 bytes"}
+2025-11-04 22:13:52.833 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:13:52.845 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (12ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"12ms","responseSize":"26 bytes"}
+2025-11-04 22:13:52.846 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (13ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"13ms","responseSize":"26 bytes"}
+2025-11-04 22:16:09.024 [INFO]: 📤 POST /api/tax-codes | {"method":"POST","url":"/api/tax-codes","bodySize":159,"user":"ADMIN"}
+2025-11-04 22:16:09.043 [INFO]: 📥 ✅ POST /api/tax-codes - 200 (19ms) | {"method":"POST","url":"/api/tax-codes","statusCode":200,"responseTime":"19ms","responseSize":"58 bytes"}
+2025-11-04 22:16:09.043 [INFO]: 📥 ✅ POST /api/tax-codes - 200 (20ms) | {"method":"POST","url":"/api/tax-codes","statusCode":200,"responseTime":"20ms","responseSize":"58 bytes"}
+2025-11-04 22:16:09.284 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:16:09.299 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (14ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"14ms","responseSize":"104 bytes"}
+2025-11-04 22:16:09.301 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (17ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"17ms","responseSize":"104 bytes"}
+2025-11-04 22:16:42.437 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:16:42.442 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (4ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"4ms","responseSize":"104 bytes"}
+2025-11-04 22:16:42.442 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (5ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"5ms","responseSize":"104 bytes"}
+2025-11-04 22:16:42.683 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:16:42.687 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (5ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"5ms","responseSize":"104 bytes"}
+2025-11-04 22:16:42.689 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (5ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"5ms","responseSize":"104 bytes"}
+2025-11-04 22:17:11.035 [INFO]: 📤 PUT /api/tax-codes/VAT01 | {"method":"PUT","url":"/api/tax-codes/VAT01","bodySize":144,"user":"ADMIN"}
+2025-11-04 22:17:11.064 [INFO]: 📥 ✅ PUT /api/tax-codes/VAT01 - 200 (28ms) | {"method":"PUT","url":"/api/tax-codes/VAT01","statusCode":200,"responseTime":"28ms","responseSize":"58 bytes"}
+2025-11-04 22:17:11.064 [INFO]: 📥 ✅ PUT /api/tax-codes/VAT01 - 200 (29ms) | {"method":"PUT","url":"/api/tax-codes/VAT01","statusCode":200,"responseTime":"29ms","responseSize":"58 bytes"}
+2025-11-04 22:17:11.291 [INFO]: 📤 GET /api/tax-codes | {"method":"GET","url":"/api/tax-codes","bodySize":0,"user":"ADMIN"}
+2025-11-04 22:17:11.295 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (4ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"4ms","responseSize":"105 bytes"}
+2025-11-04 22:17:11.295 [INFO]: 📥 ✅ GET /api/tax-codes - 200 (5ms) | {"method":"GET","url":"/api/tax-codes","statusCode":200,"responseTime":"5ms","responseSize":"105 bytes"}

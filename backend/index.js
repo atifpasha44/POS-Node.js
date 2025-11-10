@@ -70,6 +70,47 @@ db.connect((err) => {
 // Database logging enhancement
 logDatabaseConnection(db);
 
+// Detect schema capabilities (modern vs legacy) and prepare child tables if needed
+let taxStructureHasId = false;
+const detectAndPrepareSchema = () => {
+    try {
+        const schema = db.config.database;
+        const sql = `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'IT_CONF_TAXSTRUCTURE' AND COLUMN_NAME = 'id'`;
+        db.query(sql, [schema], (err, rows) => {
+            if (err) {
+                console.warn('Schema detection failed:', err.message || err);
+                return;
+            }
+            taxStructureHasId = rows && rows[0] && rows[0].cnt > 0;
+            console.log('Schema detection: IT_CONF_TAXSTRUCTURE has id:', taxStructureHasId);
+
+            if (taxStructureHasId) {
+                // Ensure child table exists for included taxes
+                const createChild = `
+                CREATE TABLE IF NOT EXISTS IT_CONF_TAXSTRUCTURE_TAX (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    tax_structure_id INT NOT NULL,
+                    tax_code VARCHAR(16) NOT NULL,
+                    sequence INT NOT NULL,
+                    calculation_method VARCHAR(64) DEFAULT 'Percentage',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_tax_structure_id (tax_structure_id),
+                    CONSTRAINT fk_taxstructure_tax FOREIGN KEY (tax_structure_id) REFERENCES IT_CONF_TAXSTRUCTURE(id) ON DELETE CASCADE ON UPDATE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
+
+                db.query(createChild, (err2) => {
+                    if (err2) console.warn('Could not create IT_CONF_TAXSTRUCTURE_TAX table:', err2.message || err2);
+                });
+            }
+        });
+    } catch (e) {
+        console.warn('Schema prepare error:', e.message || e);
+    }
+};
+
+// Run detection after initial connect
+detectAndPrepareSchema();
+
 // ========================================
 // DATABASE INITIALIZATION
 // ========================================
@@ -662,28 +703,46 @@ app.delete('/api/tax-codes/:code', (req, res) => {
 // TAX STRUCTURE API (Existing Schema)
 // ========================================
 app.get('/api/tax-structure', (req, res) => {
-    const query = 'SELECT TAXSTRCODE as tax_structure_code, TAXSTRNAME as tax_structure_name, DESCRIPTION as description, ActiveStatus as is_active FROM IT_CONF_TAXSTRUCTURE WHERE ActiveStatus = 1 ORDER BY TAXSTRCODE';
-    db.query(query, (err, results) => {
-        if (err) return handleDatabaseError(res, err, 'fetch tax structure');
-        res.json({ success: true, data: results });
-    });
+    // If modern schema (id present), return included_taxes from child table; otherwise legacy select
+    if (taxStructureHasId) {
+        // Only select columns that exist in the new schema
+        const q = `SELECT id, tax_structure_code, tax_structure_name, description, tax_code, calculation_type, is_active, created_at, updated_at FROM IT_CONF_TAXSTRUCTURE WHERE is_active = 1 ORDER BY tax_structure_code`;
+        db.query(q, (err, rows) => {
+            if (err) return handleDatabaseError(res, err, 'fetch tax structures (modern)');
+            const ids = rows.map(r => r.id);
+            if (ids.length === 0) return res.json({ success: true, data: rows.map(r => ({ ...r, included_taxes: [] })) });
+            const childQ = `SELECT tax_structure_id, tax_code, sequence, calculation_method FROM IT_CONF_TAXSTRUCTURE_TAX WHERE tax_structure_id IN (?) ORDER BY sequence`;
+            db.query(childQ, [ids], (err2, childRows) => {
+                if (err2) return handleDatabaseError(res, err2, 'fetch tax structure children');
+                const map = {};
+                (childRows || []).forEach(cr => {
+                    if (!map[cr.tax_structure_id]) map[cr.tax_structure_id] = [];
+                    map[cr.tax_structure_id].push({ tax_code: cr.tax_code, sequence: cr.sequence, calculation_method: cr.calculation_method });
+                });
+                const result = rows.map(r => ({ ...r, included_taxes: map[r.id] || [] }));
+                res.json({ success: true, data: result });
+            });
+        });
+    } else {
+        const query = 'SELECT TAXSTRCODE as tax_structure_code, TAXSTRNAME as tax_structure_name, DESCRIPTION as description, ActiveStatus as is_active FROM IT_CONF_TAXSTRUCTURE WHERE ActiveStatus = 1 ORDER BY TAXSTRCODE';
+
+        db.query(query, (err, results) => {
+            if (err) return handleDatabaseError(res, err, 'fetch tax structure');
+            res.json({ success: true, data: results });
+        });
+    }
 });
 
 app.post('/api/tax-structure', (req, res) => {
     const { 
         tax_structure_code, 
         tax_structure_name, 
-        outlet_code, 
-        menu_type, 
-        serial_number, 
-        short_tax, 
+        description = '',
         tax_code, 
         calculation_type = 'Percentage', 
-        amount = 0, 
-        target_tax = 0, 
         is_active = 1 
     } = req.body;
-    
+
     if (!tax_structure_code || !tax_structure_name) {
         return res.status(400).json({ 
             success: false, 
@@ -691,18 +750,33 @@ app.post('/api/tax-structure', (req, res) => {
         });
     }
 
-    const query = `INSERT INTO IT_CONF_TAXSTRUCTURE 
-                   (tax_structure_code, tax_structure_name, outlet_code, menu_type, 
-                    serial_number, short_tax, tax_code, calculation_type, amount, 
-                    target_tax, is_active, created_by) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'admin')`;
-    
-    db.query(query, [
-        tax_structure_code, tax_structure_name, outlet_code, menu_type, 
-        serial_number, short_tax, tax_code, calculation_type, amount, 
-        target_tax, is_active
+    // Only insert columns that exist in the new schema
+    const modernQuery = `INSERT INTO IT_CONF_TAXSTRUCTURE 
+                   (tax_structure_code, tax_structure_name, description, tax_code, calculation_type, is_active, created_at, updated_at) 
+                   VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`;
+
+    db.query(modernQuery, [
+        tax_structure_code, tax_structure_name, description, tax_code, calculation_type, is_active
     ], (err, result) => {
         if (err) {
+            // If column names don't match (legacy DB), attempt best-effort legacy insert
+            if (err.code === 'ER_BAD_FIELD_ERROR' || /Unknown column/i.test(err.message)) {
+                // Legacy table may have TAXSTRCODE (numeric), TAXSTRNAME, DESCRIPTION, ActiveStatus
+                // We'll allocate a numeric TAXSTRCODE if incoming code is non-numeric.
+                db.query('SELECT IFNULL(MAX(TAXSTRCODE),0) + 1 AS nextCode FROM IT_CONF_TAXSTRUCTURE', (err2, rows) => {
+                    if (err2) return handleDatabaseError(res, err2, 'determine legacy tax structure code');
+                    const nextCode = rows && rows[0] && rows[0].nextCode ? rows[0].nextCode : 1;
+                    const legacyCode = /^[0-9]+$/.test(String(tax_structure_code)) ? tax_structure_code : nextCode;
+                    const legacyQuery = `INSERT INTO IT_CONF_TAXSTRUCTURE (TAXSTRCODE, TAXSTRNAME, DESCRIPTION, ActiveStatus) VALUES (?, ?, ?, ?)`;
+                    const descriptionLegacy = tax_code ? `Tax:${tax_code}` : (req.body.description || '');
+                    db.query(legacyQuery, [legacyCode, tax_structure_name, description, is_active], (err3, result3) => {
+                        if (err3) return handleDatabaseError(res, err3, 'create tax structure (legacy)');
+                        return res.json({ success: true, message: 'Tax structure created (legacy)', id: result3.insertId });
+                    });
+                });
+                return;
+            }
+
             if (err.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ 
                     success: false, 
@@ -711,10 +785,39 @@ app.post('/api/tax-structure', (req, res) => {
             }
             return handleDatabaseError(res, err, 'create tax structure');
         }
-        res.json({ 
-            success: true, 
-            message: 'Tax structure created successfully',
-            id: result.insertId 
+        // If modern schema is used and included_taxes provided, persist child rows
+        const structureId = result.insertId;
+        const included = Array.isArray(req.body.included_taxes) ? req.body.included_taxes : [];
+        if (taxStructureHasId && included.length > 0) {
+            const values = included.map(t => [structureId, t.tax_code, t.sequence || 1, t.calculation_method || 'Percentage']);
+            const childInsert = 'INSERT INTO IT_CONF_TAXSTRUCTURE_TAX (tax_structure_id, tax_code, sequence, calculation_method) VALUES ?';
+            db.query(childInsert, [values], (errChild) => {
+                if (errChild) return handleDatabaseError(res, errChild, 'create tax structure children');
+                res.json({ success: true, message: 'Tax structure created successfully', id: structureId });
+            });
+        } else {
+            res.json({ 
+                success: true, 
+                message: 'Tax structure created successfully',
+                id: structureId 
+            });
+        }
+    });
+});
+
+// Temporary compatibility endpoint to insert into legacy IT_CONF_TAXSTRUCTURE schema
+// This helps create records on older databases that use TAXSTRCODE/TAXSTRNAME columns.
+app.post('/api/tax-structure/legacy', (req, res) => {
+    const { tax_structure_name, tax_code, description = '', is_active = 1 } = req.body;
+    if (!tax_structure_name) return res.status(400).json({ success: false, message: 'tax_structure_name is required' });
+
+    db.query('SELECT IFNULL(MAX(TAXSTRCODE),0) + 1 AS nextCode FROM IT_CONF_TAXSTRUCTURE', (err, rows) => {
+        if (err) return handleDatabaseError(res, err, 'determine legacy tax structure code');
+        const nextCode = rows && rows[0] && rows[0].nextCode ? rows[0].nextCode : 1;
+        const legacyQuery = `INSERT INTO IT_CONF_TAXSTRUCTURE (TAXSTRCODE, TAXSTRNAME, DESCRIPTION, ActiveStatus) VALUES (?, ?, ?, ?)`;
+        db.query(legacyQuery, [nextCode, tax_structure_name, description || (tax_code ? `Tax:${tax_code}` : ''), is_active], (err2, result2) => {
+            if (err2) return handleDatabaseError(res, err2, 'create tax structure (legacy)');
+            res.json({ success: true, message: 'Tax structure created (legacy)', id: result2.insertId, taxstrcode: nextCode });
         });
     });
 });
@@ -756,10 +859,28 @@ app.put('/api/tax-structure/:id', (req, res) => {
             });
         }
         
-        res.json({ 
-            success: true, 
-            message: 'Tax structure updated successfully' 
-        });
+        // If modern schema and included_taxes provided, replace child rows
+        const included = Array.isArray(req.body.included_taxes) ? req.body.included_taxes : null;
+        if (taxStructureHasId && included) {
+            const deleteChild = 'DELETE FROM IT_CONF_TAXSTRUCTURE_TAX WHERE tax_structure_id = ?';
+            db.query(deleteChild, [id], (errDel) => {
+                if (errDel) return handleDatabaseError(res, errDel, 'delete existing tax structure children');
+                if (included.length === 0) {
+                    return res.json({ success: true, message: 'Tax structure updated successfully' });
+                }
+                const values = included.map(t => [id, t.tax_code, t.sequence || 1, t.calculation_method || 'Percentage']);
+                const childInsert = 'INSERT INTO IT_CONF_TAXSTRUCTURE_TAX (tax_structure_id, tax_code, sequence, calculation_method) VALUES ?';
+                db.query(childInsert, [values], (errIns) => {
+                    if (errIns) return handleDatabaseError(res, errIns, 'insert tax structure children');
+                    res.json({ success: true, message: 'Tax structure updated successfully' });
+                });
+            });
+        } else {
+            res.json({ 
+                success: true, 
+                message: 'Tax structure updated successfully' 
+            });
+        }
     });
 });
 
@@ -796,79 +917,70 @@ app.get('/api/uom', (req, res) => {
 });
 
 app.post('/api/uom', (req, res) => {
-    const { 
-        uom_code, 
-        uom_name, 
-        container_unit, 
-        container_size, 
-        contained_unit, 
-        is_active = 1 
+    // The live DB schema for IT_CONF_UOM contains columns: UOM_CODE, UOM_NAME, DESCRIPTION, ActiveStatus
+    // Accept description and is_active from frontend and persist to the existing columns.
+    const {
+        uom_code,
+        uom_name,
+        description = null,
+        is_active = 1
     } = req.body;
-    
+
     if (!uom_code || !uom_name) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'UOM code and name are required' 
+        return res.status(400).json({
+            success: false,
+            message: 'UOM code and name are required'
         });
     }
 
-    const query = `INSERT INTO IT_CONF_UOM 
-                   (uom_code, uom_name, container_unit, container_size, 
-                    contained_unit, is_active, created_by) 
-                   VALUES (?, ?, ?, ?, ?, ?, 'admin')`;
-    
-    db.query(query, [
-        uom_code, uom_name, container_unit, container_size, contained_unit, is_active
-    ], (err, result) => {
+    const query = `INSERT INTO IT_CONF_UOM (UOM_CODE, UOM_NAME, DESCRIPTION, ActiveStatus) VALUES (?, ?, ?, ?)`;
+
+    db.query(query, [uom_code, uom_name, description, is_active], (err, result) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'UOM code already exists' 
+                return res.status(400).json({
+                    success: false,
+                    message: 'UOM code already exists'
                 });
             }
             return handleDatabaseError(res, err, 'create UOM');
         }
-        res.json({ 
-            success: true, 
-            message: 'UOM created successfully',
-            id: result.insertId 
+
+        // Return the created row to the client in a normalized shape
+        const selectQuery = `SELECT UOM_CODE AS uom_code, UOM_NAME AS uom_name, DESCRIPTION AS description, ActiveStatus AS is_active FROM IT_CONF_UOM WHERE UOM_CODE = ?`;
+        db.query(selectQuery, [uom_code], (err2, rows) => {
+            if (err2) return handleDatabaseError(res, err2, 'fetch created UOM');
+            res.json({ success: true, message: 'UOM created successfully', data: rows[0] });
         });
     });
 });
 
 app.put('/api/uom/:id', (req, res) => {
     const { id } = req.params;
-    const { 
-        uom_code, 
-        uom_name, 
-        container_unit, 
-        container_size, 
-        contained_unit, 
-        is_active 
+    const {
+        uom_code,
+        uom_name,
+        description = null,
+        is_active = 1
     } = req.body;
-    
+
+    if (!uom_code || !uom_name) {
+        return res.status(400).json({ success: false, message: 'UOM code and name are required' });
+    }
+
+    // Update the canonical columns present in most installations.
     const query = `UPDATE IT_CONF_UOM 
-                   SET uom_code = ?, uom_name = ?, container_unit = ?, 
-                       container_size = ?, contained_unit = ?, is_active = ?, modified_by = 'admin'
+                   SET UOM_CODE = ?, UOM_NAME = ?, DESCRIPTION = ?, ActiveStatus = ?, modified_by = 'admin', updated_at = CURRENT_TIMESTAMP
                    WHERE id = ?`;
-    
-    db.query(query, [
-        uom_code, uom_name, container_unit, container_size, contained_unit, is_active, id
-    ], (err, result) => {
+
+    db.query(query, [uom_code, uom_name, description, is_active, id], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'update UOM');
-        
+
         if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'UOM not found' 
-            });
+            return res.status(404).json({ success: false, message: 'UOM not found' });
         }
-        
-        res.json({ 
-            success: true, 
-            message: 'UOM updated successfully' 
-        });
+
+        res.json({ success: true, message: 'UOM updated successfully' });
     });
 });
 
@@ -1202,7 +1314,17 @@ app.delete('/api/reason-codes/:code', (req, res) => {
 // CREDIT CARD MANAGER API
 // ========================================
 app.get('/api/credit-cards', (req, res) => {
-    const query = 'SELECT * FROM IT_CONF_CCM ORDER BY card_code';
+    const query = `SELECT 
+        card_code, 
+        card_name, 
+        card_type, 
+        bank_issuer, 
+        status, 
+        transaction_fee, 
+        transaction_charges, 
+        effective_from, 
+        effective_to
+        FROM IT_CONF_CCM ORDER BY card_code`;
     db.query(query, (err, results) => {
         if (err) return handleDatabaseError(res, err, 'fetch credit cards');
         res.json({ success: true, data: results });
@@ -1210,90 +1332,118 @@ app.get('/api/credit-cards', (req, res) => {
 });
 
 app.post('/api/credit-cards', (req, res) => {
-    const { 
-        card_code, 
-        card_name, 
-        commission_percentage = 0, 
-        settlement_days = 0, 
-        is_active = 1 
+    const {
+        card_code,
+        card_name,
+        card_type,
+        bank_issuer,
+        status,
+        transaction_fee,
+        transaction_charges,
+        effective_from,
+        effective_to
     } = req.body;
-    
+
     if (!card_code || !card_name) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Card code and name are required' 
+        return res.status(400).json({
+            success: false,
+            message: 'Card code and name are required'
         });
     }
 
-    const query = `INSERT INTO IT_CONF_CCM 
-                   (card_code, card_name, commission_percentage, settlement_days, is_active, created_by) 
-                   VALUES (?, ?, ?, ?, ?, 'admin')`;
-    
+    const query = `INSERT INTO IT_CONF_CCM
+        (card_code, card_name, card_type, bank_issuer, status, transaction_fee, transaction_charges, effective_from, effective_to)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     db.query(query, [
-        card_code, card_name, commission_percentage, settlement_days, is_active
+        card_code,
+        card_name,
+        card_type,
+        bank_issuer,
+        status ? 1 : 0,
+        transaction_fee || 0,
+        transaction_charges || 0,
+        effective_from || null,
+        effective_to || null
     ], (err, result) => {
         if (err) {
             if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Card code already exists' 
+                return res.status(400).json({
+                    success: false,
+                    message: 'Card code already exists'
                 });
             }
             return handleDatabaseError(res, err, 'create credit card');
         }
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             message: 'Credit card created successfully',
-            id: result.insertId 
+            id: result.insertId
         });
     });
 });
 
 app.put('/api/credit-cards/:id', (req, res) => {
     const { id } = req.params;
-    const { card_code, card_name, commission_percentage, settlement_days, is_active } = req.body;
-    
-    const query = `UPDATE IT_CONF_CCM 
-                   SET card_code = ?, card_name = ?, commission_percentage = ?, 
-                       settlement_days = ?, is_active = ?, modified_by = 'admin'
-                   WHERE id = ?`;
-    
+    const {
+        card_code,
+        card_name,
+        card_type,
+        bank_issuer,
+        status,
+        transaction_fee,
+        transaction_charges,
+        effective_from,
+        effective_to
+    } = req.body;
+    const query = `UPDATE IT_CONF_CCM SET
+        card_name = ?,
+        card_type = ?,
+        bank_issuer = ?,
+        status = ?,
+        transaction_fee = ?,
+        transaction_charges = ?,
+        effective_from = ?,
+        effective_to = ?
+        WHERE card_code = ?`;
     db.query(query, [
-        card_code, card_name, commission_percentage, settlement_days, is_active, id
+        card_name,
+        card_type,
+        bank_issuer,
+        status ? 1 : 0,
+        transaction_fee || 0,
+        transaction_charges || 0,
+        effective_from || null,
+        effective_to || null,
+        card_code
     ], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'update credit card');
-        
         if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Credit card not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Credit card not found'
             });
         }
-        
-        res.json({ 
-            success: true, 
-            message: 'Credit card updated successfully' 
+        res.json({
+            success: true,
+            message: 'Credit card updated successfully'
         });
     });
 });
 
 app.delete('/api/credit-cards/:id', (req, res) => {
     const { id } = req.params;
-    
-    const query = 'DELETE FROM IT_CONF_CCM WHERE id = ?';
+    const query = 'DELETE FROM IT_CONF_CCM WHERE card_code = ?';
     db.query(query, [id], (err, result) => {
         if (err) return handleDatabaseError(res, err, 'delete credit card');
-        
         if (result.affectedRows === 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Credit card not found' 
+            return res.status(404).json({
+                success: false,
+                message: 'Credit card not found'
             });
         }
-        
-        res.json({ 
-            success: true, 
-            message: 'Credit card deleted successfully' 
+        res.json({
+            success: true,
+            message: 'Credit card deleted successfully'
         });
     });
 });
@@ -1573,8 +1723,10 @@ app.post('/api/property-codes', (req, res) => {
         reserve_2
     ];
 
+    // Debug logs to help trace session/user assignment
     console.log('DEBUG: property insert query=\n', query);
     console.log('DEBUG: property insert values=', insertValues);
+    console.log('DEBUG: property session user id=', sessionUserId, 'session.user=', req.session && req.session.user);
 
     db.query(query, insertValues, (err, result) => {
         if (err) {
