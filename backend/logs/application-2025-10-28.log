@@ -1,2 +1,0 @@
-2025-10-28 12:05:28.990 [INFO]: 🚀 POS Backend Server started on port 3001 (development) | {"port":3001,"environment":"development","nodeVersion":"v22.18.0","platform":"win32"}
-2025-10-28 12:05:29.065 [INFO]: Database connection established successfully
