@@ -136,6 +136,16 @@ const dbLogger = winston.createLogger({
   ]
 });
 
+// SQL statements touching these columns get their bound params redacted
+// before ever reaching a log line, since query params are logged raw.
+const SENSITIVE_SQL_PATTERN = /password|secret|token/i;
+
+const redactParams = (sql, params) => {
+  if (!params) return null;
+  if (SENSITIVE_SQL_PATTERN.test(sql)) return '[REDACTED]';
+  return JSON.stringify(params);
+};
+
 // Utility functions for different log types
 const logAPI = {
   request: (method, url, body = null, user = null) => {
@@ -178,7 +188,7 @@ const logDB = {
   query: (sql, params = null, executionTime = null) => {
     const logData = {
       sql: sql.replace(/\s+/g, ' ').trim(),
-      params: params ? JSON.stringify(params) : null,
+      params: redactParams(sql, params),
       executionTime: executionTime ? `${executionTime}ms` : null
     };
     dbLogger.debug(`🔍 Query: ${sql.substring(0, 100)}${sql.length > 100 ? '...' : ''}`, logData);
@@ -196,7 +206,7 @@ const logDB = {
   error: (sql, error, params = null) => {
     const logData = {
       sql: sql.replace(/\s+/g, ' ').trim(),
-      params: params ? JSON.stringify(params) : null,
+      params: redactParams(sql, params),
       error: error.message,
       code: error.code
     };

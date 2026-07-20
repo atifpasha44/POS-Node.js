@@ -115,13 +115,13 @@ const logDatabaseConnection = (db) => {
     });
   };
   
-  // Log connection events
-  db.on('connect', () => {
+  // Log pool connection lifecycle events (db is a mysql2 Pool, not a single Connection)
+  db.on('connection', () => {
     const { logDB } = require('../logger');
     logDB.connection('connected', {
-      host: db.config.host,
-      port: db.config.port,
-      database: db.config.database
+      host: db.config.connectionConfig.host,
+      port: db.config.connectionConfig.port,
+      database: db.config.connectionConfig.database
     });
   });
   

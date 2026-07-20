@@ -9,3 +9,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Backend runtime logs (rotate daily, may contain request/query data)
+backend/logs/
+backend/backend_run_output.txt
+backend/server.log
+backend_run.log
+backend_pid.txt

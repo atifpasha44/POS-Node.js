@@ -1881,18 +1881,18 @@ Generated: ${new Date().toLocaleString()}`;
       {/* Today's Collection Summary */}
       <div style={{width:'260px',background:'#fff',border:'2.5px solid #ff9800',borderRadius:'10px',boxShadow:'0 2px 8px rgba(0,0,0,0.08)'}}>
         <div style={{background:'#ff9800',color:'#fff',fontWeight:'bold',fontSize:'1.08rem',padding:'7px 0',borderTopLeftRadius:'8px',borderTopRightRadius:'8px',textAlign:'center'}}>Today's Collection Summary</div>
-        <div style={{padding:'12px 8px 0 8px',height:'140px',display:'flex',alignItems:'center',justifyContent:'center',position:'relative'}}>
+        <div style={{padding:'12px 10px',display:'flex',alignItems:'center',gap:'10px'}}>
           {/* Pie chart placeholder */}
-          <svg width="110" height="110" viewBox="0 0 110 110">
+          <svg width="90" height="90" viewBox="0 0 110 110" style={{flexShrink:0}}>
             <circle cx="55" cy="55" r="50" fill="#eee" />
             <path d="M55,55 L55,5 A50,50 0 0,1 105,55 Z" fill="#8bc34a" />
             <path d="M55,55 L105,55 A50,50 0 0,1 70,100 Z" fill="#ffd600" />
             <path d="M55,55 L70,100 A50,50 0 0,1 55,5 Z" fill="#f8bbd0" />
           </svg>
-          <div style={{position:'absolute',fontSize:'0.95rem',color:'#444',marginLeft:'-110px',marginTop:'70px'}}>
+          <div style={{fontSize:'0.85rem',color:'#444',lineHeight:'1.4'}}>
             <div>40% Cash<br />46,200.00</div>
-            <div style={{marginTop:'-40px',marginLeft:'80px'}}>28% Credit Card<br />22,000.00</div>
-            <div style={{marginTop:'-10px',marginLeft:'40px'}}>32% Company<br />28,000.00</div>
+            <div style={{marginTop:'6px'}}>28% Credit Card<br />22,000.00</div>
+            <div style={{marginTop:'6px'}}>32% Company<br />28,000.00</div>
           </div>
         </div>
         <div style={{background:'#b3e5fc',height:'18px',borderBottomLeftRadius:'8px',borderBottomRightRadius:'8px'}}></div>

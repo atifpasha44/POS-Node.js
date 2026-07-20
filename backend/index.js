@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -18,7 +20,7 @@ const {
 } = require('./middleware/logging');
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // ========================================
 // MIDDLEWARE SETUP
@@ -30,7 +32,7 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(session({
-    secret: 'pos-secret-key',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
@@ -46,15 +48,20 @@ app.use(requestLogger);        // Request/response logging
 // ========================================
 // DATABASE CONNECTION
 // ========================================
-const db = mysql.createConnection({
-    host: 'localhost',
-    port: 3307,
-    user: 'root',
-    password: 'Jaheed@9',
-    database: 'pos_db'
+const db = mysql.createPool({
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
+    waitForConnections: true,
+    queueLimit: 0
 });
 
-db.connect((err) => {
+// Verify connectivity on startup; the pool itself reconnects automatically
+// per-query afterwards, so this is just an early sanity check.
+db.query('SELECT 1', (err) => {
     if (err) {
         console.error('❌ Database connection failed:', err);
         logger.error('Database connection failed', { error: err.message, code: err.code });
@@ -1699,7 +1706,6 @@ app.post('/api/property-codes', (req, res) => {
                     created_user_id, updated_user_id, reserve_1, reserve_2) 
                    VALUES (STR_TO_DATE(?, '%Y-%m-%d'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    // Debug: log query and values to diagnose column/value mismatch
     const insertValues = [
         applicable_from || null,
         property_code,
@@ -1722,11 +1728,6 @@ app.post('/api/property-codes', (req, res) => {
         reserve_1,
         reserve_2
     ];
-
-    // Debug logs to help trace session/user assignment
-    console.log('DEBUG: property insert query=\n', query);
-    console.log('DEBUG: property insert values=', insertValues);
-    console.log('DEBUG: property session user id=', sessionUserId, 'session.user=', req.session && req.session.user);
 
     db.query(query, insertValues, (err, result) => {
         if (err) {
