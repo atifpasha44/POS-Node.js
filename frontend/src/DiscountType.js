@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -27,7 +28,18 @@ const DiscountType = ({ setParentDirty, records, setRecords }) => {
   const [selectedRecordIdx, setSelectedRecordIdx] = useState(null);
   const [selectModalMessage, setSelectModalMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [propertyCodes, setPropertyCodes] = useState([]);
   const formRef = useRef(null);
+
+  useEffect(() => {
+    axios.get('/api/property-codes')
+      .then(response => {
+        if (response.data.success) {
+          setPropertyCodes(response.data.data || []);
+        }
+      })
+      .catch(error => console.error('Error loading property codes:', error));
+  }, []);
 
   // Validation function
   const validateForm = () => {
@@ -398,9 +410,11 @@ const DiscountType = ({ setParentDirty, records, setRecords }) => {
                 required
               >
                 <option value="">Select Property Code</option>
-                <option value="PROP001">PROP001 - Hotel ABC</option>
-                <option value="PROP002">PROP002 - Restaurant XYZ</option>
-                <option value="PROP003">PROP003 - Cafe 123</option>
+                {propertyCodes.map(pc => (
+                  <option key={pc.property_code} value={pc.property_code}>
+                    {pc.property_code} - {pc.property_name}
+                  </option>
+                ))}
               </select>
               {fieldErrors.property_code && (
                 <div style={{ color: '#f44336', fontSize: '0.875rem', marginTop: '4px' }}>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
 import Dashboard from './Dashboard';
+import PosApp from './pos-terminal/PosApp';
 import logger from './utils/simpleLogger'; // ADDED: Frontend logging
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/dashboard" element={user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/login" replace />} />
+        <Route path="/pos-terminal/*" element={<PosApp />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

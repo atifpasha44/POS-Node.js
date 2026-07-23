@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ithots touch POS - Server Setup</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f2f2f2; margin:0; padding:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+  .card { background:#fff; border-radius:8px; padding:30px; width:380px; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
+  h2 { margin-top:0; color:#1976d2; }
+  label { font-weight:bold; display:block; margin-bottom:6px; color:#333; }
+  input { width:100%; height:38px; box-sizing:border-box; padding:0 10px; border:1.5px solid #bbb; border-radius:6px; font-size:1rem; margin-bottom:14px; }
+  button { width:100%; height:42px; background:#1976d2; color:#fff; border:none; border-radius:6px; font-size:1rem; font-weight:bold; cursor:pointer; }
+  .msg { margin-top:12px; font-size:0.9rem; }
+  .msg.error { color:#e53935; }
+  .msg.ok { color:#2e7d32; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h2>ithots touch POS</h2>
+    <p>Enter the address of the server this terminal should connect to.</p>
+    <label for="serverUrl">Server address (e.g. 192.168.1.50:3001)</label>
+    <input id="serverUrl" type="text" placeholder="192.168.1.50:3001" />
+    <button id="connectBtn">Connect</button>
+    <div id="msg" class="msg"></div>
+  </div>
+  <script>
+    const input = document.getElementById('serverUrl');
+    const btn = document.getElementById('connectBtn');
+    const msg = document.getElementById('msg');
+
+    btn.addEventListener('click', async () => {
+      const url = input.value.trim();
+      if (!url) return;
+      msg.className = 'msg';
+      msg.textContent = 'Checking connection...';
+      const ok = await window.electronAPI.testServer(url);
+      if (!ok) {
+        msg.className = 'msg error';
+        msg.textContent = 'Could not reach a server at that address. Check the IP/port and try again.';
+        return;
+      }
+      msg.className = 'msg ok';
+      msg.textContent = 'Connected! Loading...';
+      await window.electronAPI.saveServerConfig(url);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') btn.click();
+    });
+  </script>
+</body>
+</html>

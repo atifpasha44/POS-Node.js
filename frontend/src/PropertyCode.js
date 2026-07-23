@@ -200,7 +200,7 @@ export default function PropertyCode() {
   const handleChange = e => {
     const { name, value, type, files } = e.target;
     if (type === 'file') {
-      setForm(f => ({ ...f, property_logo: files[0] }));
+      setForm(f => ({ ...f, property_logo: files[0] ? files[0].name : null }));
       setLogoPreview(files[0] ? URL.createObjectURL(files[0]) : null);
       setIsDirty(true);
       setUploadStatus('');

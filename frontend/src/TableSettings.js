@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -12,7 +13,16 @@ const initialState = {
   inactive: false
 };
 
-const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) => {
+const mapRecordToForm = (record) => ({
+  table_no: record.table_code || '',
+  outlet_code: record.outlet_code || '',
+  table_name: record.table_name || '',
+  table_size: record.seats != null ? String(record.seats) : '',
+  table_shape: record.table_shape || 'rectangle',
+  inactive: !record.active_status
+});
+
+const TableSettings = ({ setParentDirty, records: externalRecords, setRecords: setExternalRecords, outletRecords }) => {
   const [isDirty, setIsDirty] = useState(false);
   const [form, setForm] = useState(initialState);
   const [action, setAction] = useState('Add');
@@ -22,52 +32,59 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
   const [selectedRecordIdx, setSelectedRecordIdx] = useState(null);
   const [selectModalMessage, setSelectModalMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [localRecords, setLocalRecords] = useState([]);
   const formRef = useRef(null);
+
+  const records = externalRecords || localRecords;
+  const setRecords = setExternalRecords || setLocalRecords;
+
+  const loadRecords = async () => {
+    try {
+      const response = await axios.get('/api/table-settings');
+      if (response.data.success) {
+        setRecords(response.data.data || []);
+      }
+    } catch (error) {
+      console.error('Error loading table settings:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadRecords();
+  }, []);
 
   // Validation function
   const validateForm = () => {
     const errors = {};
-    
+
     if (!form.table_no.trim()) {
       errors.table_no = 'Table No is required';
     } else if (!/^\d+$/.test(form.table_no)) {
       errors.table_no = 'Table No must be numeric';
     }
-    
+
     if (!form.outlet_code.trim()) {
       errors.outlet_code = 'Outlet Code is required';
     } else if (form.outlet_code.length > 10) {
       errors.outlet_code = 'Outlet Code must not exceed 10 characters';
     }
-    
+
     if (!form.table_name.trim()) {
       errors.table_name = 'Table Name is required';
     } else if (form.table_name.length > 50) {
       errors.table_name = 'Table Name must not exceed 50 characters';
     }
-    
+
     if (!form.table_size.trim()) {
       errors.table_size = 'Table Size is required';
     } else if (!/^\d+$/.test(form.table_size)) {
       errors.table_size = 'Table Size must be numeric';
     }
-    
+
     if (!form.table_shape) {
       errors.table_shape = 'Table Shape is required';
     }
-    
-    // Check for duplicate table numbers within the same outlet
-    if (records && records.length > 0) {
-      const isDuplicate = records.some((record, index) => 
-        index !== selectedRecordIdx && 
-        record.outlet_code === form.outlet_code &&
-        record.table_no === form.table_no
-      );
-      if (isDuplicate) {
-        errors.table_no = 'Table No already exists for this outlet';
-      }
-    }
-    
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -86,56 +103,44 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
       return;
     }
     setAction('Edit');
-    const selectedRecord = records[selectedRecordIdx];
-    setForm({
-      table_no: selectedRecord.table_no || '',
-      outlet_code: selectedRecord.outlet_code || '',
-      table_name: selectedRecord.table_name || '',
-      table_size: selectedRecord.table_size || '',
-      table_shape: selectedRecord.table_shape || 'rectangle',
-      inactive: selectedRecord.inactive || false
-    });
+    setForm(mapRecordToForm(records[selectedRecordIdx]));
     setFieldErrors({});
     setIsDirty(true);
     if (setParentDirty) setParentDirty(true);
   };
 
   const handleDelete = () => {
-    if (selectedRecordIdx === null) {
+    if (selectedRecordIdx === null || !records || selectedRecordIdx >= records.length) {
       setSelectModalMessage('Please select a record to delete.');
       setShowSelectModal(true);
       return;
     }
-    
-    // Show confirmation dialog
+
     const selectedRecord = records[selectedRecordIdx];
-    const confirmMessage = `Are you sure you want to delete Table ${selectedRecord.table_no} (${selectedRecord.table_name})?`;
-    
+    const confirmMessage = `Are you sure you want to delete Table ${selectedRecord.table_code} (${selectedRecord.table_name})?`;
+
     if (window.confirm(confirmMessage)) {
-      try {
-        // Delete record immediately
-        const updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
-        setRecords(updatedRecords);
-        
-        // Clear selection and form
-        setSelectedRecordIdx(null);
-        setForm(initialState);
-        setAction('Add');
-        setFieldErrors({});
-        
-        // Show success message
-        setLastAction('Delete');
-        setShowSavePopup(true);
-        setIsDirty(false);
-        if (setParentDirty) setParentDirty(false);
-        
-        setTimeout(() => {
-          setShowSavePopup(false);
-        }, 2000);
-        
-      } catch (error) {
-        console.error('Error deleting table setting:', error);
-      }
+      axios.delete(`/api/table-settings/${selectedRecord.id}`)
+        .then(async (response) => {
+          if (response.data.success) {
+            await loadRecords();
+            setSelectedRecordIdx(null);
+            setForm(initialState);
+            setAction('Add');
+            setFieldErrors({});
+            setLastAction('Delete');
+            setShowSavePopup(true);
+            setIsDirty(false);
+            if (setParentDirty) setParentDirty(false);
+            setTimeout(() => setShowSavePopup(false), 2000);
+          } else {
+            alert(response.data.message || 'Delete failed');
+          }
+        })
+        .catch((error) => {
+          console.error('Error deleting table setting:', error);
+          alert(error.response?.data?.message || 'Error deleting table setting');
+        });
     }
   };
 
@@ -146,15 +151,7 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
       return;
     }
     setAction('Search');
-    const selectedRecord = records[selectedRecordIdx];
-    setForm({
-      table_no: selectedRecord.table_no || '',
-      outlet_code: selectedRecord.outlet_code || '',
-      table_name: selectedRecord.table_name || '',
-      table_size: selectedRecord.table_size || '',
-      table_shape: selectedRecord.table_shape || 'rectangle',
-      inactive: selectedRecord.inactive || false
-    });
+    setForm(mapRecordToForm(records[selectedRecordIdx]));
     setFieldErrors({});
   };
 
@@ -167,68 +164,51 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
     if (setParentDirty) setParentDirty(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
 
-    try {
-      // Create a new record object
-      const newRecord = {
-        table_no: form.table_no,
-        outlet_code: form.outlet_code,
-        table_name: form.table_name,
-        table_size: form.table_size,
-        table_shape: form.table_shape,
-        inactive: form.inactive,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+    const payload = {
+      outlet_code: form.outlet_code,
+      table_code: form.table_no,
+      table_name: form.table_name,
+      seats: parseInt(form.table_size, 10) || 0,
+      table_shape: form.table_shape,
+      active_status: form.inactive ? 0 : 1
+    };
 
-      let updatedRecords;
+    try {
+      let response;
 
       if (action === 'Add') {
-        // Add new record
-        updatedRecords = [...(records || []), newRecord];
+        response = await axios.post('/api/table-settings', payload);
       } else if (action === 'Edit' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
-        // Update existing record
-        updatedRecords = [...records];
-        updatedRecords[selectedRecordIdx] = { 
-          ...newRecord, 
-          created_at: records[selectedRecordIdx].created_at || new Date().toISOString()
-        };
-      } else if (action === 'Delete' && selectedRecordIdx !== null && records && selectedRecordIdx < records.length) {
-        // Delete record
-        updatedRecords = records.filter((_, index) => index !== selectedRecordIdx);
+        response = await axios.put(`/api/table-settings/${records[selectedRecordIdx].id}`, payload);
       } else {
-        updatedRecords = records || [];
+        return;
       }
 
-      // Update the records array
-      setRecords(updatedRecords);
+      if (response.data.success) {
+        await loadRecords();
 
-      // Clear the form after successful save (except for Search action)
-      if (action !== 'Search') {
         setForm(initialState);
         setSelectedRecordIdx(null);
         setAction('Add');
         setFieldErrors({});
+
+        setLastAction(action);
+        setShowSavePopup(true);
+        setIsDirty(false);
+        if (setParentDirty) setParentDirty(false);
+
+        setTimeout(() => setShowSavePopup(false), 2000);
+      } else {
+        alert(response.data.message || 'Operation failed');
       }
-
-      // Show success popup
-      setLastAction(action);
-      setShowSavePopup(true);
-      setIsDirty(false);
-      if (setParentDirty) setParentDirty(false);
-      
-      // Auto-hide popup after 2 seconds
-      setTimeout(() => {
-        setShowSavePopup(false);
-      }, 2000);
-
     } catch (error) {
       console.error('Error saving table setting:', error);
-      // You could add error handling here
+      alert(error.response?.data?.message || 'Error saving table setting');
     }
   };
 
@@ -236,8 +216,7 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
     setForm({ ...form, [field]: value });
     setIsDirty(true);
     if (setParentDirty) setParentDirty(true);
-    
-    // Clear field error when user starts typing
+
     if (fieldErrors[field]) {
       setFieldErrors({ ...fieldErrors, [field]: '' });
     }
@@ -245,8 +224,11 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
 
   // Export handlers
   const handleExport = type => {
-    const exportData = records && records.length > 0 ? records : [form];
-    
+    const exportData = records && records.length > 0 ? records.map(r => ({
+      table_no: r.table_code, outlet_code: r.outlet_code, table_name: r.table_name,
+      table_size: r.seats, table_shape: r.table_shape, inactive: !r.active_status
+    })) : [form];
+
     if (type === 'Excel') {
       const ws = XLSX.utils.json_to_sheet(exportData);
       const wb = XLSX.utils.book_new();
@@ -390,9 +372,9 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
           fontSize: '1.1rem',
           fontWeight: 'bold'
         }}>
-          ✅ {lastAction === 'Add' ? 'Table Setting added successfully!' : 
-               lastAction === 'Edit' ? 'Table Setting updated successfully!' : 
-               lastAction === 'Delete' ? 'Table Setting deleted successfully!' : 
+          ✅ {lastAction === 'Add' ? 'Table Setting added successfully!' :
+               lastAction === 'Edit' ? 'Table Setting updated successfully!' :
+               lastAction === 'Delete' ? 'Table Setting deleted successfully!' :
                'Table Setting saved successfully!'}
         </div>
       )}
@@ -439,7 +421,7 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
 
       {/* Form Section - following OutletSetup pattern */}
       <form ref={formRef} className="propertycode-form" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0 32px',padding:'32px 32px 0 32px'}} autoComplete="off">
-        
+
         {/* Left column */}
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           {/* Table No */}
@@ -568,7 +550,7 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
             </div>
           </div>
         </div>
-        
+
         {/* Right column */}
         <div style={{display:'flex',flexDirection:'column',gap:'24px'}}>
           {/* Outlet Code */}
@@ -661,41 +643,41 @@ const TableSettings = ({ setParentDirty, records, setRecords, outletRecords }) =
               </thead>
               <tbody>
                 {records.map((record, index) => (
-                  <tr 
-                    key={index} 
-                    style={{ 
+                  <tr
+                    key={record.id || index}
+                    style={{
                       background: selectedRecordIdx === index ? '#e3f2fd' : '#fff',
                       cursor: 'pointer'
                     }}
                     onClick={() => setSelectedRecordIdx(index)}
                   >
-                    <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{record.table_no}</td>
+                    <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{record.table_code}</td>
                     <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{record.outlet_code}</td>
                     <td style={{ padding: '12px', borderBottom: '1px solid #eee' }}>{record.table_name}</td>
-                    <td style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid #eee' }}>{record.table_size}</td>
+                    <td style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid #eee' }}>{record.seats}</td>
                     <td style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid #eee' }}>
-                      <span style={{ 
+                      <span style={{
                         textTransform: 'capitalize',
                         padding: '2px 8px',
                         borderRadius: '12px',
                         fontSize: '0.85rem',
-                        background: record.table_shape === 'rectangle' ? '#e3f2fd' : 
+                        background: record.table_shape === 'rectangle' ? '#e3f2fd' :
                                    record.table_shape === 'circle' ? '#f3e5f5' : '#fff3e0',
-                        color: record.table_shape === 'rectangle' ? '#1976d2' : 
+                        color: record.table_shape === 'rectangle' ? '#1976d2' :
                                record.table_shape === 'circle' ? '#7b1fa2' : '#f57c00'
                       }}>
                         {record.table_shape}
                       </span>
                     </td>
                     <td style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid #eee' }}>
-                      <span style={{ 
-                        padding: '4px 8px', 
-                        borderRadius: '4px', 
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
                         fontSize: '0.8rem',
-                        background: record.inactive ? '#ffebee' : '#e8f5e8',
-                        color: record.inactive ? '#c62828' : '#2e7d32'
+                        background: !record.active_status ? '#ffebee' : '#e8f5e8',
+                        color: !record.active_status ? '#c62828' : '#2e7d32'
                       }}>
-                        {record.inactive ? 'Inactive' : 'Active'}
+                        {!record.active_status ? 'Inactive' : 'Active'}
                       </span>
                     </td>
                   </tr>

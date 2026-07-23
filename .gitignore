@@ -16,3 +16,8 @@ backend/backend_run_output.txt
 backend/server.log
 backend_run.log
 backend_pid.txt
+backend/stdout.log
+backend/stderr.log
+
+# POS terminal installer build output (produced by electron-builder, not source)
+backend/public/downloads/

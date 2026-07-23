@@ -7,7 +7,7 @@ import InfoTooltip from './InfoTooltip';
 
 const { autoTable } = require('jspdf-autotable');
 
-export default function ItemMaster({ setParentDirty }) {
+export default function ItemMaster({ setParentDirty, records: externalRecords, setRecords: setExternalRecords }) {
   const initialState = {
     select_outlets: [],
     item_code: '',
@@ -51,11 +51,33 @@ export default function ItemMaster({ setParentDirty }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedRecordId, setSelectedRecordId] = useState(null);
   const [showRecordSelect, setShowRecordSelect] = useState(false);
+  const [selectModalMessage, setSelectModalMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
-  const [records, setRecords] = useState([]);
+  const [localRecords, setLocalRecords] = useState([]);
+  const records = externalRecords || localRecords;
+  const setRecords = setExternalRecords || setLocalRecords;
 
   const formRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const loadRecords = async () => {
+    try {
+      const response = await axios.get('/api/item-master');
+      if (response.data.success) {
+        const data = response.data.data || [];
+        setRecords(data);
+        return data;
+      }
+    } catch (error) {
+      console.error('Error loading item master records:', error);
+    }
+    return [];
+  };
+
+  // Load saved item master records from backend on mount
+  useEffect(() => {
+    loadRecords();
+  }, []);
 
   // Load master data from backend API with localStorage fallback
   useEffect(() => {
@@ -250,11 +272,10 @@ export default function ItemMaster({ setParentDirty }) {
 
   const handleActionChange = (e) => {
     const newAction = e.target.value;
-    setAction(newAction);
-    
-    if (newAction === 'Edit' || newAction === 'Delete' || newAction === 'Search') {
-      setShowRecordSelect(true);
-    }
+    if (newAction === 'Edit') handleEdit();
+    else if (newAction === 'Delete') handleDelete();
+    else if (newAction === 'Search') handleSearch();
+    else setAction(newAction);
   };
 
   const handleAdd = () => {
@@ -264,19 +285,61 @@ export default function ItemMaster({ setParentDirty }) {
     setFieldErrors({});
   };
 
-  const handleEdit = () => {
-    setAction('Edit');
+  const openSelectModal = async (newAction, emptyMessage, promptMessage) => {
+    const freshRecords = await loadRecords();
+    setAction(newAction);
+    setSelectModalMessage(freshRecords.length === 0 ? emptyMessage : promptMessage);
     setShowRecordSelect(true);
+  };
+
+  const handleEdit = () => {
+    openSelectModal('Edit', 'No records available to edit.', 'Please select a record to edit.');
   };
 
   const handleDelete = () => {
-    setAction('Delete');
-    setShowRecordSelect(true);
+    openSelectModal('Delete', 'No records available to delete.', 'Please select a record to delete.');
   };
 
   const handleSearch = () => {
-    setAction('Search');
-    setShowRecordSelect(true);
+    openSelectModal('Search', 'No records available to search.', 'Please select a record to view.');
+  };
+
+  const handleRecordSelect = (record) => {
+    setForm({
+      select_outlets: record.select_outlets || [],
+      item_code: record.item_code || '',
+      item_name: record.item_name || '',
+      short_name: record.short_name || '',
+      item_department: record.item_department || '',
+      applicable_from: record.applicable_from ? new Date(record.applicable_from).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      inventory_code: record.inventory_code || '',
+      alternate_name: record.alternate_name || '',
+      tax_code: record.tax_code || '',
+      item_category: record.item_category || '',
+      item_price_1: record.item_price_1 ?? '',
+      item_price_2: record.item_price_2 ?? '',
+      item_price_3: record.item_price_3 ?? '',
+      item_price_4: record.item_price_4 ?? '',
+      item_printer_1: record.item_printer_1 || '',
+      item_printer_2: record.item_printer_2 || '',
+      item_printer_3: record.item_printer_3 || '',
+      set_menu: record.set_menu || '',
+      item_modifier_group: record.item_modifier_group || '',
+      unit: record.unit || '',
+      print_group: record.print_group || '',
+      cost: record.cost ?? '',
+      in_active: Boolean(record.in_active),
+      item_logo: record.item_logo || '',
+      item_logo_url: record.item_logo_url || ''
+    });
+    setSelectedRecordId(record.id);
+    setShowRecordSelect(false);
+    setIsDirty(false);
+    if (setParentDirty) setParentDirty(false);
+
+    if (action === 'Delete') {
+      setShowDeleteConfirm(true);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -300,88 +363,83 @@ export default function ItemMaster({ setParentDirty }) {
       return;
     }
     
+    const payload = {
+      select_outlets: form.select_outlets,
+      item_code: form.item_code,
+      item_name: form.item_name,
+      short_name: form.short_name,
+      item_department: form.item_department,
+      applicable_from: form.applicable_from,
+      inventory_code: form.inventory_code,
+      alternate_name: form.alternate_name,
+      tax_code: form.tax_code,
+      item_category: form.item_category,
+      item_price_1: parseFloat(form.item_price_1) || 0,
+      item_price_2: parseFloat(form.item_price_2) || 0,
+      item_price_3: parseFloat(form.item_price_3) || 0,
+      item_price_4: parseFloat(form.item_price_4) || 0,
+      item_printer_1: form.item_printer_1,
+      item_printer_2: form.item_printer_2,
+      item_printer_3: form.item_printer_3,
+      set_menu: form.set_menu,
+      item_modifier_group: form.item_modifier_group,
+      unit: form.unit,
+      print_group: form.print_group,
+      cost: parseFloat(form.cost) || 0,
+      in_active: form.in_active,
+      item_logo: typeof form.item_logo === 'string' ? form.item_logo : null,
+      item_logo_url: typeof form.item_logo_url === 'string' ? form.item_logo_url : null
+    };
+
     try {
-      // Load existing item master records
-      const existingRecords = JSON.parse(localStorage.getItem('itemMasterRecords') || '[]');
-      
-      // Create new record
-      const newRecord = {
-        id: Date.now(), // Simple ID generation
-        item_code: form.item_code,
-        item_name: form.item_name,
-        short_name: form.short_name,
-        item_department: form.item_department,
-        applicable_from: form.applicable_from,
-        inventory_code: form.inventory_code,
-        alternate_name: form.alternate_name,
-        tax_code: form.tax_code,
-        item_category: form.item_category,
-        item_price_1: parseFloat(form.item_price_1) || 0,
-        item_price_2: parseFloat(form.item_price_2) || 0,
-        item_price_3: parseFloat(form.item_price_3) || 0,
-        item_price_4: parseFloat(form.item_price_4) || 0,
-        item_printer_1: form.item_printer_1,
-        item_printer_2: form.item_printer_2,
-        item_printer_3: form.item_printer_3,
-        set_menu: form.set_menu,
-        item_modifier_group: form.item_modifier_group,
-        unit: form.unit,
-        print_group: form.print_group,
-        cost: parseFloat(form.cost) || 0,
-        in_active: form.in_active,
-        item_logo: form.item_logo,
-        item_logo_url: form.item_logo_url,
-        select_outlets: form.select_outlets,
-        created_by: 'admin', // TODO: Get from user session
-        created_date: new Date().toISOString(),
-        modified_by: 'admin',
-        modified_date: new Date().toISOString()
-      };
-      
-      // Check for duplicate item codes
-      const existingItem = existingRecords.find(record => 
-        record.item_code === form.item_code && record.id !== (selectedRecordId || null)
-      );
-      
-      if (existingItem && action === 'Add') {
-        alert('Item Code already exists. Please use a different code.');
-        return;
-      }
-      
-      let updatedRecords;
-      
+      let response;
+
       if (action === 'Add') {
-        // Add new record
-        updatedRecords = [...existingRecords, newRecord];
-        console.log('✅ Adding new item:', newRecord);
+        response = await axios.post('/api/item-master', payload);
       } else if (action === 'Edit' && selectedRecordId) {
-        // Update existing record
-        updatedRecords = existingRecords.map(record => 
-          record.id === selectedRecordId ? { ...newRecord, id: selectedRecordId } : record
-        );
-        console.log('✅ Updating existing item:', newRecord);
+        response = await axios.put(`/api/item-master/${selectedRecordId}`, payload);
       } else {
         alert('Invalid action or no record selected for editing');
         return;
       }
-      
-      // Save to localStorage
-      localStorage.setItem('itemMasterRecords', JSON.stringify(updatedRecords));
-      
-      // Show success message
-      setShowSavePopup(true);
-      setTimeout(() => setShowSavePopup(false), 1800);
-      
-      // Reset form for Add action
-      if (action === 'Add') {
-        handleClear();
+
+      if (response.data.success) {
+        setShowSavePopup(true);
+        setTimeout(() => setShowSavePopup(false), 1800);
+        await loadRecords();
+
+        if (action === 'Add') {
+          handleClear();
+        }
+      } else {
+        alert(response.data.message || 'Operation failed');
       }
-      
-      console.log('💾 Item saved successfully!');
-      
     } catch (error) {
       console.error('❌ Error saving item:', error);
-      alert('Error saving item. Please try again.');
+      alert(error.response?.data?.message || 'Error saving item. Please try again.');
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedRecordId) {
+      setShowDeleteConfirm(false);
+      return;
+    }
+
+    try {
+      const response = await axios.delete(`/api/item-master/${selectedRecordId}`);
+      if (response.data.success) {
+        await loadRecords();
+        setShowDeleteConfirm(false);
+        handleAdd();
+        setShowSavePopup(true);
+        setTimeout(() => setShowSavePopup(false), 1800);
+      } else {
+        alert(response.data.message || 'Delete failed');
+      }
+    } catch (error) {
+      console.error('❌ Error deleting item:', error);
+      alert(error.response?.data?.message || 'Error deleting item');
     }
   };
 
@@ -1389,7 +1447,7 @@ export default function ItemMaster({ setParentDirty }) {
             <div style={{fontWeight:'bold',fontSize:'18px',marginBottom:'15px',color:'#e53935'}}>Confirm Delete</div>
             <div style={{marginBottom:'20px',fontSize:'14px'}}>Are you sure you want to delete this item?</div>
             <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
-              <button onClick={() => setShowDeleteConfirm(false)} style={{background:'#e53935',color:'#fff',border:'none',borderRadius:'4px',padding:'8px 16px',fontSize:'14px',cursor:'pointer'}}>Delete</button>
+              <button onClick={confirmDelete} style={{background:'#e53935',color:'#fff',border:'none',borderRadius:'4px',padding:'8px 16px',fontSize:'14px',cursor:'pointer'}}>Delete</button>
               <button onClick={() => setShowDeleteConfirm(false)} style={{background:'#bbb',color:'#222',border:'none',borderRadius:'4px',padding:'8px 16px',fontSize:'14px',cursor:'pointer'}}>Cancel</button>
             </div>
           </div>
@@ -1397,23 +1455,51 @@ export default function ItemMaster({ setParentDirty }) {
       )}
 
       {showRecordSelect && (
-        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.3)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}}>
-          <div style={{background:'#fff',borderRadius:'8px',padding:'25px',minWidth:'500px',maxHeight:'70vh',overflow:'auto',boxShadow:'0 4px 20px rgba(0,0,0,0.15)'}}>
-            <div style={{fontWeight:'bold',fontSize:'18px',marginBottom:'15px'}}>Select Record</div>
-            <div style={{marginBottom:'20px',maxHeight:'400px',overflow:'auto',border:'1px solid #ddd',borderRadius:'4px'}}>
-              {records.map((record, index) => (
-                <div key={index} style={{padding:'10px',borderBottom:'1px solid #eee',cursor:'pointer'}} onClick={() => {
-                  setForm(record);
-                  setShowRecordSelect(false);
-                }}>
-                  <div style={{fontWeight:'bold'}}>{record.item_code} - {record.item_name}</div>
-                  <div style={{fontSize:'12px',color:'#666'}}>{record.department} | {record.category}</div>
-                </div>
-              ))}
+        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.18)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{background:'#fff',borderRadius:'14px',padding:'32px 24px',minWidth:'620px',boxShadow:'0 4px 24px rgba(0,0,0,0.18)',maxHeight:'80vh',overflowY:'auto'}}>
+            <div style={{fontWeight:'bold',fontSize:'1.2rem',marginBottom:'18px',color:'#1976d2'}}>
+              {selectModalMessage || 'Please select a record to edit.'}
+              <div style={{fontSize:'0.8rem',color:'#666',marginTop:'4px'}}>
+                Current Date: {new Date().toLocaleDateString('en-GB')} | Records sorted: Latest → Future → Past
+              </div>
             </div>
-            <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
-              <button onClick={() => setShowRecordSelect(false)} style={{background:'#bbb',color:'#222',border:'none',borderRadius:'4px',padding:'8px 16px',fontSize:'14px',cursor:'pointer'}}>Cancel</button>
-            </div>
+            {records.length === 0 ? (
+              <div style={{color:'#888',fontSize:'1.05rem'}}>No records found.</div>
+            ) : (
+              <table style={{width:'100%',borderCollapse:'collapse',marginBottom:'12px'}}>
+                <thead>
+                  <tr style={{background:'#e3e3e3'}}>
+                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Item Code</th>
+                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Item Name</th>
+                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Department</th>
+                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Category</th>
+                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Status</th>
+                    <th style={{padding:'6px 8px',fontWeight:'bold',fontSize:'1rem'}}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {records.map((record, idx) => (
+                    <tr key={record.id || idx} style={{background: idx % 2 ? '#f7f7f7' : '#fff'}}>
+                      <td style={{padding:'6px 8px'}}>{record.item_code}</td>
+                      <td style={{padding:'6px 8px'}}>{record.item_name}</td>
+                      <td style={{padding:'6px 8px'}}>{record.item_department}</td>
+                      <td style={{padding:'6px 8px'}}>{record.item_category}</td>
+                      <td style={{padding:'6px 8px'}}>{record.in_active ? 'Inactive' : 'Active'}</td>
+                      <td style={{padding:'6px 8px'}}>
+                        <button
+                          type="button"
+                          style={{background:'#7b1fa2',color:'#fff',border:'none',borderRadius:'6px',padding:'4px 12px',fontWeight:'bold',cursor:'pointer'}}
+                          onClick={() => handleRecordSelect(record)}
+                        >
+                          {action === 'Search' ? 'View' : 'Select'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            <button type="button" style={{background:'#e53935',color:'#fff',border:'none',borderRadius:'6px',padding:'8px 22px',fontWeight:'bold',fontSize:'1.08rem',marginTop:'8px',cursor:'pointer'}} onClick={()=>setShowRecordSelect(false)}>Close</button>
           </div>
         </div>
       )}

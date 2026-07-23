@@ -81,7 +81,7 @@ logDatabaseConnection(db);
 let taxStructureHasId = false;
 const detectAndPrepareSchema = () => {
     try {
-        const schema = db.config.database;
+        const schema = process.env.DB_NAME;
         const sql = `SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'IT_CONF_TAXSTRUCTURE' AND COLUMN_NAME = 'id'`;
         db.query(sql, [schema], (err, rows) => {
             if (err) {
@@ -1463,12 +1463,12 @@ app.get('/api/item-master', (req, res) => {
     db.query(query, (err, results) => {
         if (err) return handleDatabaseError(res, err, 'fetch item master');
         
-        // Parse JSON fields
+        // select_outlets is a native JSON column - mysql2 already deserializes it
         const parsedResults = results.map(item => ({
             ...item,
-            select_outlets: item.select_outlets ? JSON.parse(item.select_outlets) : []
+            select_outlets: item.select_outlets || []
         }));
-        
+
         res.json({ success: true, data: parsedResults });
     });
 });
@@ -1692,14 +1692,22 @@ app.post('/api/property-codes', (req, res) => {
     const reserve_2 = null;
     
     if (!property_code || !property_name) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Property code and name are required' 
+        return res.status(400).json({
+            success: false,
+            message: 'Property code and name are required'
+        });
+    }
+
+    if (property_logo !== null && property_logo !== undefined && typeof property_logo !== 'string') {
+        logger.warn('Rejected create property code: property_logo was not a string (likely an unhandled File object from the client)', { property_code, property_logo });
+        return res.status(400).json({
+            success: false,
+            message: 'Property logo must be a file name or URL string'
         });
     }
 
     // Use STR_TO_DATE to store the date part exactly as provided (YYYY-MM-DD) and avoid timezone shifts
-    const query = `INSERT INTO IT_CONF_PROPERTY 
+    const query = `INSERT INTO IT_CONF_PROPERTY
                    (applicable_from, property_code, property_name, nick_name, owner_name, 
                     address_name, gst_number, pan_number, group_name, local_currency,
                     currency_format, symbol, decimal_places, date_format, round_off, property_logo,
@@ -1760,7 +1768,15 @@ app.put('/api/property-codes/:id', (req, res) => {
     const sessionUserId = req.session && req.session.user ? req.session.user.id : null;
     const updated_user_id = sessionUserId;
 
-    const query = `UPDATE IT_CONF_PROPERTY 
+    if (property_logo !== null && property_logo !== undefined && typeof property_logo !== 'string') {
+        logger.warn('Rejected update property code: property_logo was not a string (likely an unhandled File object from the client)', { id, property_logo });
+        return res.status(400).json({
+            success: false,
+            message: 'Property logo must be a file name or URL string'
+        });
+    }
+
+    const query = `UPDATE IT_CONF_PROPERTY
                    SET applicable_from = STR_TO_DATE(?, '%Y-%m-%d'), property_name = ?, nick_name = ?, owner_name = ?, 
                        address_name = ?, gst_number = ?, pan_number = ?, group_name = ?, 
                        local_currency = ?, currency_format = ?, symbol = ?, decimal_places = ?, 
@@ -1960,6 +1976,173 @@ app.delete('/api/business-periods/:id', (req, res) => {
     });
 });
 
+// ========================================
+// TABLE SETTINGS API (IT_CONF_TBLMAS)
+// ========================================
+app.get('/api/table-settings', (req, res) => {
+    const query = 'SELECT * FROM IT_CONF_TBLMAS ORDER BY outlet_code, table_code';
+    db.query(query, (err, results) => {
+        if (err) return handleDatabaseError(res, err, 'fetch table settings');
+        res.json({ success: true, data: results });
+    });
+});
+
+app.post('/api/table-settings', (req, res) => {
+    const { outlet_code, table_code, table_name, seats, table_shape = 'rectangle', active_status = 1 } = req.body;
+
+    if (!outlet_code || !table_code) {
+        return res.status(400).json({
+            success: false,
+            message: 'Outlet code and table code are required'
+        });
+    }
+
+    const query = `INSERT INTO IT_CONF_TBLMAS
+                   (outlet_code, table_code, table_name, seats, table_shape, active_status, created_by)
+                   VALUES (?, ?, ?, ?, ?, ?, 'admin')`;
+
+    db.query(query, [outlet_code, table_code, table_name, seats, table_shape, active_status], (err, result) => {
+        if (err) {
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Table code already exists for this outlet'
+                });
+            }
+            return handleDatabaseError(res, err, 'create table setting');
+        }
+        res.json({
+            success: true,
+            message: 'Table setting created successfully',
+            id: result.insertId
+        });
+    });
+});
+
+app.put('/api/table-settings/:id', (req, res) => {
+    const { id } = req.params;
+    const { outlet_code, table_code, table_name, seats, table_shape, active_status } = req.body;
+
+    const query = `UPDATE IT_CONF_TBLMAS
+                   SET outlet_code = ?, table_code = ?, table_name = ?, seats = ?,
+                       table_shape = ?, active_status = ?, modified_by = 'admin'
+                   WHERE id = ?`;
+
+    db.query(query, [outlet_code, table_code, table_name, seats, table_shape, active_status, id], (err, result) => {
+        if (err) return handleDatabaseError(res, err, 'update table setting');
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Table setting not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Table setting updated successfully'
+        });
+    });
+});
+
+app.delete('/api/table-settings/:id', (req, res) => {
+    const { id } = req.params;
+
+    const query = 'DELETE FROM IT_CONF_TBLMAS WHERE id = ?';
+    db.query(query, [id], (err, result) => {
+        if (err) return handleDatabaseError(res, err, 'delete table setting');
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Table setting not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Table setting deleted successfully'
+        });
+    });
+});
+
+// ========================================
+// TABLE STATUS API (IT_POS_TABLE_STATUS) - live occupancy for the POS terminal
+// ========================================
+const getBusinessDateNumeric = () => {
+    const now = new Date();
+    return now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+};
+
+app.get('/api/table-status', (req, res) => {
+    const { outlet_code } = req.query;
+
+    if (!outlet_code) {
+        return res.status(400).json({
+            success: false,
+            message: 'outlet_code is required'
+        });
+    }
+
+    const businessDate = getBusinessDateNumeric();
+    const query = `SELECT
+        t.outlet_code, t.table_code, t.table_name, t.seats, t.table_shape,
+        COALESCE(s.status, 'VACANT') AS status,
+        COALESCE(s.guest_count, 0) AS guest_count,
+        s.opened_at, s.opened_by_user_code, s.check_id
+        FROM IT_CONF_TBLMAS t
+        LEFT JOIN IT_POS_TABLE_STATUS s
+            ON s.outlet_code = t.outlet_code AND s.table_code = t.table_code AND s.business_date = ?
+        WHERE t.outlet_code = ? AND t.active_status = 1
+        ORDER BY t.table_code`;
+
+    db.query(query, [businessDate, outlet_code], (err, results) => {
+        if (err) return handleDatabaseError(res, err, 'fetch table status');
+        res.json({ success: true, data: results });
+    });
+});
+
+app.post('/api/table-status/:outlet_code/:table_code/open', (req, res) => {
+    const { outlet_code, table_code } = req.params;
+    const { guest_count } = req.body;
+    const sessionUserCode = req.session && req.session.user ? req.session.user.user_code : null;
+
+    if (!guest_count || guest_count < 1) {
+        return res.status(400).json({
+            success: false,
+            message: 'Guest count is required'
+        });
+    }
+
+    const businessDate = getBusinessDateNumeric();
+    const query = `INSERT INTO IT_POS_TABLE_STATUS
+                   (business_date, outlet_code, table_code, status, guest_count, opened_at, opened_by_user_code)
+                   VALUES (?, ?, ?, 'OCCUPIED', ?, NOW(), ?)
+                   ON DUPLICATE KEY UPDATE
+                       status = 'OCCUPIED', guest_count = VALUES(guest_count),
+                       opened_at = NOW(), opened_by_user_code = VALUES(opened_by_user_code)`;
+
+    db.query(query, [businessDate, outlet_code, table_code, guest_count, sessionUserCode], (err) => {
+        if (err) return handleDatabaseError(res, err, 'open table');
+        res.json({ success: true, message: 'Table opened successfully' });
+    });
+});
+
+app.post('/api/table-status/:outlet_code/:table_code/vacate', (req, res) => {
+    const { outlet_code, table_code } = req.params;
+    const businessDate = getBusinessDateNumeric();
+
+    const query = `UPDATE IT_POS_TABLE_STATUS
+                   SET status = 'VACANT', guest_count = 0, opened_at = NULL,
+                       opened_by_user_code = NULL, check_id = NULL
+                   WHERE business_date = ? AND outlet_code = ? AND table_code = ?`;
+
+    db.query(query, [businessDate, outlet_code, table_code], (err) => {
+        if (err) return handleDatabaseError(res, err, 'vacate table');
+        res.json({ success: true, message: 'Table vacated successfully' });
+    });
+});
+
 // HEALTH CHECK ENDPOINT
 // ========================================
 app.get('/api/health', (req, res) => {
@@ -1975,6 +2158,23 @@ app.get('/api/health', (req, res) => {
 // ERROR HANDLING MIDDLEWARE (ADDED)
 // ========================================
 app.use(errorLogger);          // Log all errors
+
+// ========================================
+// POS TERMINAL INSTALLER DOWNLOAD
+// ========================================
+app.use('/downloads', express.static(path.join(__dirname, 'public', 'downloads')));
+
+// ========================================
+// STATIC FRONTEND SERVING (POS terminal + back-office, production build)
+// ========================================
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+app.get('*', (req, res, next) => {
+    // Let /api/* 404 normally, and let /downloads/* 404 normally if the file wasn't
+    // found above - otherwise a missing download would silently render the SPA shell
+    // at an unrecognized route, which React Router then bounces to /login.
+    if (req.path.startsWith('/api/') || req.path.startsWith('/downloads/')) return next();
+    res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
 
 // ========================================
 // SERVER STARTUP

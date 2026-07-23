@@ -1876,6 +1876,10 @@ Generated: ${new Date().toLocaleString()}`;
                 setSoftwareControlEnabled: setSoftwareControlEnabled
               })}
             </React.Suspense>
+          ) : activeMainMenu === 'POS System' && !activeSubmenu ? (
+            <React.Suspense fallback={<div>Loading...</div>}>
+              {React.createElement(require('./PosSystemDownload').default)}
+            </React.Suspense>
           ) : activeTab === 'dashboard' ? (
     <div className="dashboard-summary-panel" style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:'32px',marginTop:'16px'}}>
       {/* Today's Collection Summary */}
