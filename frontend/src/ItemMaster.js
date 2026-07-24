@@ -270,6 +270,28 @@ export default function ItemMaster({ setParentDirty, records: externalRecords, s
     if (setParentDirty) setParentDirty(true);
   };
 
+  const handleUploadLogo = async () => {
+    if (!(form.item_logo instanceof File)) {
+      alert('Please choose an image file first.');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('logo', form.item_logo);
+    try {
+      const response = await axios.post('/api/item-master/upload-logo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (response.data.success) {
+        setForm(prev => ({ ...prev, item_logo: response.data.filename, item_logo_url: response.data.url }));
+      } else {
+        alert(response.data.message || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('❌ Error uploading logo:', error);
+      alert(error.response?.data?.message || 'Error uploading image');
+    }
+  };
+
   const handleActionChange = (e) => {
     const newAction = e.target.value;
     if (newAction === 'Edit') handleEdit();
@@ -381,14 +403,22 @@ export default function ItemMaster({ setParentDirty, records: externalRecords, s
       item_printer_1: form.item_printer_1,
       item_printer_2: form.item_printer_2,
       item_printer_3: form.item_printer_3,
-      set_menu: form.set_menu,
+      // set_menu is a MySQL ENUM('Yes','No') column - an empty string ("Select" left
+      // unchosen) isn't a valid enum member and MySQL rejects it outright; send null
+      // so the column's own default ('No') applies instead.
+      set_menu: form.set_menu || null,
       item_modifier_group: form.item_modifier_group,
       unit: form.unit,
       print_group: form.print_group,
       cost: parseFloat(form.cost) || 0,
       in_active: form.in_active,
       item_logo: typeof form.item_logo === 'string' ? form.item_logo : null,
-      item_logo_url: typeof form.item_logo_url === 'string' ? form.item_logo_url : null
+      // item_logo_url is VARCHAR(256) in the DB; the file picker only produces a local
+      // base64 preview (data: URI), which is far too long to store and isn't a real,
+      // persisted file location - there's no upload endpoint yet, so don't send it.
+      item_logo_url: (typeof form.item_logo_url === 'string' && !form.item_logo_url.startsWith('data:'))
+        ? form.item_logo_url
+        : null
     };
 
     try {
@@ -1065,11 +1095,7 @@ export default function ItemMaster({ setParentDirty, records: externalRecords, s
               {!isFormReadOnly && (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (fileInputRef.current) {
-                      fileInputRef.current.click();
-                    }
-                  }}
+                  onClick={handleUploadLogo}
                   style={{
                     backgroundColor: '#007BFF',
                     color: 'white',

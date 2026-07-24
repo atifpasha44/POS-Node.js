@@ -6,6 +6,7 @@ const cors = require('cors');
 const session = require('express-session');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
 // ========================================
 // LOGGING SETUP (ADDED)
@@ -615,10 +616,28 @@ app.delete('/api/outlet-setup/:id', (req, res) => {
             });
         }
         
-        res.json({ 
-            success: true, 
-            message: 'Outlet setup deleted successfully' 
+        res.json({
+            success: true,
+            message: 'Outlet setup deleted successfully'
         });
+    });
+});
+
+// Bill header fields for the configured outlet (group name + address come from the
+// linked Property Code record) - used by Order Entry's Print Check to render the
+// standard bill design with the outlet's real data.
+app.get('/api/outlet-setup/:outlet_code/bill-header', (req, res) => {
+    const { outlet_code } = req.params;
+    const query = `SELECT o.outlet_code, o.outlet_name, o.check_prefix, p.group_name, p.address_name, p.local_currency
+                   FROM IT_CONF_OUTSET o
+                   LEFT JOIN IT_CONF_PROPERTY p ON p.property_code = o.property
+                   WHERE o.outlet_code = ?`;
+    db.query(query, [outlet_code], (err, rows) => {
+        if (err) return handleDatabaseError(res, err, 'fetch bill header');
+        if (!rows || rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Outlet not found' });
+        }
+        res.json({ success: true, data: rows[0] });
     });
 });
 
@@ -1456,6 +1475,45 @@ app.delete('/api/credit-cards/:id', (req, res) => {
 });
 
 // ========================================
+// ITEM IMAGE UPLOAD (stores a real file + returns a short URL for item_logo_url)
+// ========================================
+const itemLogoStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, 'public', 'uploads', 'items'));
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname) || '.jpg';
+        cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+    }
+});
+const itemLogoUpload = multer({
+    storage: itemLogoStorage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+            return cb(new Error('Only image files are allowed'));
+        }
+        cb(null, true);
+    }
+});
+
+app.post('/api/item-master/upload-logo', (req, res) => {
+    itemLogoUpload.single('logo')(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ success: false, message: err.message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        }
+        res.json({
+            success: true,
+            filename: req.file.filename,
+            url: `/uploads/items/${req.file.filename}`
+        });
+    });
+});
+
+// ========================================
 // ITEM MASTER API
 // ========================================
 app.get('/api/item-master', (req, res) => {
@@ -2165,14 +2223,19 @@ app.use(errorLogger);          // Log all errors
 app.use('/downloads', express.static(path.join(__dirname, 'public', 'downloads')));
 
 // ========================================
+// UPLOADED ITEM IMAGES
+// ========================================
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+
+// ========================================
 // STATIC FRONTEND SERVING (POS terminal + back-office, production build)
 // ========================================
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 app.get('*', (req, res, next) => {
-    // Let /api/* 404 normally, and let /downloads/* 404 normally if the file wasn't
-    // found above - otherwise a missing download would silently render the SPA shell
-    // at an unrecognized route, which React Router then bounces to /login.
-    if (req.path.startsWith('/api/') || req.path.startsWith('/downloads/')) return next();
+    // Let /api/*, /downloads/*, and /uploads/* 404 normally if the file wasn't found
+    // above - otherwise a missing file would silently render the SPA shell at an
+    // unrecognized route, which React Router then bounces to /login.
+    if (req.path.startsWith('/api/') || req.path.startsWith('/downloads/') || req.path.startsWith('/uploads/')) return next();
     res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
 
